@@ -1,0 +1,15 @@
+services:
+  pantrypal-api:
+    build: .
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - JWT_SECRET=pantrypal-docker-secret-change-me
+      - NODE_ENV=production
+    volumes:
+      - pantrypal-data:/app/db
+    restart: unless-stopped
+
+volumes:
+  pantrypal-data:
