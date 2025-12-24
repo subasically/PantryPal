@@ -318,4 +318,12 @@ final class APIService: Sendable {
     func getActiveInvites() async throws -> ActiveInvitesResponse {
         try await request(endpoint: "/auth/household/invites")
     }
+    
+    func resetHouseholdData() async throws {
+        struct ResetResponse: Codable, Sendable {
+            let success: Bool
+            let message: String
+        }
+        let _: ResetResponse = try await request(endpoint: "/auth/household/data", method: "DELETE")
+    }
 }

@@ -1,11 +1,9 @@
 import SwiftUI
 
 struct CheckoutView: View {
+    @Environment(\.modelContext) private var modelContext
+    @State private var viewModel = CheckoutViewModel()
     @State private var scannedCode: String?
-    @State private var lastCheckout: CheckoutScanResponse?
-    @State private var isProcessing = false
-    @State private var errorMessage: String?
-    @State private var checkoutHistory: [CheckoutHistoryItem] = []
     @State private var showHistory = false
     
     // Toast state
@@ -19,7 +17,7 @@ struct CheckoutView: View {
                 // Scanner
                 BarcodeScannerView(scannedCode: $scannedCode, isPresented: .constant(true)) { code in
                     Task {
-                        await processCheckout(upc: code)
+                        await viewModel.processCheckout(upc: code)
                     }
                 }
                 
@@ -28,21 +26,21 @@ struct CheckoutView: View {
                     Spacer()
                     
                     // Result card
-                    if let checkout = lastCheckout {
+                    if let checkout = viewModel.lastCheckout {
                         checkoutResultCard(checkout)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                     
-                    if let error = errorMessage {
+                    if let error = viewModel.errorMessage {
                         errorCard(error)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
-                .animation(.spring(response: 0.4), value: lastCheckout != nil)
-                .animation(.spring(response: 0.4), value: errorMessage != nil)
+                .animation(.spring(response: 0.4), value: viewModel.lastCheckout != nil)
+                .animation(.spring(response: 0.4), value: viewModel.errorMessage != nil)
                 
                 // Processing indicator
-                if isProcessing {
+                if viewModel.isProcessing {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
                     
@@ -64,6 +62,21 @@ struct CheckoutView: View {
                 CheckoutHistoryView()
             }
             .toast(isShowing: $showToast, message: toastMessage, type: toastType)
+            .onAppear {
+                viewModel.setContext(modelContext)
+            }
+            .onDisappear {
+                viewModel.lastCheckout = nil
+                scannedCode = nil
+                viewModel.errorMessage = nil
+            }
+            .onChange(of: viewModel.lastCheckout) { _, newValue in
+                if let response = newValue, response.success == true {
+                    toastMessage = "Checked out \(response.product?.name ?? "item")"
+                    toastType = .success
+                    showToast = true
+                }
+            }
         }
     }
     
@@ -119,7 +132,7 @@ struct CheckoutView: View {
             
             Button("Scan Another") {
                 withAnimation {
-                    lastCheckout = nil
+                    viewModel.lastCheckout = nil
                     scannedCode = nil
                 }
             }
@@ -146,7 +159,7 @@ struct CheckoutView: View {
             
             Button("Try Again") {
                 withAnimation {
-                    errorMessage = nil
+                    viewModel.errorMessage = nil
                     scannedCode = nil
                 }
             }
@@ -156,37 +169,6 @@ struct CheckoutView: View {
         .background(.regularMaterial)
         .cornerRadius(16)
         .padding()
-    }
-    
-    private func processCheckout(upc: String) async {
-        isProcessing = true
-        errorMessage = nil
-        lastCheckout = nil
-        HapticManager.medium()
-        
-        do {
-            let response = try await APIService.shared.checkoutScan(upc: upc)
-            lastCheckout = response
-            
-            if response.success == true {
-                HapticManager.success()
-                toastMessage = "Checked out \(response.product?.name ?? "item")"
-                toastType = .success
-                showToast = true
-                
-                // Send notification for checkout (especially for low stock)
-                if let productName = response.product?.name, let remaining = response.newQuantity {
-                    NotificationService.shared.sendCheckoutNotification(itemName: productName, remainingQuantity: remaining)
-                }
-            } else {
-                HapticManager.warning()
-            }
-        } catch {
-            errorMessage = error.localizedDescription
-            HapticManager.error()
-        }
-        
-        isProcessing = false
     }
 }
 

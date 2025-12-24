@@ -104,7 +104,7 @@ struct UPCLookupResponse: Codable, Sendable {
 
 // MARK: - Inventory
 
-struct InventoryItem: Codable, Identifiable, Sendable {
+struct InventoryItem: Codable, Identifiable, Sendable, Equatable {
     let id: String
     let productId: String
     let householdId: String
@@ -286,13 +286,14 @@ struct CheckoutScanRequest: Codable, Sendable {
     let upc: String
 }
 
-struct CheckoutScanResponse: Codable, Sendable {
+struct CheckoutScanResponse: Codable, Sendable, Equatable {
     let success: Bool?
     let message: String?
     let product: CheckoutProduct?
     let previousQuantity: Int?
     let newQuantity: Int?
     let itemDeleted: Bool?
+    let inventoryItem: InventoryItem?
     let checkoutId: String?
     
     // Error responses
@@ -302,7 +303,7 @@ struct CheckoutScanResponse: Codable, Sendable {
     let upc: String?
 }
 
-struct CheckoutProduct: Codable, Sendable {
+struct CheckoutProduct: Codable, Sendable, Equatable {
     let id: String
     let name: String
     let brand: String?

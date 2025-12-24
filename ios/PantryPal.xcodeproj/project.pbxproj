@@ -28,11 +28,13 @@
 		2F3780022EFC6A97006F4E33 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780012EFC6A97006F4E33 /* OCRService.swift */; };
 		2F3780042EFC6AAD006F4E33 /* PhotoCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */; };
 		2F3780062EFC6AEB006F4E33 /* SmartScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */; };
+		2F3780082EFC725E006F4E33 /* SDPendingAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780072EFC725E006F4E33 /* SDPendingAction.swift */; };
+		2F37800A2EFC726B006F4E33 /* CheckoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780092EFC726B006F4E33 /* CheckoutViewModel.swift */; };
+		2F37800C2EFC7274006F4E33 /* ActionQueueService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */; };
+		2F37800E2EFC743A006F4E33 /* barcode-beep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2F37800D2EFC743A006F4E33 /* barcode-beep.mp3 */; };
+		2F3780112EFC7A7E006F4E33 /* HouseholdSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */; };
 		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
-		2F74C5972EDFA400006E985C /* barcode-beep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2F74C5962EDFA400006E985C /* barcode-beep.mp3 */; };
-		66B84200AC66651825A0E24E /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55B457FB1DBB941CA0DFB17 /* HapticService.swift */; };
 		933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */; };
-		A31215D9B10B9BC2C145F61A /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF858262D85ADAF0187F8A1E /* HapticManager.swift */; };
 		A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */; };
 		B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4A7C84F0B02C27FF31131A /* ToastView.swift */; };
 /* End PBXBuildFile section */
@@ -62,13 +64,15 @@
 		2F3780012EFC6A97006F4E33 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
 		2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureView.swift; sourceTree = "<group>"; };
 		2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartScannerView.swift; sourceTree = "<group>"; };
+		2F3780072EFC725E006F4E33 /* SDPendingAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPendingAction.swift; sourceTree = "<group>"; };
+		2F3780092EFC726B006F4E33 /* CheckoutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutViewModel.swift; sourceTree = "<group>"; };
+		2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionQueueService.swift; sourceTree = "<group>"; };
+		2F37800D2EFC743A006F4E33 /* barcode-beep.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "barcode-beep.mp3"; sourceTree = "<group>"; };
+		2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdSetupView.swift; sourceTree = "<group>"; };
 		2F74C56F2EDE639E006E985C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		2F74C5962EDFA400006E985C /* barcode-beep.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "barcode-beep.mp3"; sourceTree = "<group>"; };
 		3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationsSettingsView.swift; sourceTree = "<group>"; };
 		52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CheckoutView.swift; sourceTree = "<group>"; };
-		AF858262D85ADAF0187F8A1E /* HapticManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		ED4A7C84F0B02C27FF31131A /* ToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
-		F55B457FB1DBB941CA0DFB17 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HapticService.swift; path = PantryPal/Services/HapticService.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,16 +89,15 @@
 		300 = {
 			isa = PBXGroup;
 			children = (
-				2F74C5962EDFA400006E985C /* barcode-beep.mp3 */,
 				301 /* PantryPal */,
 				302 /* Products */,
-				F55B457FB1DBB941CA0DFB17 /* HapticService.swift */,
 			);
 			sourceTree = "<group>";
 		};
 		301 /* PantryPal */ = {
 			isa = PBXGroup;
 			children = (
+				2F37800D2EFC743A006F4E33 /* barcode-beep.mp3 */,
 				2F2078C32EF59CE3002B7B2C /* PantryPal.entitlements */,
 				101 /* PantryPalApp.swift */,
 				109 /* Info.plist */,
@@ -104,7 +107,6 @@
 				305 /* ViewModels */,
 				306 /* Services */,
 				307 /* Utils */,
-				BE21BADA81B608E8AC50F940 /* Utilities */,
 			);
 			path = PantryPal;
 			sourceTree = "<group>";
@@ -120,6 +122,7 @@
 		303 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				2F3780072EFC725E006F4E33 /* SDPendingAction.swift */,
 				2F377FFB2EFC65D4006F4E33 /* SwiftDataModels.swift */,
 				102 /* Models.swift */,
 			);
@@ -129,6 +132,7 @@
 		304 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */,
 				2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */,
 				2F377FF92EFB7975006F4E33 /* SplashView.swift */,
 				2F74C56F2EDE639E006E985C /* SettingsView.swift */,
@@ -146,6 +150,7 @@
 		305 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				2F3780092EFC726B006F4E33 /* CheckoutViewModel.swift */,
 				104 /* AuthViewModel.swift */,
 				105 /* InventoryViewModel.swift */,
 			);
@@ -155,6 +160,7 @@
 		306 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */,
 				2F3780012EFC6A97006F4E33 /* OCRService.swift */,
 				2F377FFD2EFC6621006F4E33 /* HapticService.swift */,
 				2F377FFE2EFC6621006F4E33 /* SyncService.swift */,
@@ -181,14 +187,6 @@
 				ED4A7C84F0B02C27FF31131A /* ToastView.swift */,
 			);
 			path = Components;
-			sourceTree = "<group>";
-		};
-		BE21BADA81B608E8AC50F940 /* Utilities */ = {
-			isa = PBXGroup;
-			children = (
-				AF858262D85ADAF0187F8A1E /* HapticManager.swift */,
-			);
-			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -250,7 +248,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				010 /* Assets.xcassets in Resources */,
-				2F74C5972EDFA400006E985C /* barcode-beep.mp3 in Resources */,
+				2F37800E2EFC743A006F4E33 /* barcode-beep.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,12 +259,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F37800A2EFC726B006F4E33 /* CheckoutViewModel.swift in Sources */,
 				001 /* PantryPalApp.swift in Sources */,
 				002 /* Models.swift in Sources */,
+				2F37800C2EFC7274006F4E33 /* ActionQueueService.swift in Sources */,
 				2F377FFF2EFC6621006F4E33 /* SyncService.swift in Sources */,
 				2F3780002EFC6621006F4E33 /* HapticService.swift in Sources */,
 				2F3780042EFC6AAD006F4E33 /* PhotoCaptureView.swift in Sources */,
 				003 /* APIService.swift in Sources */,
+				2F3780082EFC725E006F4E33 /* SDPendingAction.swift in Sources */,
 				004 /* AuthViewModel.swift in Sources */,
 				005 /* InventoryViewModel.swift in Sources */,
 				006 /* LoginView.swift in Sources */,
@@ -280,13 +281,12 @@
 				013 /* NotificationService.swift in Sources */,
 				2F377FFC2EFC65D4006F4E33 /* SwiftDataModels.swift in Sources */,
 				2F3780022EFC6A97006F4E33 /* OCRService.swift in Sources */,
-				A31215D9B10B9BC2C145F61A /* HapticManager.swift in Sources */,
+				2F3780112EFC7A7E006F4E33 /* HouseholdSetupView.swift in Sources */,
 				B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */,
 				A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */,
 				933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */,
 				2F377FFA2EFB7975006F4E33 /* SplashView.swift in Sources */,
 				115 /* HouseholdSharingView.swift in Sources */,
-				66B84200AC66651825A0E24E /* HapticService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -423,7 +423,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -438,7 +438,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -458,7 +458,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -473,7 +473,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

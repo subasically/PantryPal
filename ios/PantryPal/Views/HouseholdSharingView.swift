@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreImage.CIFilterBuiltins
+@preconcurrency import AVFoundation
 
 struct HouseholdSharingView: View {
     @StateObject private var viewModel = HouseholdSharingViewModel()
@@ -342,32 +343,57 @@ class QRScannerViewController: UIViewController {
         preview.videoGravity = .resizeAspectFill
         view.layer.addSublayer(preview)
         
+        // Capture session is not Sendable, so we capture it weakly or use a local reference
+        // but since we are in a class, we can just use [weak self] and access it, 
+        // but self is MainActor isolated? No, UIViewController is MainActor.
+        // The issue is capturing 'session' local variable in the closure.
+        
+        // Fix: Don't capture the local 'session' variable in the async closure.
+        // Instead, use the property 'self.captureSession' but access it safely?
+        // Actually, the best way is to just capture the session instance if we know what we are doing,
+        // but Swift 6 is strict.
+        
+        // Let's try to just use the local variable but mark the closure as @Sendable (implicit in async)
+        // and since AVCaptureSession is not Sendable, we get a warning.
+        
+        // Workaround: Create a separate start function or just ignore if we can't fix easily without major refactor.
+        // But we can try to use a detached task or just keep it simple.
+        
+        // The error says: Capture of 'session' with non-Sendable type 'AVCaptureSession?' in a '@Sendable' closure
+        
+        // We can try to make the session start on a background queue without capturing the variable directly if possible?
+        // No, we need the reference.
+        
+        // Let's use a helper method that takes the session.
+        
+        startSession(session)
+        
         self.captureSession = session
         self.previewLayer = preview
-        
-        DispatchQueue.global(qos: .userInitiated).async { [weak session] in
-            session?.startRunning()
+    }
+    
+    private func startSession(_ session: AVCaptureSession) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            session.startRunning()
+        }
+    }
+    
+    private func stopSession() {
+        guard let session = captureSession else { return }
+        DispatchQueue.global(qos: .userInitiated).async {
+            session.stopRunning()
         }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
-        let session = captureSession
-        DispatchQueue.global(qos: .userInitiated).async {
-            session?.stopRunning()
-        }
+        stopSession()
     }
     
     func handleScannedCode(_ stringValue: String) {
         guard !hasScanned else { return }
         hasScanned = true
-        
-        let session = captureSession
-        DispatchQueue.global(qos: .userInitiated).async {
-            session?.stopRunning()
-        }
-        
+        stopSession()
         onCodeScanned?(stringValue)
     }
 }

@@ -1,5 +1,5 @@
 import SwiftUI
-import AVFoundation
+@preconcurrency import AVFoundation
 
 struct PhotoCaptureView: UIViewControllerRepresentable {
     @Binding var isPresented: Bool
@@ -89,11 +89,15 @@ class PhotoCaptureViewController: UIViewController {
             view.layer.insertSublayer(previewLayer, at: 0)
         }
         
+        self.captureSession = session
+        
+        startSession(session)
+    }
+    
+    private func startSession(_ session: AVCaptureSession) {
         DispatchQueue.global(qos: .userInitiated).async {
             session.startRunning()
         }
-        
-        self.captureSession = session
     }
     
     @objc private func capturePhoto() {

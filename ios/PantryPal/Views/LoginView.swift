@@ -7,10 +7,7 @@ struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var name = ""
-    @State private var householdName = ""
-    @State private var joinHouseholdId = ""
     @State private var isRegistering = false
-    @State private var isJoiningHousehold = false
     
     var body: some View {
         @Bindable var authViewModel = authViewModel
@@ -93,19 +90,6 @@ struct LoginView: View {
                         SecureField("Password", text: $password)
                             .textFieldStyle(.roundedBorder)
                             .textContentType(isRegistering ? .newPassword : .password)
-                        
-                        if isRegistering {
-                            Toggle("Join existing household", isOn: $isJoiningHousehold)
-                                .padding(.horizontal, 4)
-                            
-                            if isJoiningHousehold {
-                                TextField("Household ID", text: $joinHouseholdId)
-                                    .textFieldStyle(.roundedBorder)
-                            } else {
-                                TextField("Household Name (optional)", text: $householdName)
-                                    .textFieldStyle(.roundedBorder)
-                            }
-                        }
                     }
                     .padding(.horizontal)
                     
@@ -126,9 +110,7 @@ struct LoginView: View {
                                     await authViewModel.register(
                                         email: email,
                                         password: password,
-                                        name: name,
-                                        householdName: householdName.isEmpty ? nil : householdName,
-                                        householdId: isJoiningHousehold ? joinHouseholdId : nil
+                                        name: name
                                     )
                                 } else {
                                     await authViewModel.login(email: email, password: password)
@@ -165,7 +147,7 @@ struct LoginView: View {
     
     private var isFormValid: Bool {
         if isRegistering {
-            return !email.isEmpty && !password.isEmpty && !name.isEmpty && (!isJoiningHousehold || !joinHouseholdId.isEmpty)
+            return !email.isEmpty && !password.isEmpty && !name.isEmpty
         }
         return !email.isEmpty && !password.isEmpty
     }

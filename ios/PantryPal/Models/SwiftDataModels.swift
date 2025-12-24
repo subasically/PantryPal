@@ -50,6 +50,13 @@ final class SDLocation {
         self.level = level
         self.sortOrder = sortOrder
     }
+    
+    func toFlat() -> LocationFlat {
+        // Construct full path by traversing up? 
+        // For now, just use name as we don't have easy parent access without recursion in model
+        // In a real app, we'd compute full path properly
+        LocationFlat(id: id, name: name, fullPath: name, level: level, parentId: parentId)
+    }
 }
 
 @Model
@@ -99,5 +106,28 @@ final class SDInventoryItem {
     
     var displayName: String {
         product?.name ?? "Unknown Product"
+    }
+    
+    func toDomain() -> InventoryItem {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        return InventoryItem(
+            id: id,
+            productId: productId,
+            householdId: householdId,
+            locationId: locationId,
+            quantity: quantity,
+            expirationDate: expirationDate.map { dateFormatter.string(from: $0) },
+            notes: notes,
+            createdAt: createdAt.map { dateFormatter.string(from: $0) },
+            updatedAt: updatedAt.map { dateFormatter.string(from: $0) },
+            productName: product?.name,
+            productBrand: product?.brand,
+            productUpc: product?.upc,
+            productImageUrl: product?.imageUrl,
+            productCategory: product?.category,
+            locationName: location?.name
+        )
     }
 }

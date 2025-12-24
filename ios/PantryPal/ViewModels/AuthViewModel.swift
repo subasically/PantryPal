@@ -9,6 +9,7 @@ final class AuthViewModel {
     var isLoading = false
     var errorMessage: String?
     var showBiometricEnablePrompt = false
+    var showHouseholdSetup = false
     
     private var pendingCredentials: (email: String, password: String)?
     private let biometricService = BiometricAuthService.shared
@@ -143,14 +144,15 @@ final class AuthViewModel {
         biometricService.disableBiometricLogin()
     }
     
-    func register(email: String, password: String, name: String, householdName: String? = nil, householdId: String? = nil) async {
+    func register(email: String, password: String, name: String) async {
         isLoading = true
         errorMessage = nil
         
         do {
-            let response = try await APIService.shared.register(email: email, password: password, name: name, householdName: householdName, householdId: householdId)
+            let response = try await APIService.shared.register(email: email, password: password, name: name)
             currentUser = response.user
             isAuthenticated = true
+            showHouseholdSetup = true
         } catch let error as APIError {
             errorMessage = error.localizedDescription
         } catch {
@@ -158,6 +160,12 @@ final class AuthViewModel {
         }
         
         isLoading = false
+    }
+    
+    func completeHouseholdSetup() async {
+        showHouseholdSetup = false
+        // Refresh current user to ensure we have the latest household info
+        await loadCurrentUser()
     }
     
     func logout() {

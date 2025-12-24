@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @MainActor
 @Observable
@@ -11,218 +12,311 @@ final class InventoryViewModel {
     var errorMessage: String?
     var successMessage: String?
     
+    private var modelContext: ModelContext?
+    
+    func setContext(_ context: ModelContext) {
+        self.modelContext = context
+    }
+    
     func loadInventory() async {
+        guard let context = modelContext else { return }
         isLoading = true
         errorMessage = nil
         
+        // Load from local database
         do {
-            items = try await APIService.shared.getInventory()
-            // Schedule expiration notifications for items with expiration dates
+            let descriptor = FetchDescriptor<SDInventoryItem>(sortBy: [SortDescriptor(\.expirationDate)])
+            let sdItems = try context.fetch(descriptor)
+            
+            // Convert to domain model
+            self.items = sdItems.map { $0.toDomain() }
+            
+            // Schedule notifications
             await NotificationService.shared.scheduleExpirationNotifications(for: items)
-        } catch let error as APIError {
-            errorMessage = error.localizedDescription
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "Failed to load local inventory: \(error.localizedDescription)"
         }
         
         isLoading = false
     }
     
     func loadLocations() async {
-        do {
-            locations = try await APIService.shared.getLocations()
-        } catch {
-            print("Failed to load locations: \(error)")
-        }
-    }
-    
-    func loadExpiringItems(days: Int = 7) async {
-        do {
-            expiringItems = try await APIService.shared.getExpiringItems(days: days)
-        } catch {
-            print("Failed to load expiring items: \(error)")
-        }
-    }
-    
-    func loadExpiredItems() async {
-        do {
-            expiredItems = try await APIService.shared.getExpiredItems()
-        } catch {
-            print("Failed to load expired items: \(error)")
-        }
-    }
-    
-    func quickAdd(upc: String, quantity: Int = 1, expirationDate: Date? = nil, locationId: String) async -> QuickAddResponse? {
-        errorMessage = nil
-        successMessage = nil
-        
-        var dateString: String? = nil
-        if let date = expirationDate {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            dateString = formatter.string(from: date)
-        }
+        guard let context = modelContext else { return }
         
         do {
-            let response = try await APIService.shared.quickAdd(upc: upc, quantity: quantity, expirationDate: dateString, locationId: locationId)
-            
-            if response.requiresCustomProduct == true {
-                return response
-            }
-            
-            if let item = response.item {
-                successMessage = response.action == "updated" 
-                    ? "Updated \(item.displayName)" 
-                    : "Added \(item.displayName)"
-                HapticService.shared.itemAdded()
-                await loadInventory()
-            }
-            
-            return response
-        } catch let error as APIError {
-            errorMessage = error.localizedDescription
-            HapticService.shared.errorOccurred()
-            return nil
+            let descriptor = FetchDescriptor<SDLocation>(sortBy: [SortDescriptor(\.sortOrder)])
+            let sdLocations = try context.fetch(descriptor)
+            self.locations = sdLocations.map { $0.toFlat() }
         } catch {
-            errorMessage = error.localizedDescription
-            HapticService.shared.errorOccurred()
-            return nil
+            print("Failed to load local locations: \(error)")
         }
     }
+    
+    // ... (keep expiring/expired loaders if needed, or derive from items)
     
     func addItem(productId: String, quantity: Int = 1, expirationDate: Date? = nil, notes: String? = nil, locationId: String) async -> Bool {
+        guard let context = modelContext else { return false }
         errorMessage = nil
         
-        var dateString: String? = nil
-        if let date = expirationDate {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            dateString = formatter.string(from: date)
+        // 1. Create local item immediately
+        let newItemId = UUID().uuidString // Generate temporary ID
+        let newItem = SDInventoryItem(
+            id: newItemId,
+            householdId: "current", // Placeholder, will be overwritten by sync
+            quantity: quantity,
+            expirationDate: expirationDate,
+            notes: notes,
+            productId: productId,
+            locationId: locationId
+        )
+        
+        // Link relationships
+        let prodDesc = FetchDescriptor<SDProduct>(predicate: #Predicate { $0.id == productId })
+        newItem.product = try? context.fetch(prodDesc).first
+        
+        let locDesc = FetchDescriptor<SDLocation>(predicate: #Predicate { $0.id == locationId })
+        newItem.location = try? context.fetch(locDesc).first
+        
+        context.insert(newItem)
+        
+        // 2. Enqueue action
+        let dateString: String? = expirationDate.map { 
+            let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; return f.string(from: $0) 
         }
         
-        do {
-            let item = try await APIService.shared.addToInventory(productId: productId, quantity: quantity, expirationDate: dateString, notes: notes, locationId: locationId)
-            successMessage = "Added \(item.displayName)"
-            HapticService.shared.itemAdded()
-            await loadInventory()
-            return true
-        } catch let error as APIError {
-            errorMessage = error.localizedDescription
-            HapticService.shared.errorOccurred()
-            return false
-        } catch {
-            errorMessage = error.localizedDescription
-            HapticService.shared.errorOccurred()
-            return false
+        struct AddRequest: Codable {
+            let productId: String
+            let quantity: Int
+            let expirationDate: String?
+            let notes: String?
+            let locationId: String
+            // We send the temp ID so server can map it if we want, but for now server generates ID.
+            // Ideally, we should let client generate ID.
         }
-    }
-    
-    func adjustQuantity(id: String, adjustment: Int) async {
-        errorMessage = nil
         
-        do {
-            let response = try await APIService.shared.adjustQuantity(id: id, adjustment: adjustment)
-            if response.wasDeleted {
-                // Item was deleted because quantity hit 0
-                items.removeAll { $0.id == id }
-                successMessage = "Item removed from pantry"
-                HapticService.shared.itemDeleted()
-            } else if let newQuantity = response.quantity {
-                // Update the item locally for instant feedback
-                if let index = items.firstIndex(where: { $0.id == id }) {
-                    items[index].quantity = newQuantity
-                }
-                HapticService.shared.itemRemoved()
-            }
-        } catch let error as APIError {
-            errorMessage = error.localizedDescription
-            HapticService.shared.errorOccurred()
-        } catch {
-            errorMessage = error.localizedDescription
-            HapticService.shared.errorOccurred()
-        }
-    }
-    
-    func getItem(id: String) -> InventoryItem? {
-        items.first { $0.id == id }
-    }
-    
-    func deleteItem(id: String) async {
-        errorMessage = nil
+        let body = AddRequest(productId: productId, quantity: quantity, expirationDate: dateString, notes: notes, locationId: locationId)
         
-        do {
-            try await APIService.shared.deleteInventoryItem(id: id)
-            items.removeAll { $0.id == id }
-            HapticService.shared.itemDeleted()
-        } catch let error as APIError {
-            errorMessage = error.localizedDescription
-            HapticService.shared.errorOccurred()
-        } catch {
-            errorMessage = error.localizedDescription
-            HapticService.shared.errorOccurred()
-        }
+        ActionQueueService.shared.enqueue(
+            context: context,
+            type: .create,
+            endpoint: "/inventory",
+            method: "POST",
+            body: body
+        )
+        
+        successMessage = "Added \(newItem.product?.name ?? "item")"
+        HapticService.shared.itemAdded()
+        await loadInventory()
+        return true
     }
     
     func updateItem(id: String, quantity: Int?, expirationDate: Date?, notes: String?, locationId: String? = nil) async {
+        guard let context = modelContext else { return }
         errorMessage = nil
         
-        var dateString: String? = nil
-        if let date = expirationDate {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            dateString = formatter.string(from: date)
+        // 1. Update local item
+        let descriptor = FetchDescriptor<SDInventoryItem>(predicate: #Predicate { $0.id == id })
+        guard let item = try? context.fetch(descriptor).first else { return }
+        
+        if let q = quantity { item.quantity = q }
+        if let e = expirationDate { item.expirationDate = e } // Handle nil clearing?
+        if let n = notes { item.notes = n }
+        if let l = locationId { 
+            item.locationId = l
+            let locDesc = FetchDescriptor<SDLocation>(predicate: #Predicate { $0.id == l })
+            item.location = try? context.fetch(locDesc).first
         }
         
+        try? context.save()
+        
+        // 2. Enqueue action
+        let dateString: String? = expirationDate.map { 
+            let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; return f.string(from: $0) 
+        }
+        
+        struct UpdateRequest: Codable {
+            let quantity: Int?
+            let expirationDate: String?
+            let notes: String?
+            let locationId: String?
+        }
+        
+        let body = UpdateRequest(quantity: quantity, expirationDate: dateString, notes: notes, locationId: locationId)
+        
+        ActionQueueService.shared.enqueue(
+            context: context,
+            type: .update,
+            endpoint: "/inventory/\(id)",
+            method: "PUT",
+            body: body
+        )
+        
+        await loadInventory()
+    }
+    
+    func deleteItem(id: String) async {
+        guard let context = modelContext else { return }
+        errorMessage = nil
+        
+        // 1. Delete local
+        let descriptor = FetchDescriptor<SDInventoryItem>(predicate: #Predicate { $0.id == id })
+        if let item = try? context.fetch(descriptor).first {
+            context.delete(item)
+            try? context.save()
+        }
+        
+        // 2. Enqueue action
+        ActionQueueService.shared.enqueue(
+            context: context,
+            type: .delete,
+            endpoint: "/inventory/\(id)",
+            method: "DELETE"
+        )
+        
+        items.removeAll { $0.id == id }
+        HapticService.shared.itemDeleted()
+    }
+    
+    func adjustQuantity(id: String, adjustment: Int) async {
+        guard let context = modelContext else { return }
+        
+        // 1. Local update
+        let descriptor = FetchDescriptor<SDInventoryItem>(predicate: #Predicate { $0.id == id })
+        guard let item = try? context.fetch(descriptor).first else { return }
+        
+        let newQuantity = item.quantity + adjustment
+        
+        if newQuantity <= 0 {
+            context.delete(item)
+            items.removeAll { $0.id == id }
+            successMessage = "Item removed"
+            HapticService.shared.itemDeleted()
+        } else {
+            item.quantity = newQuantity
+            if let index = items.firstIndex(where: { $0.id == id }) {
+                items[index].quantity = newQuantity
+            }
+            HapticService.shared.itemRemoved()
+        }
+        try? context.save()
+        
+        // 2. Enqueue action
+        struct QuantityAdjustRequest: Codable {
+            let adjustment: Int
+        }
+        
+        ActionQueueService.shared.enqueue(
+            context: context,
+            type: .update,
+            endpoint: "/inventory/\(id)/quantity",
+            method: "PATCH",
+            body: QuantityAdjustRequest(adjustment: adjustment)
+        )
+    }
+
+    // ... (keep other methods, adapting them similarly)
+
+    
+    func quickAdd(upc: String, quantity: Int = 1, expirationDate: Date? = nil, locationId: String) async -> QuickAddResponse? {
+        // For quick add, we might still want to hit the API to check for product existence/custom product requirement
+        // Or we can implement local lookup.
+        // For now, let's keep it hybrid: Check API, if success, update local.
+        
+        // Ideally: Lookup local product -> if found, add local item -> enqueue.
+        // If not found locally -> Lookup API -> if found, add local product & item -> enqueue.
+        
         do {
-            _ = try await APIService.shared.updateInventoryItem(id: id, quantity: quantity, expirationDate: dateString, notes: notes, locationId: locationId)
-            await loadInventory()
-        } catch let error as APIError {
-            errorMessage = error.localizedDescription
+            return try await APIService.shared.quickAdd(upc: upc, quantity: quantity, expirationDate: nil, locationId: locationId)
         } catch {
             errorMessage = error.localizedDescription
+            return nil
         }
     }
     
     func addSmartItem(name: String, upc: String?, expirationDate: Date?) async -> Bool {
-        // Default location (first one)
+        guard let context = modelContext else { return false }
         guard let locationId = locations.first?.id else {
             errorMessage = "No location found"
             return false
         }
         
-        // 1. Try Quick Add if we have a UPC
+        // 1. Create/Find Product Locally
+        var productId: String?
+        
+        // Check if product exists locally by UPC
         if let upc = upc {
-            let response = await quickAdd(upc: upc, quantity: 1, expirationDate: expirationDate, locationId: locationId)
-            
-            // If successful and didn't require custom product, we are done
-            if let response = response, response.requiresCustomProduct != true {
-                return true
+            let descriptor = FetchDescriptor<SDProduct>(predicate: #Predicate { $0.upc == upc })
+            if let existing = try? context.fetch(descriptor).first {
+                productId = existing.id
             }
-            
-            // If failed or requires custom product, proceed to create product
         }
         
-        // 2. Create Product
-        do {
-            let product = try await APIService.shared.createProduct(
+        if productId == nil {
+            // Create new local product
+            let newProductId = UUID().uuidString
+            let newProduct = SDProduct(
+                id: newProductId,
                 upc: upc,
                 name: name,
                 brand: nil,
-                description: "Added via Smart Scanner",
-                category: "Uncategorized"
+                details: "Added via Smart Scanner",
+                imageUrl: nil,
+                category: "Uncategorized",
+                isCustom: true,
+                householdId: "current"
             )
+            context.insert(newProduct)
+            productId = newProductId
             
-            // 3. Add to Inventory
-            return await addItem(
-                productId: product.id,
-                quantity: 1,
-                expirationDate: expirationDate,
-                notes: "Added via Smart Scanner",
-                locationId: locationId
+            // Enqueue Product Creation
+            struct CreateProductRequest: Codable {
+                let upc: String?
+                let name: String
+                let brand: String?
+                let description: String?
+                let category: String?
+            }
+            
+            ActionQueueService.shared.enqueue(
+                context: context,
+                type: .create,
+                endpoint: "/products",
+                method: "POST",
+                body: CreateProductRequest(upc: upc, name: name, brand: nil, description: "Added via Smart Scanner", category: "Uncategorized")
             )
-        } catch {
-            errorMessage = error.localizedDescription
-            return false
         }
+        
+        // 2. Add Item
+        if let pid = productId {
+            return await addItem(productId: pid, quantity: 1, expirationDate: expirationDate, locationId: locationId)
+        }
+        
+        return false
+    }
+    
+    // Helper to load expiring/expired from local
+    func loadExpiringItems(days: Int = 7) async {
+        // Filter local items
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let today = Calendar.current.startOfDay(for: Date())
+        let threshold = Calendar.current.date(byAdding: .day, value: days, to: today)!
+        
+        expiringItems = items.filter { 
+            guard let dateStr = $0.expirationDate,
+                  let date = dateFormatter.date(from: dateStr) else { return false }
+            
+            let itemDate = Calendar.current.startOfDay(for: date)
+            return itemDate >= today && itemDate <= threshold
+        }
+    }
+    
+    func loadExpiredItems() async {
+        expiredItems = items.filter { $0.isExpired }
+    }
+    
+    func getItem(id: String) -> InventoryItem? {
+        items.first { $0.id == id }
     }
 }

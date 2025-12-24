@@ -103,10 +103,10 @@ struct LocationsSettingsView: View {
         do {
             try await APIService.shared.deleteLocation(id: id)
             await loadLocations()
-            HapticManager.success()
+            HapticService.shared.success()
         } catch {
             errorMessage = error.localizedDescription
-            HapticManager.error()
+            HapticService.shared.error()
         }
     }
 }
@@ -348,12 +348,12 @@ struct AddLocationSheet: View {
         
         do {
             _ = try await APIService.shared.createLocation(name: name.trimmingCharacters(in: .whitespaces), parentId: parentId)
-            HapticManager.success()
+            HapticService.shared.success()
             await onSave()
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
-            HapticManager.error()
+            HapticService.shared.error()
         }
         
         isLoading = false

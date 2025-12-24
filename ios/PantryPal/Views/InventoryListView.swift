@@ -83,6 +83,7 @@ struct InventoryListView: View {
                 await viewModel.loadInventory()
                 // Trigger background sync
                 try? await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                await ActionQueueService.shared.processQueue(modelContext: modelContext)
             }
             .sheet(isPresented: $showingScanner) {
                 if UserPreferences.shared.useSmartScanner {
@@ -116,10 +117,12 @@ struct InventoryListView: View {
                 Text(viewModel.errorMessage ?? "")
             }
             .task {
+                viewModel.setContext(modelContext)
                 await viewModel.loadInventory()
                 await viewModel.loadLocations()
                 // Initial sync
                 try? await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                await ActionQueueService.shared.processQueue(modelContext: modelContext)
             }
             .toast(isShowing: $showToast, message: toastMessage, type: toastType)
         }
@@ -128,7 +131,7 @@ struct InventoryListView: View {
     private func showSuccessToast(_ message: String) {
         toastMessage = message
         toastType = .success
-        HapticManager.success()
+        HapticService.shared.success()
         withAnimation {
             showToast = true
         }
@@ -263,9 +266,9 @@ struct InventoryItemRow: View {
                     Button(action: {
                         if item.quantity <= 1 {
                             showDeleteConfirmation = true
-                            HapticManager.warning()
+                            HapticService.shared.warning()
                         } else {
-                            HapticManager.light()
+                            HapticService.shared.lightImpact()
                             Task { await viewModel.adjustQuantity(id: item.id, adjustment: -1) }
                         }
                     }) {
@@ -281,7 +284,7 @@ struct InventoryItemRow: View {
                         .frame(minWidth: 30)
                     
                     Button(action: {
-                        HapticManager.light()
+                        HapticService.shared.lightImpact()
                         Task { await viewModel.adjustQuantity(id: item.id, adjustment: 1) }
                     }) {
                         Image(systemName: "plus.circle.fill")
@@ -349,7 +352,7 @@ struct ScannerSheet: View {
                 } else {
                     BarcodeScannerView(scannedCode: $scannedCode, isPresented: .constant(true)) { code in
                         scannedCode = code
-                        HapticManager.medium()
+                        HapticService.shared.mediumImpact()
                         lookupProduct(upc: code)
                     }
                 }
@@ -713,7 +716,7 @@ struct ScannerSheet: View {
             onItemAdded?(productName)
         } catch {
             viewModel.errorMessage = error.localizedDescription
-            HapticManager.error()
+            HapticService.shared.error()
         }
         
         isAddingCustom = false
@@ -867,7 +870,7 @@ struct AddCustomItemView: View {
             }
         } catch {
             viewModel.errorMessage = error.localizedDescription
-            HapticManager.error()
+            HapticService.shared.error()
         }
         
         isLoading = false

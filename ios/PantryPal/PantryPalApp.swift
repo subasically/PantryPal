@@ -12,6 +12,7 @@ struct PantryPalApp: App {
             SDProduct.self,
             SDInventoryItem.self,
             SDLocation.self,
+            SDPendingAction.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -75,7 +76,11 @@ struct ContentView: View {
         @Bindable var authViewModel = authViewModel
         Group {
             if authViewModel.isAuthenticated {
-                MainTabView()
+                if authViewModel.showHouseholdSetup {
+                    HouseholdSetupView()
+                } else {
+                    MainTabView()
+                }
             } else {
                 LoginView()
             }

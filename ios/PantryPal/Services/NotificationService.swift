@@ -57,13 +57,13 @@ final class NotificationService: ObservableObject {
     }
     
     private func registerTokenWithServer(_ token: String) async {
-        guard let authToken = await APIService.shared.currentToken else {
+        guard let authToken = APIService.shared.currentToken else {
             print("No auth token, skipping device token registration")
             return
         }
         
         do {
-            let baseURL = await APIService.shared.currentBaseURL
+            let baseURL = APIService.shared.currentBaseURL
             var request = URLRequest(url: URL(string: "\(baseURL)/notifications/register")!)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -81,10 +81,10 @@ final class NotificationService: ObservableObject {
     
     func unregisterTokenFromServer() async {
         guard let token = deviceToken,
-              let authToken = await APIService.shared.currentToken else { return }
+              let authToken = APIService.shared.currentToken else { return }
         
         do {
-            let baseURL = await APIService.shared.currentBaseURL
+            let baseURL = APIService.shared.currentBaseURL
             var request = URLRequest(url: URL(string: "\(baseURL)/notifications/unregister")!)
             request.httpMethod = "DELETE"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

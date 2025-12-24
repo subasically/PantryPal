@@ -3,11 +3,17 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @EnvironmentObject private var notificationService: NotificationService
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
     @State private var biometricEnabled: Bool
     @State private var smartScannerEnabled: Bool
     @State private var showingDisableAlert = false
+    @State private var showingResetConfirmation = false
+    @State private var showingResetVerification = false
+    @State private var resetVerificationText = ""
+    @State private var isResetting = false
+    @State private var resetError: String?
     
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -191,6 +197,29 @@ struct SettingsView: View {
                         }
                     }
                 }
+                
+                // Danger Zone
+                Section {
+                    Button(role: .destructive) {
+                        showingResetConfirmation = true
+                    } label: {
+                        HStack {
+                            Spacer()
+                            if isResetting {
+                                ProgressView()
+                                    .tint(.red)
+                            } else {
+                                Label("Reset All Data", systemImage: "trash.fill")
+                            }
+                            Spacer()
+                        }
+                    }
+                    .disabled(isResetting)
+                } header: {
+                    Text("Danger Zone")
+                } footer: {
+                    Text("This will permanently delete all inventory, history, and custom products for your household.")
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -211,7 +240,61 @@ struct SettingsView: View {
             } message: {
                 Text("You will need to enter your email and password to sign in.")
             }
+            .alert("Reset All Data?", isPresented: $showingResetConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Continue", role: .destructive) {
+                    resetVerificationText = ""
+                    showingResetVerification = true
+                }
+            } message: {
+                Text("This action cannot be undone. All data will be wiped from all devices in your household.")
+            }
+            .alert("Verify Reset", isPresented: $showingResetVerification) {
+                TextField("Type 'delete all data'", text: $resetVerificationText)
+                    .textInputAutocapitalization(.never)
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    if resetVerificationText == "delete all data" {
+                        Task { await performReset() }
+                    }
+                }
+                .disabled(resetVerificationText != "delete all data")
+            } message: {
+                Text("Type 'delete all data' to confirm.")
+            }
+            .alert("Error", isPresented: Binding(get: { resetError != nil }, set: { if !$0 { resetError = nil } })) {
+                Button("OK") { resetError = nil }
+            } message: {
+                Text(resetError ?? "Unknown error")
+            }
         }
+    }
+    
+    private func performReset() async {
+        isResetting = true
+        
+        do {
+            // 1. Call API to wipe server data
+            try await APIService.shared.resetHouseholdData()
+            
+            // 2. Wipe local data
+            try modelContext.delete(model: SDInventoryItem.self)
+            try modelContext.delete(model: SDProduct.self)
+            try modelContext.delete(model: SDLocation.self)
+            try modelContext.delete(model: SDPendingAction.self)
+            
+            // 3. Re-sync to get default locations
+            try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+            
+            // 4. Success feedback
+            HapticService.shared.success()
+            dismiss()
+        } catch {
+            resetError = error.localizedDescription
+            HapticService.shared.error()
+        }
+        
+        isResetting = false
     }
 }
 
