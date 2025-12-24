@@ -356,4 +356,34 @@ router.get('/household/invites', authenticateToken, (req, res) => {
     }
 });
 
+// Reset household data (wipe inventory, history, custom products, locations)
+router.delete('/household/data', authenticateToken, (req, res) => {
+    try {
+        const householdId = req.user.householdId;
+        console.log(`[Reset] Wiping data for household ${householdId} by user ${req.user.id}`);
+
+        const deleteInventory = db.prepare('DELETE FROM inventory WHERE household_id = ?');
+        const deleteHistory = db.prepare('DELETE FROM checkout_history WHERE household_id = ?');
+        const deleteCustomProducts = db.prepare('DELETE FROM products WHERE household_id = ? AND is_custom = 1');
+        const deleteLocations = db.prepare('DELETE FROM locations WHERE household_id = ?');
+
+        const transaction = db.transaction(() => {
+            deleteInventory.run(householdId);
+            deleteHistory.run(householdId);
+            deleteCustomProducts.run(householdId);
+            deleteLocations.run(householdId);
+            
+            // Re-seed default locations so the app isn't empty
+            createDefaultLocations(householdId);
+        });
+
+        transaction();
+
+        res.json({ success: true, message: 'Household data reset successfully' });
+    } catch (error) {
+        console.error('Reset household data error:', error);
+        res.status(500).json({ error: 'Failed to reset household data' });
+    }
+});
+
 module.exports = router;
