@@ -98,8 +98,8 @@ struct InventoryListView: View {
                         }
                     })
                 } else {
-                    ScannerSheet(viewModel: $viewModel, isPresented: $showingScanner, onItemAdded: { name in
-                        showSuccessToast("Added \(name) to pantry!")
+                    ScannerSheet(viewModel: $viewModel, isPresented: $showingScanner, onItemAdded: { message in
+                        showSuccessToast(message.contains("Added") || message.contains("Updated") ? message : "Added \(message) to pantry!")
                     })
                 }
             }
@@ -344,6 +344,8 @@ struct ScannerSheet: View {
     @State private var editedName = ""
     @State private var editedBrand = ""
     
+    @State private var existingItem: InventoryItem?
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -387,6 +389,26 @@ struct ScannerSheet: View {
                     .padding(.vertical, 6)
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(6)
+                
+                // Existing item alert
+                if let existing = existingItem {
+                    HStack {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundColor(.ppPurple)
+                        VStack(alignment: .leading) {
+                            Text("Item in Inventory")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                            Text("You have \(existing.quantity) in \(existing.locationName ?? "storage")")
+                                .font(.caption)
+                        }
+                        Spacer()
+                    }
+                    .padding()
+                    .background(Color.ppPurple.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
+                }
                 
                 // Product details card
                 productDetailsCard
@@ -520,7 +542,12 @@ struct ScannerSheet: View {
                                     } else {
                                         let productName = lookupResult?.product?.name ?? "Item"
                                         isPresented = false
-                                        onItemAdded?(productName)
+                                        
+                                        if let action = response?.action, action == "updated" {
+                                            onItemAdded?("Updated \(productName)")
+                                        } else {
+                                            onItemAdded?("Added \(productName)")
+                                        }
                                     }
                                 }
                             }
@@ -736,6 +763,17 @@ struct ScannerSheet: View {
                 await MainActor.run {
                     lookupResult = result
                     isLookingUp = false
+                    
+                    // Check for existing item in local inventory
+                    if let product = result.product {
+                        existingItem = viewModel.items.first { $0.productId == product.id || $0.productUpc == upc }
+                        if let existing = existingItem {
+                            // Pre-select location if exists
+                            if let locId = existing.locationId {
+                                selectedLocationId = locId
+                            }
+                        }
+                    }
                 }
             } catch {
                 await MainActor.run {

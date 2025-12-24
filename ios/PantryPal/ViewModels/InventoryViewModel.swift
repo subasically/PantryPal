@@ -222,11 +222,12 @@ final class InventoryViewModel {
         // Or we can implement local lookup.
         // For now, let's keep it hybrid: Check API, if success, update local.
         
-        // Ideally: Lookup local product -> if found, add local item -> enqueue.
-        // If not found locally -> Lookup API -> if found, add local product & item -> enqueue.
+        let dateString: String? = expirationDate.map { 
+            let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; return f.string(from: $0) 
+        }
         
         do {
-            return try await APIService.shared.quickAdd(upc: upc, quantity: quantity, expirationDate: nil, locationId: locationId)
+            return try await APIService.shared.quickAdd(upc: upc, quantity: quantity, expirationDate: dateString, locationId: locationId)
         } catch {
             errorMessage = error.localizedDescription
             return nil
