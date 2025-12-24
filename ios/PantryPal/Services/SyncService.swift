@@ -8,11 +8,13 @@ final class SyncService: Sendable {
     private init() {}
     
     func syncFromRemote(modelContext: ModelContext) async throws {
+        print("🔄 [SyncService] Starting syncFromRemote...")
         // 1. Fetch all data from API
         async let fullSyncResponse = APIService.shared.fullSync()
         async let locationsResponse = APIService.shared.getLocationsHierarchy()
         
         let (syncData, locationsData) = try await (fullSyncResponse, locationsResponse)
+        print("✅ [SyncService] Fetched \(syncData.inventory.count) items and \(locationsData.locations.count) locations from server")
         
         // 2. Sync Locations
         // We flatten the hierarchy for storage, but keep parentId
@@ -79,22 +81,42 @@ final class SyncService: Sendable {
         let allItems = (try? modelContext.fetch(allItemsDescriptor)) ?? []
         let remoteIds = Set(syncData.inventory.map { $0.id })
         
+        print("📊 [SyncService] Local items: \(allItems.count), Remote items: \(remoteIds.count)")
+        
         // Delete items not in remote
+        var deletedCount = 0
         for item in allItems {
             if !remoteIds.contains(item.id) {
+                print("🗑️ [SyncService] Deleting local item not in remote: \(item.id) (\(item.displayName))")
                 modelContext.delete(item)
+                deletedCount += 1
             }
+        }
+        if deletedCount > 0 {
+            print("🗑️ [SyncService] Deleted \(deletedCount) stale local items")
         }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
         for item in syncData.inventory {
             let itemId = item.id
             let descriptor = FetchDescriptor<SDInventoryItem>(predicate: #Predicate { $0.id == itemId })
             let existing = try? modelContext.fetch(descriptor).first
             
-            let expDate: Date? = item.expirationDate != nil ? dateFormatter.date(from: item.expirationDate!) : nil
+            var expDate: Date? = nil
+            if let dateStr = item.expirationDate {
+                // Try simple format first, then ISO
+                expDate = dateFormatter.date(from: dateStr) ?? isoFormatter.date(from: dateStr)
+                // Fallback for ISO without fractional seconds
+                if expDate == nil {
+                    let isoSimple = ISO8601DateFormatter()
+                    expDate = isoSimple.date(from: dateStr)
+                }
+            }
             
             if let existing = existing {
                 existing.quantity = item.quantity

@@ -80,10 +80,20 @@ struct InventoryListView: View {
             }
             .searchable(text: $searchText, prompt: "Search items")
             .refreshable {
-                await viewModel.loadInventory()
-                // Trigger background sync
-                try? await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                print("🔄 [InventoryListView] User triggered refresh")
+                // 1. Upload pending changes first so they are included in the sync
                 await ActionQueueService.shared.processQueue(modelContext: modelContext)
+                
+                // 2. Fetch latest data (which should now include our uploads)
+                do {
+                    try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                    print("✅ [InventoryListView] Sync completed successfully")
+                } catch {
+                    print("❌ [InventoryListView] Sync failed: \(error)")
+                }
+                
+                // 3. Reload view model
+                await viewModel.loadInventory()
             }
             .sheet(isPresented: $showingScanner) {
                 if UserPreferences.shared.useSmartScanner {
@@ -117,12 +127,20 @@ struct InventoryListView: View {
                 Text(viewModel.errorMessage ?? "")
             }
             .task {
+                print("🚀 [InventoryListView] View loaded, starting initial sync sequence")
                 viewModel.setContext(modelContext)
                 await viewModel.loadInventory()
                 await viewModel.loadLocations()
-                // Initial sync
-                try? await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                
+                // Initial sync sequence
                 await ActionQueueService.shared.processQueue(modelContext: modelContext)
+                do {
+                    try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                    print("✅ [InventoryListView] Initial sync completed")
+                } catch {
+                    print("❌ [InventoryListView] Initial sync failed: \(error)")
+                }
+                await viewModel.loadInventory()
             }
             .toast(isShowing: $showToast, message: toastMessage, type: toastType)
         }
