@@ -18,11 +18,19 @@ router.post('/scan', (req, res) => {
             return res.status(400).json({ error: 'UPC is required' });
         }
 
-        // Find product by UPC
-        const product = db.prepare(`
-            SELECT * FROM products 
-            WHERE upc = ? AND (household_id IS NULL OR household_id = ?)
-        `).get(upc, req.user.householdId);
+        // 1. Check for household-specific custom product first (with custom UPC format)
+        const customUpc = `${upc}-${req.user.householdId}`;
+        let product = db.prepare(`
+            SELECT * FROM products WHERE upc = ?
+        `).get(customUpc);
+
+        // 2. If not found, check global products
+        if (!product) {
+            product = db.prepare(`
+                SELECT * FROM products 
+                WHERE upc = ? AND (household_id IS NULL OR household_id = ?)
+            `).get(upc, req.user.householdId);
+        }
 
         console.log(`[Checkout] Product lookup for UPC ${upc}:`, product ? `Found "${product.name}" (ID: ${product.id})` : 'Not found');
 

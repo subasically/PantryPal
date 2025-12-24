@@ -22,6 +22,12 @@
 		013 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114 /* NotificationService.swift */; };
 		115 /* HouseholdSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116 /* HouseholdSharingView.swift */; };
 		2F377FFA2EFB7975006F4E33 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FF92EFB7975006F4E33 /* SplashView.swift */; };
+		2F377FFC2EFC65D4006F4E33 /* SwiftDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FFB2EFC65D4006F4E33 /* SwiftDataModels.swift */; };
+		2F377FFF2EFC6621006F4E33 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FFE2EFC6621006F4E33 /* SyncService.swift */; };
+		2F3780002EFC6621006F4E33 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FFD2EFC6621006F4E33 /* HapticService.swift */; };
+		2F3780022EFC6A97006F4E33 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780012EFC6A97006F4E33 /* OCRService.swift */; };
+		2F3780042EFC6AAD006F4E33 /* PhotoCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */; };
+		2F3780062EFC6AEB006F4E33 /* SmartScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */; };
 		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
 		2F74C5972EDFA400006E985C /* barcode-beep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2F74C5962EDFA400006E985C /* barcode-beep.mp3 */; };
 		66B84200AC66651825A0E24E /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55B457FB1DBB941CA0DFB17 /* HapticService.swift */; };
@@ -50,6 +56,12 @@
 		116 /* HouseholdSharingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdSharingView.swift; sourceTree = "<group>"; };
 		2F2078C32EF59CE3002B7B2C /* PantryPal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PantryPal.entitlements; sourceTree = "<group>"; };
 		2F377FF92EFB7975006F4E33 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		2F377FFB2EFC65D4006F4E33 /* SwiftDataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataModels.swift; sourceTree = "<group>"; };
+		2F377FFD2EFC6621006F4E33 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
+		2F377FFE2EFC6621006F4E33 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
+		2F3780012EFC6A97006F4E33 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
+		2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureView.swift; sourceTree = "<group>"; };
+		2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartScannerView.swift; sourceTree = "<group>"; };
 		2F74C56F2EDE639E006E985C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2F74C5962EDFA400006E985C /* barcode-beep.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "barcode-beep.mp3"; sourceTree = "<group>"; };
 		3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationsSettingsView.swift; sourceTree = "<group>"; };
@@ -108,6 +120,7 @@
 		303 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				2F377FFB2EFC65D4006F4E33 /* SwiftDataModels.swift */,
 				102 /* Models.swift */,
 			);
 			path = Models;
@@ -116,6 +129,7 @@
 		304 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */,
 				2F377FF92EFB7975006F4E33 /* SplashView.swift */,
 				2F74C56F2EDE639E006E985C /* SettingsView.swift */,
 				106 /* LoginView.swift */,
@@ -141,6 +155,9 @@
 		306 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2F3780012EFC6A97006F4E33 /* OCRService.swift */,
+				2F377FFD2EFC6621006F4E33 /* HapticService.swift */,
+				2F377FFE2EFC6621006F4E33 /* SyncService.swift */,
 				103 /* APIService.swift */,
 				112 /* BiometricAuthService.swift */,
 				113 /* UserPreferences.swift */,
@@ -160,6 +177,7 @@
 		7155113A53D7C3F6CB2C86DE /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */,
 				ED4A7C84F0B02C27FF31131A /* ToastView.swift */,
 			);
 			path = Components;
@@ -245,6 +263,9 @@
 			files = (
 				001 /* PantryPalApp.swift in Sources */,
 				002 /* Models.swift in Sources */,
+				2F377FFF2EFC6621006F4E33 /* SyncService.swift in Sources */,
+				2F3780002EFC6621006F4E33 /* HapticService.swift in Sources */,
+				2F3780042EFC6AAD006F4E33 /* PhotoCaptureView.swift in Sources */,
 				003 /* APIService.swift in Sources */,
 				004 /* AuthViewModel.swift in Sources */,
 				005 /* InventoryViewModel.swift in Sources */,
@@ -255,7 +276,10 @@
 				2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */,
 				011 /* BiometricAuthService.swift in Sources */,
 				012 /* UserPreferences.swift in Sources */,
+				2F3780062EFC6AEB006F4E33 /* SmartScannerView.swift in Sources */,
 				013 /* NotificationService.swift in Sources */,
+				2F377FFC2EFC65D4006F4E33 /* SwiftDataModels.swift in Sources */,
+				2F3780022EFC6A97006F4E33 /* OCRService.swift in Sources */,
 				A31215D9B10B9BC2C145F61A /* HapticManager.swift in Sources */,
 				B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */,
 				A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */,

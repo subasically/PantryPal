@@ -10,7 +10,7 @@ final class SyncService: Sendable {
     func syncFromRemote(modelContext: ModelContext) async throws {
         // 1. Fetch all data from API
         async let fullSyncResponse = APIService.shared.fullSync()
-        async let locationsResponse = APIService.shared.getLocations()
+        async let locationsResponse = APIService.shared.getLocationsHierarchy()
         
         let (syncData, locationsData) = try await (fullSyncResponse, locationsResponse)
         

@@ -182,4 +182,47 @@ final class InventoryViewModel {
             errorMessage = error.localizedDescription
         }
     }
+    
+    func addSmartItem(name: String, upc: String?, expirationDate: Date?) async -> Bool {
+        // Default location (first one)
+        guard let locationId = locations.first?.id else {
+            errorMessage = "No location found"
+            return false
+        }
+        
+        // 1. Try Quick Add if we have a UPC
+        if let upc = upc {
+            let response = await quickAdd(upc: upc, quantity: 1, expirationDate: expirationDate, locationId: locationId)
+            
+            // If successful and didn't require custom product, we are done
+            if let response = response, response.requiresCustomProduct != true {
+                return true
+            }
+            
+            // If failed or requires custom product, proceed to create product
+        }
+        
+        // 2. Create Product
+        do {
+            let product = try await APIService.shared.createProduct(
+                upc: upc,
+                name: name,
+                brand: nil,
+                description: "Added via Smart Scanner",
+                category: "Uncategorized"
+            )
+            
+            // 3. Add to Inventory
+            return await addItem(
+                productId: product.id,
+                quantity: 1,
+                expirationDate: expirationDate,
+                notes: "Added via Smart Scanner",
+                locationId: locationId
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
 }

@@ -9,6 +9,7 @@ final class UserPreferences: Sendable {
     
     private enum Keys {
         static let lastUsedLocationId = "lastUsedLocationId"
+        static let useSmartScanner = "useSmartScanner"
     }
     
     private init() {}
@@ -16,5 +17,10 @@ final class UserPreferences: Sendable {
     nonisolated var lastUsedLocationId: String? {
         get { UserDefaults.standard.string(forKey: Keys.lastUsedLocationId) }
         set { UserDefaults.standard.set(newValue, forKey: Keys.lastUsedLocationId) }
+    }
+    
+    nonisolated var useSmartScanner: Bool {
+        get { UserDefaults.standard.bool(forKey: Keys.useSmartScanner) }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.useSmartScanner) }
     }
 }

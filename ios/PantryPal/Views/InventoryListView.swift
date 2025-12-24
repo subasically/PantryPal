@@ -85,9 +85,22 @@ struct InventoryListView: View {
                 try? await SyncService.shared.syncFromRemote(modelContext: modelContext)
             }
             .sheet(isPresented: $showingScanner) {
-                ScannerSheet(viewModel: $viewModel, isPresented: $showingScanner, onItemAdded: { name in
-                    showSuccessToast("Added \(name) to pantry!")
-                })
+                if UserPreferences.shared.useSmartScanner {
+                    SmartScannerView(isPresented: $showingScanner, onItemScanned: { name, upc, date in
+                        Task {
+                            let success = await viewModel.addSmartItem(name: name, upc: upc, expirationDate: date)
+                            if success {
+                                showSuccessToast("Added \(name) to pantry!")
+                            } else {
+                                // Error is handled in viewModel.errorMessage
+                            }
+                        }
+                    })
+                } else {
+                    ScannerSheet(viewModel: $viewModel, isPresented: $showingScanner, onItemAdded: { name in
+                        showSuccessToast("Added \(name) to pantry!")
+                    })
+                }
             }
             .sheet(isPresented: $showingAddCustom) {
                 AddCustomItemView(viewModel: $viewModel, isPresented: $showingAddCustom, onItemAdded: { name in

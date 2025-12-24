@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var biometricEnabled: Bool
+    @State private var smartScannerEnabled: Bool
     @State private var showingDisableAlert = false
     
     private var appVersion: String {
@@ -16,6 +17,7 @@ struct SettingsView: View {
     
     init() {
         _biometricEnabled = State(initialValue: BiometricAuthService.shared.isBiometricLoginEnabled)
+        _smartScannerEnabled = State(initialValue: UserPreferences.shared.useSmartScanner)
     }
     
     var body: some View {
@@ -88,6 +90,26 @@ struct SettingsView: View {
                                 Text("Enable Notifications")
                             }
                         }
+                    }
+                }
+                
+                // Scanner Section
+                Section("Scanner") {
+                    Toggle(isOn: $smartScannerEnabled) {
+                        HStack {
+                            Image(systemName: "text.viewfinder")
+                                .foregroundColor(.ppPurple)
+                                .frame(width: 24)
+                            VStack(alignment: .leading) {
+                                Text("Smart Scanner")
+                                Text("Multi-step flow with OCR for product name and expiration date")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .onChange(of: smartScannerEnabled) { _, newValue in
+                        UserPreferences.shared.useSmartScanner = newValue
                     }
                 }
                 

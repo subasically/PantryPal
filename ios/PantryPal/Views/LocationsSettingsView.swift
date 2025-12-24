@@ -4,12 +4,15 @@ struct LocationsSettingsView: View {
     @State private var locations: [LocationFlat] = []
     @State private var hierarchy: [LocationHierarchy] = []
     @State private var isLoading = true
-    @State private var showAddLocation = false
-    @State private var showAddSubLocation = false
-    @State private var selectedParentId: String?
-    @State private var selectedParentName: String?
+    @State private var activeSheet: LocationSheetConfig?
     @State private var errorMessage: String?
     @State private var expandedLocations: Set<String> = []
+    
+    struct LocationSheetConfig: Identifiable {
+        let id = UUID()
+        let parentId: String?
+        let parentName: String?
+    }
     
     var body: some View {
         Group {
@@ -24,16 +27,15 @@ struct LocationsSettingsView: View {
         .navigationTitle("Storage Locations")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showAddLocation = true }) {
+                Button(action: { 
+                    activeSheet = LocationSheetConfig(parentId: nil, parentName: nil)
+                }) {
                     Image(systemName: "plus")
                 }
             }
         }
-        .sheet(isPresented: $showAddLocation) {
-            AddLocationSheet(parentId: nil, parentName: nil, onSave: { await loadLocations() })
-        }
-        .sheet(isPresented: $showAddSubLocation) {
-            AddLocationSheet(parentId: selectedParentId, parentName: selectedParentName, onSave: { await loadLocations() })
+        .sheet(item: $activeSheet) { config in
+            AddLocationSheet(parentId: config.parentId, parentName: config.parentName, onSave: { await loadLocations() })
         }
         .alert("Error", isPresented: .constant(errorMessage != nil)) {
             Button("OK") { errorMessage = nil }
@@ -52,7 +54,7 @@ struct LocationsSettingsView: View {
             Text("Set up your storage locations to organize your pantry.\n\nExample: Basement Pantry → Rack 1 → Shelf 2")
         } actions: {
             Button("Add Location") {
-                showAddLocation = true
+                activeSheet = LocationSheetConfig(parentId: nil, parentName: nil)
             }
             .buttonStyle(.ppPrimary)
         }
@@ -67,9 +69,7 @@ struct LocationsSettingsView: View {
                         level: 0,
                         expandedLocations: $expandedLocations,
                         onAddSubLocation: { id, name in
-                            selectedParentId = id
-                            selectedParentName = name
-                            showAddSubLocation = true
+                            activeSheet = LocationSheetConfig(parentId: id, parentName: name)
                         },
                         onDelete: { id in
                             Task { await deleteLocation(id) }
