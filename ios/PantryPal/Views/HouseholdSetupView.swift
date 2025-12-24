@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HouseholdSetupView: View {
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.modelContext) private var modelContext
     @State private var showJoinSheet = false
     @State private var householdName = ""
     @State private var isRenaming = false
@@ -93,7 +94,11 @@ struct HouseholdSetupView: View {
             }
             .navigationBarHidden(true)
             .sheet(isPresented: $showJoinSheet) {
-                JoinHouseholdOnboardingView()
+                JoinHouseholdOnboardingView(onJoinSuccess: {
+                    Task {
+                        try? await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                    }
+                })
             }
         }
     }
@@ -104,6 +109,7 @@ struct JoinHouseholdOnboardingView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @StateObject private var viewModel = JoinHouseholdViewModel()
     @State private var showScanner = false
+    var onJoinSuccess: (() -> Void)?
     
     var body: some View {
         NavigationStack {
@@ -164,6 +170,7 @@ struct JoinHouseholdOnboardingView: View {
                             Task {
                                 await viewModel.joinHousehold()
                                 if viewModel.showSuccess {
+                                    onJoinSuccess?()
                                     await authViewModel.completeHouseholdSetup()
                                     dismiss()
                                 }

@@ -1,8 +1,10 @@
 import SwiftUI
+import UIKit
 import CoreImage.CIFilterBuiltins
-@preconcurrency import AVFoundation
+import AVFoundation
 
 struct HouseholdSharingView: View {
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = HouseholdSharingViewModel()
     @State private var showJoinSheet = false
     
@@ -123,7 +125,12 @@ struct HouseholdSharingView: View {
         }
         .navigationTitle("Household Sharing")
         .sheet(isPresented: $showJoinSheet) {
-            JoinHouseholdView()
+            JoinHouseholdView(onJoinSuccess: {
+                Task {
+                    try? await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                    await viewModel.loadMembers()
+                }
+            })
         }
         .alert("Error", isPresented: $viewModel.showError) {
             Button("OK", role: .cancel) {}
@@ -157,6 +164,7 @@ struct JoinHouseholdView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = JoinHouseholdViewModel()
     @State private var showScanner = false
+    var onJoinSuccess: (() -> Void)?
     
     var body: some View {
         NavigationStack {
@@ -219,6 +227,9 @@ struct JoinHouseholdView: View {
                         Button {
                             Task {
                                 await viewModel.joinHousehold()
+                                if viewModel.showSuccess {
+                                    onJoinSuccess?()
+                                }
                             }
                         } label: {
                             Text("Join Household")
