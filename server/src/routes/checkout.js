@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const db = require('../models/database');
 const { v4: uuidv4 } = require('uuid');
-const { authenticateToken } = require('../middleware/auth');
+const authenticateToken = require('../middleware/auth');
 const pushService = require('../services/pushNotifications');
+const { logSync } = require('../services/syncLogger');
 
 // All routes require authentication
 router.use(authenticateToken);
@@ -32,7 +33,7 @@ router.post('/scan', (req, res) => {
             `).get(upc, req.user.householdId);
         }
 
-        console.log(`[Checkout] Product lookup for UPC ${upc}:`, product ? `Found "${product.name}" (ID: ${product.id})` : 'Not found');
+        console.log(`[Checkout] Product lookup for UPC ${upc}:`, product ? `Found ${product.name} (ID: ${product.id})` : 'Not found');
 
         if (!product) {
             return res.status(200).json({ 
@@ -83,9 +84,18 @@ router.post('/scan', (req, res) => {
         // Reduce quantity or delete if last one
         if (inventoryItem.quantity <= 1) {
             db.prepare('DELETE FROM inventory WHERE id = ?').run(inventoryItem.id);
+            
+            logSync(req.user.householdId, 'inventory', inventoryItem.id, 'delete', {});
         } else {
             db.prepare('UPDATE inventory SET quantity = quantity - 1, updated_at = ? WHERE id = ?')
                 .run(now, inventoryItem.id);
+                
+            logSync(req.user.householdId, 'inventory', inventoryItem.id, 'update', { 
+                quantity: inventoryItem.quantity - 1,
+                expirationDate: inventoryItem.expiration_date,
+                notes: inventoryItem.notes,
+                locationId: inventoryItem.location_id
+            });
         }
 
         // Get updated inventory item (or null if deleted)

@@ -1,28 +1,40 @@
 const express = require('express');
+const router = express.Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../models/database');
-const { generateToken, authenticateToken } = require('../middleware/auth');
 const appleSignin = require('apple-signin-auth');
+const authenticateToken = require('../middleware/auth');
 
-const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// Create default locations for a new household
+// Helper to generate JWT
+function generateToken(user) {
+    return jwt.sign(
+        { 
+            id: user.id, 
+            email: user.email, 
+            householdId: user.household_id 
+        }, 
+        JWT_SECRET, 
+        { expiresIn: '30d' }
+    );
+}
+
+// Helper to create default locations
 function createDefaultLocations(householdId) {
-    const now = new Date().toISOString();
     const defaultLocations = [
-        { name: 'Basement Pantry', sortOrder: 0 },
-        { name: 'Basement Chest Freezer', sortOrder: 1 },
-        { name: 'Kitchen Fridge', sortOrder: 2 }
+        { name: 'Pantry', type: 'pantry' },
+        { name: 'Fridge', type: 'fridge' },
+        { name: 'Freezer', type: 'freezer' }
     ];
-
-    for (const loc of defaultLocations) {
-        const id = uuidv4();
-        db.prepare(`
-            INSERT INTO locations (id, household_id, name, parent_id, level, sort_order, created_at, updated_at)
-            VALUES (?, ?, ?, NULL, 0, ?, ?, ?)
-        `).run(id, householdId, loc.name, loc.sortOrder, now, now);
-    }
+    
+    const insertLocation = db.prepare('INSERT INTO locations (id, name, type, household_id) VALUES (?, ?, ?, ?)');
+    
+    defaultLocations.forEach(loc => {
+        insertLocation.run(uuidv4(), loc.name, loc.type, householdId);
+    });
 }
 
 // Apple Sign In
@@ -43,40 +55,43 @@ router.post('/apple', async (req, res) => {
         // Check if user exists by Apple ID
         let user = db.prepare('SELECT * FROM users WHERE apple_id = ?').get(appleId);
 
-        // If not found by Apple ID, try email (linking accounts)
-        if (!user && (email || appleEmail)) {
-            const searchEmail = email || appleEmail;
-            user = db.prepare('SELECT * FROM users WHERE email = ?').get(searchEmail);
-            
-            if (user) {
-                // Link Apple ID to existing account
-                db.prepare('UPDATE users SET apple_id = ? WHERE id = ?').run(appleId, user.id);
-                user.apple_id = appleId;
-            }
+        if (!user) {
+             const searchEmail = email || appleEmail;
+             // Check if user exists by email (linking accounts)
+             const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(searchEmail);
+             if (existingUser) {
+                 console.log('[Auth] Linking Apple ID ' + appleId + ' to existing user ' + existingUser.id);
+                 db.prepare('UPDATE users SET apple_id = ? WHERE id = ?').run(appleId, existingUser.id);
+                 user = db.prepare('SELECT * FROM users WHERE id = ?').get(existingUser.id);
+             }
         }
 
         if (!user) {
             // Create new user
             const userId = uuidv4();
-            const finalHouseholdId = uuidv4();
-            
-            // Create new household
-            db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(
-                finalHouseholdId,
-                householdName || `${name?.givenName || 'User'}'s Household`
-            );
-            
-            createDefaultLocations(finalHouseholdId);
+            let householdId;
 
-            // Create user
-            // Note: password_hash is null for Apple-only users
-            const userEmail = email || appleEmail || `${appleId}@privaterelay.appleid.com`;
-            const userName = name ? `${name.givenName} ${name.familyName}`.trim() : 'Apple User';
+            // Create household
+            const newHouseholdId = uuidv4();
+            const finalHouseholdName = householdName || (name ? `${name.firstName}'s Household` : 'My Household');
+            
+            db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(newHouseholdId, finalHouseholdName);
+            householdId = newHouseholdId;
+            
+            // Create default locations
+            createDefaultLocations(householdId);
+
+            const finalEmail = email || appleEmail || `${appleId}@privaterelay.appleid.com`;
+            const finalName = name ? `${name.firstName} ${name.lastName}`.trim() : 'Apple User';
+
+            // Create user with placeholder password hash (since they use Apple Sign In)
+            // We use a dummy hash that won't match any password
+            const placeholderHash = '$2a$10$placeholder_hash_for_apple_signin_users_only';
 
             db.prepare(`
                 INSERT INTO users (id, email, password_hash, name, household_id, apple_id)
-                VALUES (?, ?, NULL, ?, ?, ?)
-            `).run(userId, userEmail, userName, finalHouseholdId, appleId);
+                VALUES (?, ?, ?, ?, ?, ?)
+            `).run(userId, finalEmail, placeholderHash, finalName, householdId, appleId);
 
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
         }
@@ -90,60 +105,50 @@ router.post('/apple', async (req, res) => {
                 name: user.name,
                 householdId: user.household_id
             },
-            token,
-            householdId: user.household_id
+            token
         });
-
     } catch (error) {
         console.error('Apple Sign In error:', error);
         res.status(500).json({ error: 'Apple Sign In failed' });
     }
 });
 
-// Register new user
+// Register
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, name, householdName, householdId } = req.body;
+        const { email, password, name, householdName } = req.body;
 
         if (!email || !password || !name) {
             return res.status(400).json({ error: 'Email, password, and name are required' });
         }
 
-        // Check if user already exists
-        const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+        // Check if user exists
+        const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
         if (existingUser) {
-            return res.status(409).json({ error: 'Email already registered' });
+            return res.status(400).json({ error: 'User already exists' });
         }
 
-        const passwordHash = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         const userId = uuidv4();
-        let finalHouseholdId = householdId;
+        let finalHouseholdId;
 
-        // If joining existing household
-        if (householdId) {
-            const household = db.prepare('SELECT id FROM households WHERE id = ?').get(householdId);
-            if (!household) {
-                return res.status(404).json({ error: 'Household not found' });
-            }
-        } else {
-            // Create new household
-            finalHouseholdId = uuidv4();
-            db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(
-                finalHouseholdId,
-                householdName || `${name}'s Household`
-            );
-            
-            // Create default locations for the new household
-            createDefaultLocations(finalHouseholdId);
-        }
+        // Create household
+        const newHouseholdId = uuidv4();
+        const finalHouseholdName = householdName || `${name}'s Household`;
+        
+        db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(newHouseholdId, finalHouseholdName);
+        finalHouseholdId = newHouseholdId;
+        
+        // Create default locations
+        createDefaultLocations(finalHouseholdId);
 
         // Create user
         db.prepare(`
             INSERT INTO users (id, email, password_hash, name, household_id)
             VALUES (?, ?, ?, ?, ?)
-        `).run(userId, email, passwordHash, name, finalHouseholdId);
+        `).run(userId, email, hashedPassword, name, finalHouseholdId);
 
-        const user = db.prepare('SELECT id, email, name, household_id FROM users WHERE id = ?').get(userId);
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
         const token = generateToken(user);
 
         res.status(201).json({

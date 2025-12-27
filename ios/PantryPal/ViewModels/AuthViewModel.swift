@@ -93,11 +93,14 @@ final class AuthViewModel {
         isLoading = true
         errorMessage = nil
         
+        print("Starting Apple Sign In...")
+        
         switch result {
         case .success(let auth):
             guard let appleIDCredential = auth.credential as? ASAuthorizationAppleIDCredential,
                   let identityTokenData = appleIDCredential.identityToken,
                   let identityToken = String(data: identityTokenData, encoding: .utf8) else {
+                print("Apple Sign In Error: Invalid credentials or missing identity token")
                 errorMessage = "Invalid Apple ID credentials"
                 isLoading = false
                 return
@@ -106,21 +109,27 @@ final class AuthViewModel {
             let email = appleIDCredential.email
             let name = appleIDCredential.fullName
             
+            print("Apple Sign In: Got identity token. Email: \(String(describing: email))")
+            
             do {
                 let response = try await APIService.shared.loginWithApple(
                     identityToken: identityToken,
                     email: email,
                     name: name
                 )
+                print("Apple Sign In: API success. User: \(response.user.id)")
                 currentUser = response.user
                 isAuthenticated = true
             } catch let error as APIError {
+                print("Apple Sign In API Error: \(error.localizedDescription)")
                 errorMessage = error.localizedDescription
             } catch {
+                print("Apple Sign In Unknown Error: \(error.localizedDescription)")
                 errorMessage = error.localizedDescription
             }
             
         case .failure(let error):
+            print("Apple Sign In Failure: \(error.localizedDescription)")
             // Ignore cancellation error
             if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
                 errorMessage = error.localizedDescription

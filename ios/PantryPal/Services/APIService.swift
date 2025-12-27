@@ -94,8 +94,11 @@ final class APIService: Sendable {
         if httpResponse.statusCode >= 400 {
             if let errorResponse = try? JSONDecoder().decode([String: String].self, from: data),
                let errorMessage = errorResponse["error"] {
+                print("API Error (\(httpResponse.statusCode)): \(errorMessage)")
                 throw APIError.serverError(errorMessage)
             }
+            let responseString = String(data: data, encoding: .utf8) ?? "No data"
+            print("API Error (\(httpResponse.statusCode)): \(responseString)")
             throw APIError.serverError("Request failed with status \(httpResponse.statusCode)")
         }
         

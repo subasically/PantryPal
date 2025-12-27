@@ -1,64 +1,56 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../models/database');
-const { authenticateToken } = require('../middleware/auth');
+const authenticateToken = require('../middleware/auth');
+const { logSync } = require('../services/syncLogger');
 
 const router = express.Router();
 
-// All routes require authentication
 router.use(authenticateToken);
 
 // Get all inventory items for household
 router.get('/', (req, res) => {
     try {
         const householdId = req.user.householdId;
-        const items = db.prepare(`
-            SELECT 
-                i.*,
-                p.name as product_name,
-                p.brand as product_brand,
-                p.upc as product_upc,
-                p.image_url as product_image_url,
-                p.category as product_category,
-                l.name as location_name,
-                l.id as location_id
+        const inventory = db.prepare(`
+            SELECT i.*, p.name as product_name, p.brand as product_brand, 
+                   p.upc as product_upc, p.image_url as product_image_url,
+                   p.category as product_category,
+                   l.name as location_name
             FROM inventory i
             JOIN products p ON i.product_id = p.id
             LEFT JOIN locations l ON i.location_id = l.id
             WHERE i.household_id = ?
-            ORDER BY i.expiration_date ASC NULLS LAST, p.name ASC
         `).all(householdId);
         
-        res.json(items);
+        res.json(inventory);
     } catch (error) {
         console.error('Get inventory error:', error);
         res.status(500).json({ error: 'Failed to get inventory' });
     }
 });
 
-// Get expiring items (within N days)
+// Get expiring items
 router.get('/expiring', (req, res) => {
     try {
         const householdId = req.user.householdId;
         const days = parseInt(req.query.days) || 7;
         
-        const items = db.prepare(`
-            SELECT 
-                i.*,
-                p.name as product_name,
-                p.brand as product_brand,
-                p.upc as product_upc,
-                p.image_url as product_image_url
+        const inventory = db.prepare(`
+            SELECT i.*, p.name as product_name, p.brand as product_brand, 
+                   p.upc as product_upc, p.image_url as product_image_url,
+                   l.name as location_name
             FROM inventory i
             JOIN products p ON i.product_id = p.id
-            WHERE i.household_id = ?
+            LEFT JOIN locations l ON i.location_id = l.id
+            WHERE i.household_id = ? 
             AND i.expiration_date IS NOT NULL
-            AND i.expiration_date <= date('now', '+' || ? || ' days')
-            AND i.expiration_date >= date('now')
+            AND date(i.expiration_date) <= date('now', '+' || ? || ' days')
+            AND date(i.expiration_date) >= date('now')
             ORDER BY i.expiration_date ASC
         `).all(householdId, days);
         
-        res.json(items);
+        res.json(inventory);
     } catch (error) {
         console.error('Get expiring items error:', error);
         res.status(500).json({ error: 'Failed to get expiring items' });
@@ -70,22 +62,20 @@ router.get('/expired', (req, res) => {
     try {
         const householdId = req.user.householdId;
         
-        const items = db.prepare(`
-            SELECT 
-                i.*,
-                p.name as product_name,
-                p.brand as product_brand,
-                p.upc as product_upc,
-                p.image_url as product_image_url
+        const inventory = db.prepare(`
+            SELECT i.*, p.name as product_name, p.brand as product_brand, 
+                   p.upc as product_upc, p.image_url as product_image_url,
+                   l.name as location_name
             FROM inventory i
             JOIN products p ON i.product_id = p.id
-            WHERE i.household_id = ?
+            LEFT JOIN locations l ON i.location_id = l.id
+            WHERE i.household_id = ? 
             AND i.expiration_date IS NOT NULL
-            AND i.expiration_date < date('now')
-            ORDER BY i.expiration_date ASC
+            AND date(i.expiration_date) < date('now')
+            ORDER BY i.expiration_date DESC
         `).all(householdId);
         
-        res.json(items);
+        res.json(inventory);
     } catch (error) {
         console.error('Get expired items error:', error);
         res.status(500).json({ error: 'Failed to get expired items' });
@@ -102,44 +92,50 @@ router.post('/', (req, res) => {
             return res.status(400).json({ error: 'Product ID is required' });
         }
 
-        if (!locationId) {
-            return res.status(400).json({ error: 'Location is required' });
-        }
-
         // Verify product exists
         const product = db.prepare('SELECT id FROM products WHERE id = ?').get(productId);
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        // Verify location exists and belongs to household
-        const location = db.prepare('SELECT id FROM locations WHERE id = ? AND household_id = ?').get(locationId, householdId);
-        if (!location) {
-            return res.status(404).json({ error: 'Location not found' });
+        // Verify location if provided
+        if (locationId) {
+            const location = db.prepare('SELECT id FROM locations WHERE id = ? AND household_id = ?').get(locationId, householdId);
+            if (!location) {
+                return res.status(404).json({ error: 'Location not found' });
+            }
         }
 
-        // Check if already in inventory (same product, same expiration, same location)
+        // Check if item already exists (same product, same expiration, same location)
         let existingItem = null;
         if (expirationDate) {
             existingItem = db.prepare(`
                 SELECT * FROM inventory 
-                WHERE product_id = ? AND household_id = ? AND expiration_date = ? AND location_id = ?
-            `).get(productId, householdId, expirationDate, locationId);
+                WHERE product_id = ? AND household_id = ? AND expiration_date = ? AND location_id ${locationId ? '= ?' : 'IS NULL'}
+            `).get(productId, householdId, expirationDate, ...(locationId ? [locationId] : []));
         } else {
             existingItem = db.prepare(`
                 SELECT * FROM inventory 
-                WHERE product_id = ? AND household_id = ? AND expiration_date IS NULL AND location_id = ?
-            `).get(productId, householdId, locationId);
+                WHERE product_id = ? AND household_id = ? AND expiration_date IS NULL AND location_id ${locationId ? '= ?' : 'IS NULL'}
+            `).get(productId, householdId, ...(locationId ? [locationId] : []));
         }
 
         if (existingItem) {
-            // Increment quantity
+            // Update quantity
+            const newQuantity = existingItem.quantity + (quantity || 1);
             db.prepare(`
                 UPDATE inventory 
-                SET quantity = quantity + ?, notes = COALESCE(?, notes), updated_at = CURRENT_TIMESTAMP
+                SET quantity = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
-            `).run(quantity || 1, notes, existingItem.id);
-            
+            `).run(newQuantity, existingItem.id);
+
+            logSync(householdId, 'inventory', existingItem.id, 'update', { 
+                quantity: newQuantity,
+                expirationDate: existingItem.expiration_date,
+                notes: existingItem.notes,
+                locationId: existingItem.location_id
+            });
+
             const item = db.prepare(`
                 SELECT 
                     i.*,
@@ -154,7 +150,7 @@ router.post('/', (req, res) => {
                 LEFT JOIN locations l ON i.location_id = l.id
                 WHERE i.id = ?
             `).get(existingItem.id);
-            
+
             return res.json(item);
         }
 
@@ -163,6 +159,14 @@ router.post('/', (req, res) => {
             INSERT INTO inventory (id, product_id, household_id, location_id, quantity, expiration_date, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `).run(inventoryId, productId, householdId, locationId, quantity || 1, expirationDate || null, notes || null);
+
+        logSync(householdId, 'inventory', inventoryId, 'create', { 
+            productId, 
+            quantity: quantity || 1, 
+            expirationDate: expirationDate || null, 
+            notes: notes || null,
+            locationId
+        });
 
         const item = db.prepare(`
             SELECT 
@@ -257,12 +261,20 @@ router.post('/quick-add', async (req, res) => {
 
         if (existingItem) {
             // Increment quantity
+            const newQuantity = existingItem.quantity + (quantity || 1);
             db.prepare(`
                 UPDATE inventory 
-                SET quantity = quantity + ?, updated_at = CURRENT_TIMESTAMP
+                SET quantity = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
-            `).run(quantity || 1, existingItem.id);
+            `).run(newQuantity, existingItem.id);
             
+            logSync(householdId, 'inventory', existingItem.id, 'update', { 
+                quantity: newQuantity,
+                expirationDate: existingItem.expiration_date,
+                notes: existingItem.notes,
+                locationId: existingItem.location_id
+            });
+
             const item = db.prepare(`
                 SELECT i.*, p.name as product_name, p.brand as product_brand, 
                        p.upc as product_upc, p.image_url as product_image_url,
@@ -282,6 +294,13 @@ router.post('/quick-add', async (req, res) => {
             INSERT INTO inventory (id, product_id, household_id, location_id, quantity, expiration_date)
             VALUES (?, ?, ?, ?, ?, ?)
         `).run(inventoryId, product.id, householdId, locationId, quantity || 1, expirationDate || null);
+
+        logSync(householdId, 'inventory', inventoryId, 'create', { 
+            productId: product.id, 
+            quantity: quantity || 1, 
+            expirationDate: expirationDate || null,
+            locationId
+        });
 
         const item = db.prepare(`
             SELECT i.*, p.name as product_name, p.brand as product_brand, 
@@ -333,6 +352,13 @@ router.put('/:id', (req, res) => {
             req.params.id
         );
 
+        logSync(householdId, 'inventory', req.params.id, 'update', { 
+            quantity: quantity !== undefined ? quantity : item.quantity,
+            expirationDate: expirationDate !== undefined ? expirationDate : item.expiration_date,
+            notes: notes !== undefined ? notes : item.notes,
+            locationId: locationId !== undefined ? locationId : item.location_id
+        });
+
         const updated = db.prepare(`
             SELECT i.*, p.name as product_name, p.brand as product_brand, 
                    p.upc as product_upc, p.image_url as product_image_url,
@@ -372,6 +398,9 @@ router.patch('/:id/quantity', (req, res) => {
         if (newQuantity <= 0) {
             // Remove item if quantity reaches 0
             db.prepare('DELETE FROM inventory WHERE id = ?').run(req.params.id);
+            
+            logSync(householdId, 'inventory', req.params.id, 'delete', {});
+            
             return res.json({ deleted: true, id: req.params.id });
         }
 
@@ -380,6 +409,13 @@ router.patch('/:id/quantity', (req, res) => {
             SET quantity = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `).run(newQuantity, req.params.id);
+
+        logSync(householdId, 'inventory', req.params.id, 'update', { 
+            quantity: newQuantity,
+            expirationDate: item.expiration_date,
+            notes: item.notes,
+            locationId: item.location_id
+        });
 
         const updated = db.prepare(`
             SELECT i.*, p.name as product_name, p.brand as product_brand, 
@@ -409,6 +445,9 @@ router.delete('/:id', (req, res) => {
         }
 
         db.prepare('DELETE FROM inventory WHERE id = ?').run(req.params.id);
+        
+        logSync(householdId, 'inventory', req.params.id, 'delete', {});
+        
         res.json({ success: true });
     } catch (error) {
         console.error('Delete inventory error:', error);
