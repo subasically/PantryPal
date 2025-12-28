@@ -224,7 +224,10 @@ router.get('/me', authenticateToken, (req, res) => {
             name: user.name,
             householdId: user.household_id
         },
-        household: household
+        household: {
+            ...household,
+            isPremium: Boolean(household.is_premium)
+        }
     });
 });
 

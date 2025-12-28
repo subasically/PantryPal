@@ -82,11 +82,30 @@ router.get('/expired', (req, res) => {
     }
 });
 
+// Helper to check inventory limit
+function checkInventoryLimit(householdId) {
+    const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId);
+    if (household && household.is_premium) return true;
+
+    const count = db.prepare('SELECT COUNT(*) as count FROM inventory WHERE household_id = ?').get(householdId).count;
+    return count < 50;
+}
+
 // Add item to inventory
 router.post('/', (req, res) => {
     try {
         const { productId, quantity, expirationDate, notes, locationId } = req.body;
         const householdId = req.user.householdId;
+
+        // Check limit
+        if (!checkInventoryLimit(householdId)) {
+            return res.status(403).json({ 
+                error: 'Inventory limit reached',
+                code: 'LIMIT_REACHED',
+                limit: 50,
+                upgradeRequired: true
+            });
+        }
 
         if (!productId) {
             return res.status(400).json({ error: 'Product ID is required' });
@@ -195,6 +214,16 @@ router.post('/quick-add', async (req, res) => {
     try {
         const { upc, quantity, expirationDate, locationId } = req.body;
         const householdId = req.user.householdId;
+
+        // Check limit
+        if (!checkInventoryLimit(householdId)) {
+            return res.status(403).json({ 
+                error: 'Inventory limit reached',
+                code: 'LIMIT_REACHED',
+                limit: 50,
+                upgradeRequired: true
+            });
+        }
 
         if (!upc) {
             return res.status(400).json({ error: 'UPC is required' });
