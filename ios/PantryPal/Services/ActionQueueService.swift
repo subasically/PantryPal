@@ -64,7 +64,7 @@ final class ActionQueueService: Sendable {
             request.httpBody = payload
         }
         
-        let (_, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.noData
