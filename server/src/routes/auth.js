@@ -25,15 +25,18 @@ function generateToken(user) {
 // Helper to create default locations
 function createDefaultLocations(householdId) {
     const defaultLocations = [
-        { name: 'Pantry', type: 'pantry' },
-        { name: 'Fridge', type: 'fridge' },
-        { name: 'Freezer', type: 'freezer' }
+        { name: 'Pantry', sortOrder: 0 },
+        { name: 'Fridge', sortOrder: 1 },
+        { name: 'Freezer', sortOrder: 2 }
     ];
     
-    const insertLocation = db.prepare('INSERT INTO locations (id, name, type, household_id) VALUES (?, ?, ?, ?)');
+    const insertLocation = db.prepare(`
+        INSERT INTO locations (id, household_id, name, parent_id, level, sort_order, created_at, updated_at)
+        VALUES (?, ?, ?, NULL, 0, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `);
     
     defaultLocations.forEach(loc => {
-        insertLocation.run(uuidv4(), loc.name, loc.type, householdId);
+        insertLocation.run(uuidv4(), householdId, loc.name, loc.sortOrder);
     });
 }
 
