@@ -59,7 +59,7 @@ struct InventoryListView: View {
                     inventoryListContent
                 }
             }
-            .navigationTitle("Pantry")
+            .navigationTitle("Pantry (\(viewModel.items.count))")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showingSettings = true }) {
