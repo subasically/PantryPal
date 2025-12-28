@@ -234,6 +234,16 @@ router.get('/me', authenticateToken, (req, res) => {
 // Generate household invite code (6-character alphanumeric, expires in 24 hours)
 router.post('/household/invite', authenticateToken, (req, res) => {
     try {
+        // Check if household is premium
+        const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(req.user.householdId);
+        if (!household.is_premium) {
+            return res.status(403).json({ 
+                error: 'Household sharing is a Premium feature',
+                code: 'PREMIUM_REQUIRED',
+                upgradeRequired: true
+            });
+        }
+
         // Generate a 6-character alphanumeric code
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude confusing chars (0,O,1,I)
         let code = '';
@@ -249,12 +259,12 @@ router.post('/household/invite', authenticateToken, (req, res) => {
             VALUES (?, ?, ?, ?, ?)
         `).run(id, req.user.householdId, code, req.user.id, expiresAt);
         
-        const household = db.prepare('SELECT name FROM households WHERE id = ?').get(req.user.householdId);
+        const householdName = db.prepare('SELECT name FROM households WHERE id = ?').get(req.user.householdId);
         
         res.json({
             code,
             expiresAt,
-            householdName: household?.name || 'Unknown Household'
+            householdName: householdName?.name || 'Unknown Household'
         });
     } catch (error) {
         console.error('Generate invite error:', error);
