@@ -34,9 +34,10 @@ struct Household: Codable, Identifiable, Sendable {
     let id: String
     let name: String
     let createdAt: String?
+    let isPremium: Bool?
     
     enum CodingKeys: String, CodingKey {
-        case id, name
+        case id, name, isPremium
         case createdAt = "created_at"
     }
 }

@@ -8,6 +8,7 @@ struct InventoryListView: View {
     @State private var showingScanner = false
     @State private var showingAddCustom = false
     @State private var showingSettings = false
+    @State private var showingPaywall = false
     @State private var editingItem: InventoryItem?
     @State private var scannedUPC: String?
     @State private var searchText = ""
@@ -68,11 +69,15 @@ struct InventoryListView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-                        Button(action: { showingAddCustom = true }) {
+                        Button(action: { 
+                            if checkLimit() { showingAddCustom = true }
+                        }) {
                             Image(systemName: "plus")
                         }
                         
-                        Button(action: { showingScanner = true }) {
+                        Button(action: { 
+                            if checkLimit() { showingScanner = true }
+                        }) {
                             Image(systemName: "barcode.viewfinder")
                         }
                     }
@@ -121,8 +126,16 @@ struct InventoryListView: View {
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
             }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView()
+            }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
-                Button("OK") { viewModel.errorMessage = nil }
+                Button("OK") { 
+                    if viewModel.errorMessage?.contains("limit reached") == true {
+                        showingPaywall = true
+                    }
+                    viewModel.errorMessage = nil 
+                }
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
@@ -155,6 +168,17 @@ struct InventoryListView: View {
         }
     }
     
+    private func checkLimit() -> Bool {
+        let isPremium = authViewModel.currentHousehold?.isPremium ?? false
+        let count = viewModel.items.count
+        
+        if !isPremium && count >= 50 {
+            showingPaywall = true
+            return false
+        }
+        return true
+    }
+    
     private var emptyStateView: some View {
         VStack(spacing: 16) {
             Image(systemName: "tray")
@@ -168,13 +192,17 @@ struct InventoryListView: View {
                 .foregroundColor(.secondary)
             
             HStack(spacing: 16) {
-                Button(action: { showingScanner = true }) {
+                Button(action: { 
+                    if checkLimit() { showingScanner = true }
+                }) {
                     Label("Scan", systemImage: "barcode.viewfinder")
                 }
                 .buttonStyle(.ppPrimary)
                 .frame(width: 140)
                 
-                Button(action: { showingAddCustom = true }) {
+                Button(action: { 
+                    if checkLimit() { showingAddCustom = true }
+                }) {
                     Label("Add", systemImage: "plus")
                 }
                 .buttonStyle(.ppSecondary)

@@ -6,6 +6,7 @@ import AuthenticationServices
 final class AuthViewModel {
     var isAuthenticated = false
     var currentUser: User?
+    var currentHousehold: Household?
     var isLoading = false
     var errorMessage: String?
     var showBiometricEnablePrompt = false
@@ -57,6 +58,9 @@ final class AuthViewModel {
                 pendingCredentials = (email, password)
                 showBiometricEnablePrompt = true
             }
+            
+            // Load full household info (for premium status)
+            await loadCurrentUser()
         } catch let error as APIError {
             errorMessage = error.localizedDescription
         } catch {
@@ -80,6 +84,9 @@ final class AuthViewModel {
             let response = try await APIService.shared.login(email: credentials.email, password: credentials.password)
             currentUser = response.user
             isAuthenticated = true
+            
+            // Load full household info
+            await loadCurrentUser()
         } catch let error as APIError {
             errorMessage = error.localizedDescription
         } catch {
@@ -120,6 +127,9 @@ final class AuthViewModel {
                 print("Apple Sign In: API success. User: \(response.user.id)")
                 currentUser = response.user
                 isAuthenticated = true
+                
+                // Load full household info
+                await loadCurrentUser()
             } catch let error as APIError {
                 print("Apple Sign In API Error: \(error.localizedDescription)")
                 errorMessage = error.localizedDescription
@@ -162,6 +172,9 @@ final class AuthViewModel {
             currentUser = response.user
             isAuthenticated = true
             showHouseholdSetup = true
+            
+            // Load full household info
+            await loadCurrentUser()
         } catch let error as APIError {
             errorMessage = error.localizedDescription
         } catch {
@@ -180,12 +193,15 @@ final class AuthViewModel {
     func logout() {
         APIService.shared.logout()
         currentUser = nil
+        currentHousehold = nil
         isAuthenticated = false
     }
     
     func loadCurrentUser() async {
         do {
-            currentUser = try await APIService.shared.getCurrentUser()
+            let (user, household) = try await APIService.shared.getCurrentUser()
+            currentUser = user
+            currentHousehold = household
         } catch {
             logout()
         }

@@ -26,6 +26,17 @@ final class ActionQueueService: Sendable {
                 print("Action \(action.type) processed successfully")
             } catch {
                 print("Failed to process action \(action.type): \(error)")
+                
+                // Handle permanent errors (403 Forbidden - Limit Reached)
+                if let apiError = error as? APIError, 
+                   case .serverError(let msg) = apiError, 
+                   msg.contains("limit reached") || msg.contains("Status 403") {
+                    print("Action rejected by server (Limit Reached). Removing from queue.")
+                    modelContext.delete(action)
+                    try? modelContext.save()
+                    continue
+                }
+                
                 action.retryCount += 1
                 // If it's a permanent error (e.g. 400), maybe we should delete it or move to a "failed" queue?
                 // For now, we just leave it to retry later (simple exponential backoff could be added)
@@ -64,6 +75,21 @@ final class ActionQueueService: Sendable {
             if httpResponse.statusCode == 404 && action.method == "DELETE" {
                 return
             }
+            
+            // Try to parse error message
+            if let errorResponse = try? JSONDecoder().decode([String: String].self, from: data),
+               let errorMessage = errorResponse["error"] {
+                throw APIError.serverError(errorMessage)
+            }
+            
+            // Try to parse complex error response (like limit reached)
+            struct ComplexError: Codable {
+                let error: String
+            }
+            if let complexError = try? JSONDecoder().decode(ComplexError.self, from: data) {
+                throw APIError.serverError(complexError.error)
+            }
+            
             throw APIError.serverError("Status \(httpResponse.statusCode)")
         }
     }
