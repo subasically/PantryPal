@@ -34,6 +34,10 @@ final class ActionQueueService: Sendable {
                     print("Action rejected by server (Limit Reached). Removing from queue.")
                     modelContext.delete(action)
                     try? modelContext.save()
+                    
+                    // Trigger Paywall
+                    NotificationCenter.default.post(name: .showPaywall, object: nil)
+                    
                     continue
                 }
                 

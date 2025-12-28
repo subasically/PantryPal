@@ -155,6 +155,11 @@ struct InventoryListView: View {
                 }
                 await viewModel.loadInventory()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
+                showingPaywall = true
+                // Refresh inventory to revert local optimistic changes
+                Task { await viewModel.loadInventory() }
+            }
             .toast(isShowing: $showToast, message: toastMessage, type: toastType)
         }
     }
