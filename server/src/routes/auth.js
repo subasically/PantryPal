@@ -55,6 +55,8 @@ router.post('/apple', async (req, res) => {
             // Optional: ignoreExpiration: true, // Ignore token expiration
         });
 
+        console.log(`[Auth] Apple Sign In attempt: AppleID=${appleId}, Email=${appleEmail}, InputEmail=${email}`);
+
         // Check if user exists by Apple ID
         let user = db.prepare('SELECT * FROM users WHERE apple_id = ?').get(appleId);
 
