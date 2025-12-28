@@ -13,6 +13,9 @@ extension Color {
     /// Sage Green - Tertiary/success color #6D9F71
     static let ppGreen = Color(red: 109/255, green: 159/255, blue: 113/255)
     
+    /// Blue - Gradient accent #4169E1
+    static let ppBlue = Color(red: 65/255, green: 105/255, blue: 225/255)
+    
     /// White #FFFFFF
     static let ppWhite = Color.white
     
