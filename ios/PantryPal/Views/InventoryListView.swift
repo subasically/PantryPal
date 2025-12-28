@@ -177,7 +177,7 @@ struct InventoryListView: View {
         let isPremium = authViewModel.currentHousehold?.isPremium ?? false
         let count = viewModel.items.count
         
-        if !isPremium && count >= 50 {
+        if !isPremium && count >= 3 {
             showingPaywall = true
             return false
         }

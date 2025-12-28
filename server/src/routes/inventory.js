@@ -88,7 +88,16 @@ function checkInventoryLimit(householdId) {
     if (household && household.is_premium) return true;
 
     const count = db.prepare('SELECT COUNT(*) as count FROM inventory WHERE household_id = ?').get(householdId).count;
-    return count < 50;
+    return count < 30;
+}
+
+// Helper to check write permissions (shared household requires premium)
+function checkWritePermission(householdId) {
+    const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId);
+    if (household && household.is_premium) return true;
+
+    const memberCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?').get(householdId).count;
+    return memberCount <= 1;
 }
 
 // Add item to inventory
@@ -97,12 +106,21 @@ router.post('/', (req, res) => {
         const { productId, quantity, expirationDate, notes, locationId } = req.body;
         const householdId = req.user.householdId;
 
+        // Check write permission (shared household)
+        if (!checkWritePermission(householdId)) {
+            return res.status(403).json({ 
+                error: 'Household sharing is a Premium feature. Upgrade to add items.',
+                code: 'PREMIUM_REQUIRED',
+                upgradeRequired: true
+            });
+        }
+
         // Check limit
         if (!checkInventoryLimit(householdId)) {
             return res.status(403).json({ 
                 error: 'Inventory limit reached',
                 code: 'LIMIT_REACHED',
-                limit: 50,
+                limit: 30,
                 upgradeRequired: true
             });
         }
@@ -215,12 +233,21 @@ router.post('/quick-add', async (req, res) => {
         const { upc, quantity, expirationDate, locationId } = req.body;
         const householdId = req.user.householdId;
 
+        // Check write permission (shared household)
+        if (!checkWritePermission(householdId)) {
+            return res.status(403).json({ 
+                error: 'Household sharing is a Premium feature. Upgrade to add items.',
+                code: 'PREMIUM_REQUIRED',
+                upgradeRequired: true
+            });
+        }
+
         // Check limit
         if (!checkInventoryLimit(householdId)) {
             return res.status(403).json({ 
                 error: 'Inventory limit reached',
                 code: 'LIMIT_REACHED',
-                limit: 50,
+                limit: 30,
                 upgradeRequired: true
             });
         }
@@ -354,6 +381,15 @@ router.put('/:id', (req, res) => {
         const { quantity, expirationDate, notes, locationId } = req.body;
         const householdId = req.user.householdId;
 
+        // Check write permission (shared household)
+        if (!checkWritePermission(householdId)) {
+            return res.status(403).json({ 
+                error: 'Household sharing is a Premium feature. Upgrade to edit items.',
+                code: 'PREMIUM_REQUIRED',
+                upgradeRequired: true
+            });
+        }
+
         const item = db.prepare('SELECT * FROM inventory WHERE id = ? AND household_id = ?')
             .get(req.params.id, householdId);
         
@@ -411,6 +447,15 @@ router.patch('/:id/quantity', (req, res) => {
         const { adjustment } = req.body; // positive or negative number
         const householdId = req.user.householdId;
 
+        // Check write permission (shared household)
+        if (!checkWritePermission(householdId)) {
+            return res.status(403).json({ 
+                error: 'Household sharing is a Premium feature. Upgrade to adjust quantity.',
+                code: 'PREMIUM_REQUIRED',
+                upgradeRequired: true
+            });
+        }
+
         if (typeof adjustment !== 'number') {
             return res.status(400).json({ error: 'Adjustment must be a number' });
         }
@@ -466,6 +511,15 @@ router.delete('/:id', (req, res) => {
     try {
         const householdId = req.user.householdId;
         
+        // Check write permission (shared household)
+        if (!checkWritePermission(householdId)) {
+            return res.status(403).json({ 
+                error: 'Household sharing is a Premium feature. Upgrade to delete items.',
+                code: 'PREMIUM_REQUIRED',
+                upgradeRequired: true
+            });
+        }
+
         const item = db.prepare('SELECT * FROM inventory WHERE id = ? AND household_id = ?')
             .get(req.params.id, householdId);
         
