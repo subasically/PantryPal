@@ -114,3 +114,7 @@ final class ActionQueueService: Sendable {
         }
     }
 }
+
+extension Notification.Name {
+    static let showPaywall = Notification.Name("showPaywall")
+}
