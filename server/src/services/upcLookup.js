@@ -5,7 +5,13 @@ async function lookupUPC(upc) {
     return new Promise((resolve, reject) => {
         const url = `https://world.openfoodfacts.org/api/v0/product/${upc}.json`;
         
-        https.get(url, (res) => {
+        const options = {
+            headers: {
+                'User-Agent': 'PantryPal/1.0 (subasically@gmail.com) - iOS App'
+            }
+        };
+        
+        https.get(url, options, (res) => {
             let data = '';
             
             res.on('data', chunk => {
