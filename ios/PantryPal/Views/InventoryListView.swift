@@ -198,36 +198,44 @@ struct InventoryListView: View {
     }
     
     private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "tray")
-                .font(.system(size: 60))
-                .foregroundColor(.ppGreen)
-            
-            Text("No items in your pantry")
-                .font(.headline)
-            
-            Text("Scan a barcode or add items manually")
-                .foregroundColor(.secondary)
-            
-            HStack(spacing: 16) {
-                Button(action: { 
-                    if checkLimit() { showingScanner = true }
-                }) {
-                    Label("Scan", systemImage: "barcode.viewfinder")
-                }
-                .buttonStyle(.ppPrimary)
-                .frame(width: 140)
+        ScrollView {
+            VStack(spacing: 16) {
+                Spacer()
+                    .frame(height: 100)
                 
-                Button(action: { 
-                    if checkLimit() { showingAddCustom = true }
-                }) {
-                    Label("Add", systemImage: "plus")
+                Image(systemName: "tray")
+                    .font(.system(size: 60))
+                    .foregroundColor(.ppGreen)
+                
+                Text("No items in your pantry")
+                    .font(.headline)
+                
+                Text("Scan a barcode or add items manually")
+                    .foregroundColor(.secondary)
+                
+                HStack(spacing: 16) {
+                    Button(action: { 
+                        if checkLimit() { showingScanner = true }
+                    }) {
+                        Label("Scan", systemImage: "barcode.viewfinder")
+                    }
+                    .buttonStyle(.ppPrimary)
+                    .frame(width: 140)
+                    
+                    Button(action: { 
+                        if checkLimit() { showingAddCustom = true }
+                    }) {
+                        Label("Add", systemImage: "plus")
+                    }
+                    .buttonStyle(.ppSecondary)
+                    .frame(width: 140)
                 }
-                .buttonStyle(.ppSecondary)
-                .frame(width: 140)
+                
+                Spacer()
             }
+            .frame(maxWidth: .infinity)
+            .padding()
         }
-        .padding()
     }
     
     private var inventoryListContent: some View {
