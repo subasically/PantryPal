@@ -229,7 +229,7 @@ struct SettingsView: View {
             } message: {
                 Text("For security, please log out and log in again to enable \(authViewModel.biometricName).")
             }
-            .alert("Reset All Data?", isPresented: $showingResetConfirmation) {
+            .alert("Delete Household Data?", isPresented: $showingResetConfirmation) {
                 Button("Cancel", role: .cancel) { }
                 Button("Continue", role: .destructive) {
                     resetVerificationText = ""

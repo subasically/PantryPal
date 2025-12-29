@@ -1,10 +1,16 @@
 import SwiftUI
 
+enum PaywallReason {
+    case itemLimit
+    case householdSharing
+}
+
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isLoading = false
     
     var limit: Int = 30
+    var reason: PaywallReason = .itemLimit
     
     var body: some View {
         NavigationStack {
@@ -23,13 +29,25 @@ struct PaywallView: View {
                         .padding(.top, 40)
                     
                     VStack(spacing: 8) {
-                        Text("Unlock Unlimited Items")
-                            .font(.title)
-                            .fontWeight(.bold)
-                        
-                        Text("You've reached the \(limit)-item limit.")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
+                        if reason == .householdSharing {
+                            Text("Unlock Household Sharing")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            
+                            Text("Invite family members to manage your pantry together.")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        } else {
+                            Text("Unlock Unlimited Items")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            
+                            Text("You've reached the \(limit)-item limit.")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     
                     // Features List
