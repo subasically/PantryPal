@@ -19,6 +19,18 @@ final class SyncService: Sendable {
         // 2. Sync Locations
         // We flatten the hierarchy for storage, but keep parentId
         let flatLocations = flattenLocations(locationsData.locations)
+        let remoteLocationIds = Set(flatLocations.map { $0.id })
+        
+        // Delete local locations not in remote
+        let allLocationsDescriptor = FetchDescriptor<SDLocation>()
+        if let allLocations = try? modelContext.fetch(allLocationsDescriptor) {
+            for loc in allLocations {
+                if !remoteLocationIds.contains(loc.id) {
+                    print("🗑️ [SyncService] Deleting stale local location: \(loc.name) (\(loc.id))")
+                    modelContext.delete(loc)
+                }
+            }
+        }
         
         for loc in flatLocations {
             let locationId = loc.id
