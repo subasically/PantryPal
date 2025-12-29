@@ -58,7 +58,7 @@ struct HouseholdSharingView: View {
                 } else {
                     if !viewModel.isPremium {
                         Button {
-                            NotificationCenter.default.post(name: .showPaywall, object: nil)
+                            showPaywall = true
                         } label: {
                             HStack {
                                 Image(systemName: "lock.fill")

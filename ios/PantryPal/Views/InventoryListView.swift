@@ -166,9 +166,12 @@ struct InventoryListView: View {
                 await viewModel.loadLocations()
             }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
-                showingPaywall = true
-                // Refresh inventory to revert local optimistic changes
-                Task { await viewModel.loadInventory() }
+                // Only show paywall if we're not already showing settings (which handles its own paywall)
+                if !showingSettings {
+                    showingPaywall = true
+                    // Refresh inventory to revert local optimistic changes
+                    Task { await viewModel.loadInventory() }
+                }
             }
             .toast(isShowing: $showToast, message: toastMessage, type: toastType)
         }
