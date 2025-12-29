@@ -19,6 +19,10 @@ struct User: Codable, Identifiable, Sendable {
     }
 }
 
+struct AppConfig: Codable, Sendable {
+    let freeLimit: Int?
+}
+
 struct AuthResponse: Codable, Sendable {
     let user: User
     let token: String

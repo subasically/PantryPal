@@ -128,7 +128,7 @@ struct InventoryListView: View {
                 SettingsView()
             }
             .sheet(isPresented: $showingPaywall) {
-                PaywallView(limit: 30)
+                PaywallView(limit: authViewModel.freeLimit)
             }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("OK") { 
@@ -180,7 +180,7 @@ struct InventoryListView: View {
         let isPremium = authViewModel.currentHousehold?.isPremium ?? false
         let count = viewModel.items.count
         
-        if !isPremium && count >= 30 {
+        if !isPremium && count >= authViewModel.freeLimit {
             showingPaywall = true
             return false
         }

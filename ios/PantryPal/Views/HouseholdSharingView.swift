@@ -3,6 +3,7 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct HouseholdSharingView: View {
+    @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = HouseholdSharingViewModel()
     @State private var showJoinSheet = false
@@ -185,7 +186,7 @@ struct HouseholdSharingView: View {
             showPaywall = true
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView(limit: 30, reason: .householdSharing)
+            PaywallView(limit: authViewModel.freeLimit, reason: .householdSharing)
         }
     }
     

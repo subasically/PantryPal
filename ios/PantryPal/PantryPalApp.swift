@@ -112,11 +112,6 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Checkout", systemImage: "barcode.viewfinder")
                 }
-            
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gear")
-                }
         }
         .tint(.ppPurple)
     }

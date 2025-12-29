@@ -12,6 +12,7 @@ final class AuthViewModel {
     var showBiometricEnablePrompt = false
     var showHouseholdSetup = false
     var hasLoggedOut = false
+    var freeLimit: Int = 30
     
     private var pendingCredentials: (email: String, password: String)?
     private let biometricService = BiometricAuthService.shared
@@ -271,9 +272,13 @@ final class AuthViewModel {
     
     func loadCurrentUser() async {
         do {
-            let (user, household) = try await APIService.shared.getCurrentUser()
+            let (user, household, config) = try await APIService.shared.getCurrentUser()
             currentUser = user
             currentHousehold = household
+            
+            if let limit = config?.freeLimit {
+                freeLimit = limit
+            }
             
             // If user has no household, show setup
             if household == nil {

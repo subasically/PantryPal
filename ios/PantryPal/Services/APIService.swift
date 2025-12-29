@@ -168,13 +168,14 @@ final class APIService: Sendable {
         setToken(nil)
     }
     
-    func getCurrentUser() async throws -> (User, Household?) {
+    func getCurrentUser() async throws -> (User, Household?, AppConfig?) {
         struct MeResponse: Codable, Sendable {
             let user: User
             let household: Household?
+            let config: AppConfig?
         }
         let response: MeResponse = try await request(endpoint: "/auth/me")
-        return (response.user, response.household)
+        return (response.user, response.household, response.config)
     }
     
     // MARK: - Products

@@ -27,7 +27,8 @@ function createDefaultLocations(householdId) {
     const defaultLocations = [
         { name: 'Pantry', sortOrder: 0 },
         { name: 'Fridge', sortOrder: 1 },
-        { name: 'Freezer', sortOrder: 2 }
+        { name: 'Freezer', sortOrder: 2 },
+        { name: 'Other', sortOrder: 3 }
     ];
     
     const insertLocation = db.prepare(`
@@ -200,6 +201,8 @@ router.post('/login', async (req, res) => {
     }
 });
 
+const FREE_LIMIT = 30;
+
 // Get current user
 router.get('/me', authenticateToken, (req, res) => {
     const user = db.prepare('SELECT id, email, name, household_id FROM users WHERE id = ?').get(req.user.id);
@@ -225,7 +228,10 @@ router.get('/me', authenticateToken, (req, res) => {
             name: user.name,
             householdId: user.household_id
         },
-        household
+        household,
+        config: {
+            freeLimit: FREE_LIMIT
+        }
     });
 });
 

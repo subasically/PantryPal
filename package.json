@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "apple-signin-auth": "^2.0.0"
+    "apple-signin-auth": "^2.0.0",
+    "pg": "^8.16.3"
   }
 }

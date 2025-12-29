@@ -82,13 +82,15 @@ router.get('/expired', (req, res) => {
     }
 });
 
+const FREE_LIMIT = 30;
+
 // Helper to check inventory limit
 function checkInventoryLimit(householdId) {
     const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId);
     if (household && household.is_premium) return true;
 
     const count = db.prepare('SELECT COUNT(*) as count FROM inventory WHERE household_id = ?').get(householdId).count;
-    return count < 30;
+    return count < FREE_LIMIT;
 }
 
 // Helper to check write permissions (shared household requires premium)
@@ -120,7 +122,7 @@ router.post('/', (req, res) => {
             return res.status(403).json({ 
                 error: 'Inventory limit reached',
                 code: 'LIMIT_REACHED',
-                limit: 30,
+                limit: FREE_LIMIT,
                 upgradeRequired: true
             });
         }
@@ -247,7 +249,7 @@ router.post('/quick-add', async (req, res) => {
             return res.status(403).json({ 
                 error: 'Inventory limit reached',
                 code: 'LIMIT_REACHED',
-                limit: 30,
+                limit: FREE_LIMIT,
                 upgradeRequired: true
             });
         }
