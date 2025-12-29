@@ -149,6 +149,7 @@ struct SettingsView: View {
                 }
                 
                 // Locations Section
+                /*
                 Section("Storage Locations") {
                     NavigationLink {
                         LocationsSettingsView()
@@ -161,6 +162,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                */
                 
                 // Household Section
                 Section("Household") {
