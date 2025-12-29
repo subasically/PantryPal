@@ -12,7 +12,7 @@ final class AuthViewModel {
     var showBiometricEnablePrompt = false
     var showHouseholdSetup = false
     var hasLoggedOut = false
-    var freeLimit: Int = 3
+    var freeLimit: Int = 25
     var isAppLocked = false
     
     private var pendingCredentials: (email: String, password: String)?
