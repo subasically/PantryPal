@@ -111,6 +111,26 @@ final class BiometricAuthService {
         return nil
     }
     
+    // Simple authentication for App Lock
+    func authenticateUser(reason: String = "Unlock PantryPal") async -> Bool {
+        let context = LAContext()
+        var error: NSError?
+        
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+            return false
+        }
+        
+        do {
+            return try await context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: reason
+            )
+        } catch {
+            print("Biometric authentication failed: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
     // MARK: - Keychain Operations
     
     private func saveCredentials(email: String, password: String) -> Bool {
