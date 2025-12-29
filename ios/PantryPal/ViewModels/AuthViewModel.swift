@@ -105,6 +105,9 @@ final class AuthViewModel {
             return
         }
         
+        // Store credentials to allow re-enabling if disabled
+        pendingCredentials = credentials
+        
         do {
             let response = try await APIService.shared.login(email: credentials.email, password: credentials.password)
             currentUser = response.user
@@ -192,11 +195,12 @@ final class AuthViewModel {
     func enableBiometricLogin() {
         guard let credentials = pendingCredentials else { return }
         _ = biometricService.enableBiometricLogin(email: credentials.email, password: credentials.password)
-        pendingCredentials = nil
+        // Keep pendingCredentials to allow toggling off and on without re-login
     }
     
     func declineBiometricLogin() {
-        pendingCredentials = nil
+        // Just dismiss the prompt, but keep credentials in case user wants to enable later in Settings
+        showBiometricEnablePrompt = false
     }
     
     func disableBiometricLogin() {
@@ -262,6 +266,7 @@ final class AuthViewModel {
         currentHousehold = nil
         isAuthenticated = false
         hasLoggedOut = true
+        pendingCredentials = nil
     }
     
     func loadCurrentUser() async {
