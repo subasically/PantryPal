@@ -78,7 +78,16 @@ router.post('/apple', async (req, res) => {
             // let householdId = null; 
 
             const finalEmail = email || appleEmail || `${appleId}@privaterelay.appleid.com`;
-            const finalName = name ? `${name.firstName} ${name.lastName}`.trim() : 'Apple User';
+            
+            let finalName = 'Apple User';
+            if (name) {
+                // Handle both raw object and PersonNameComponents (givenName/familyName)
+                const first = name.firstName || name.givenName || '';
+                const last = name.lastName || name.familyName || '';
+                if (first || last) {
+                    finalName = `${first} ${last}`.trim();
+                }
+            }
 
             // Create user with placeholder password hash (since they use Apple Sign In)
             // We use a dummy hash that won't match any password
