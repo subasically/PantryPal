@@ -419,38 +419,63 @@ struct ScannerSheet: View {
     @State private var editedBrand = ""
     
     @State private var existingItem: InventoryItem?
+    @State private var isScanning = true
     
     var body: some View {
-        NavigationStack {
+        ZStack(alignment: .bottom) {
+            // Camera View (Always visible)
+            BarcodeScannerView(scannedCode: $scannedCode, isPresented: .constant(true), isScanning: $isScanning) { code in
+                scannedCode = code
+                HapticService.shared.mediumImpact()
+                lookupProduct(upc: code)
+            }
+            .edgesIgnoringSafeArea(.all)
+            
+            // Overlay Sheet
+            if scannedCode != nil {
+                VStack(spacing: 0) {
+                    // Handle bar
+                    Capsule()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 40, height: 5)
+                        .padding(.top, 10)
+                        .padding(.bottom, 10)
+                    
+                    scannedResultView
+                        .padding(.bottom, 20)
+                }
+                .background(Color(uiColor: .systemBackground))
+                .cornerRadius(20)
+                .shadow(radius: 10)
+                .transition(.move(edge: .bottom))
+                .padding(.bottom, 0)
+            }
+            
+            // Close button (top left)
             VStack {
-                if let code = scannedCode {
-                    scannedResultView(code: code)
-                } else {
-                    BarcodeScannerView(scannedCode: $scannedCode, isPresented: .constant(true)) { code in
-                        scannedCode = code
-                        HapticService.shared.mediumImpact()
-                        lookupProduct(upc: code)
-                    }
-                }
-            }
-            .navigationTitle("Scan Barcode")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                HStack {
+                    Button(action: {
                         isPresented = false
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(.white)
+                            .shadow(radius: 2)
                     }
+                    .padding()
+                    Spacer()
                 }
+                Spacer()
             }
-            .onAppear {
-                if selectedLocationId == nil {
-                    selectedLocationId = UserPreferences.shared.lastUsedLocationId
-                }
-                selectDefaultLocation()
+        }
+        .onAppear {
+            if selectedLocationId == nil {
+                selectedLocationId = UserPreferences.shared.lastUsedLocationId
             }
-            .onChange(of: viewModel.locations) { _, _ in
-                selectDefaultLocation()
-            }
+            selectDefaultLocation()
+        }
+        .onChange(of: viewModel.locations) { _, _ in
+            selectDefaultLocation()
         }
     }
     
@@ -464,318 +489,205 @@ struct ScannerSheet: View {
         }
     }
     
-    private func scannedResultView(code: String) -> some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Header with checkmark
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 50))
-                    .foregroundColor(.ppGreen)
-                
-                Text("Barcode Scanned")
-                    .font(.headline)
-                
-                Text(code)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(6)
-                
-                // Existing item alert
-                if let existing = existingItem {
-                    HStack {
-                        Image(systemName: "info.circle.fill")
-                            .foregroundColor(.ppPurple)
-                        VStack(alignment: .leading) {
-                            Text("Item in Inventory")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                            Text("You have \(existing.quantity) in \(existing.locationName ?? "storage")")
-                                .font(.caption)
-                        }
-                        Spacer()
-                    }
-                    .padding()
-                    .background(Color.ppPurple.opacity(0.1))
-                    .cornerRadius(8)
-                    .padding(.horizontal)
+    private var scannedResultView: some View {
+        VStack(spacing: 16) {
+            // Product Details Header
+            HStack(alignment: .top, spacing: 12) {
+                // Thumbnail
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.ppPurple.opacity(0.1))
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: "shippingbox.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.ppPurple)
                 }
                 
-                // Product details card
-                productDetailsCard
-                
-                // Add Options Container
-                VStack(spacing: 0) {
-                    // Location Row
-                    if !viewModel.locations.isEmpty {
-                        HStack {
-                            Text("Location")
-                            Spacer()
-                            Picker("Location", selection: $selectedLocationId) {
-                                Text("Select Location").tag(nil as String?)
-                                ForEach(viewModel.locations) { location in
-                                    Text(location.fullPath).tag(location.id as String?)
-                                }
+                VStack(alignment: .leading, spacing: 2) {
+                    if isLookingUp {
+                        Text("Looking up...")
+                            .font(.headline)
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    } else if let result = lookupResult {
+                        if result.found, let product = result.product {
+                            Text(editedName.isEmpty ? product.name : editedName)
+                                .font(.headline)
+                                .lineLimit(2)
+                            
+                            let displayBrand = editedBrand.isEmpty ? product.brand : editedBrand
+                            if let brand = displayBrand, !brand.isEmpty {
+                                Text(brand)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
                             }
-                            .pickerStyle(.menu)
-                            .labelsHidden()
+                        } else {
+                            Text("New Item")
+                                .font(.headline)
+                            Text("Enter details below")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
-                        .padding()
-                        
-                        Divider()
-                            .padding(.leading)
-                    }
-                    
-                    // Quantity Row
-                    Stepper(existingItem != nil ? "Adding: \(quantity)" : "Quantity: \(quantity)", value: $quantity, in: 1...99)
-                        .padding()
-                    
-                    Divider()
-                        .padding(.leading)
-                    
-                    // Expiration Toggle Row
-                    Toggle("Add expiration date", isOn: $showingDatePicker)
-                        .padding()
-                    
-                    // Expiration Date Picker
-                    if showingDatePicker {
-                        Divider()
-                            .padding(.leading)
-                        
-                        DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
-                            .datePickerStyle(.compact)
-                            .padding()
-                    }
-                }
-                .background(Color.gray.opacity(0.05))
-                .cornerRadius(12)
-                .padding(.horizontal)
-                
-                // Action buttons
-                HStack(spacing: 16) {
-                    Button("Scan Again") {
-                        scannedCode = nil
-                        lookupResult = nil
-                    }
-                    .buttonStyle(.ppSecondary)
-                    .frame(width: 130)
-                    
-                    if isProductNotFound {
-                        // Add custom product button
-                        Button(isAddingCustom ? "Adding..." : "Add to Pantry") {
-                            Task {
-                                await addCustomProduct(upc: code)
-                            }
-                        }
-                        .buttonStyle(.ppPrimary)
-                        .frame(width: 150)
-                        .disabled(!canAddCustomProduct || isAddingCustom || selectedLocationId == nil)
-                    } else {
-                        // Add existing product button
-                        Button(action: {
-                            Task {
-                                guard let locationId = selectedLocationId else { return }
-                                UserPreferences.shared.lastUsedLocationId = locationId
-                                
-                                // Check if user edited the product
-                                if !editedName.isEmpty {
-                                    // User edited - create/update custom product with edited values
-                                    isAddingCustom = true
-                                    do {
-                                        let product = try await APIService.shared.createProduct(
-                                            upc: code,
-                                            name: editedName.trimmingCharacters(in: .whitespaces),
-                                            brand: editedBrand.isEmpty ? nil : editedBrand.trimmingCharacters(in: .whitespaces),
-                                            description: nil,
-                                            category: lookupResult?.product?.category
-                                        )
-                                        
-                                        _ = await viewModel.addCustomItem(
-                                            product: product,
-                                            quantity: quantity,
-                                            expirationDate: showingDatePicker ? expirationDate : nil,
-                                            locationId: locationId
-                                        )
-                                        
-                                        isPresented = false
-                                        onItemAdded?(editedName)
-                                    } catch {
-                                        viewModel.errorMessage = error.localizedDescription
-                                    }
-                                    isAddingCustom = false
-                                } else {
-                                    // Use original product
-                                    let response = await viewModel.quickAdd(
-                                        upc: code,
-                                        quantity: quantity,
-                                        expirationDate: showingDatePicker ? expirationDate : nil,
-                                        locationId: locationId
-                                    )
-                                    
-                                    if response?.requiresCustomProduct == true {
-                                        // This shouldn't happen now since we handle it inline
-                                        pendingUPC = code
-                                        showingCustomProductForm = true
-                                    } else {
-                                        let productName = lookupResult?.product?.name ?? "Item"
-                                        isPresented = false
-                                        
-                                        if let action = response?.action, action == "updated", let item = response?.item {
-                                            onItemAdded?("Now \(item.quantity) in Pantry")
-                                        } else {
-                                            onItemAdded?("Added \(productName)")
-                                        }
-                                    }
-                                }
-                            }
-                        }, label: {
-                            Text(existingItem != nil ? "Increase Quantity" : "Add to Pantry")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.5)
-                        })
-                        .buttonStyle(.ppPrimary)
-                        .frame(width: 150)
-                        .disabled(selectedLocationId == nil || isAddingCustom)
                     }
                 }
                 
                 Spacer()
-            }
-            .padding(.top, 30)
-            .padding(.bottom, 50)
-        }
-    }
-    
-    @ViewBuilder
-    private var productDetailsCard: some View {
-        VStack(spacing: 12) {
-            if isLookingUp {
-                ProgressView()
-                    .padding()
-                Text("Looking up product...")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            } else if let result = lookupResult {
-                if result.found, let product = result.product {
-                    // Product found - show details with edit option
-                    VStack(spacing: 12) {
-                        HStack(spacing: 16) {
-                            // Product image placeholder
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.ppPurple.opacity(0.1))
-                                    .frame(width: 80, height: 80)
-                                
-                                Image(systemName: "shippingbox.fill")
-                                    .font(.system(size: 30))
-                                    .foregroundColor(.ppPurple)
-                            }
-                            
-                            if isEditingFoundProduct {
-                                // Editable fields
-                                VStack(alignment: .leading, spacing: 8) {
-                                    TextField("Product Name", text: $editedName)
-                                        .textFieldStyle(.roundedBorder)
-                                    
-                                    TextField("Brand (optional)", text: $editedBrand)
-                                        .textFieldStyle(.roundedBorder)
-                                }
-                            } else {
-                                // Display mode
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(editedName.isEmpty ? product.name : editedName)
-                                        .font(.headline)
-                                        .lineLimit(2)
-                                    
-                                    let displayBrand = editedBrand.isEmpty ? product.brand : editedBrand
-                                    if let brand = displayBrand, !brand.isEmpty {
-                                        Text(brand)
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    
-                                    if let category = product.category, !category.isEmpty {
-                                        Text(category)
-                                            .font(.caption)
-                                            .foregroundColor(.ppPurple)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 2)
-                                            .background(Color.ppPurple.opacity(0.1))
-                                            .cornerRadius(4)
-                                    }
-                                }
-                            }
-                            
-                            Spacer()
-                            
-                            // Edit/Done button
-                            Button {
-                                if isEditingFoundProduct {
-                                    // Done editing
-                                    isEditingFoundProduct = false
-                                } else {
-                                    // Start editing - populate fields
-                                    editedName = product.name
-                                    editedBrand = product.brand ?? ""
-                                    isEditingFoundProduct = true
-                                }
-                            } label: {
-                                Image(systemName: isEditingFoundProduct ? "checkmark.circle.fill" : "pencil.circle")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.ppPurple)
-                            }
-                        }
-                        
+                
+                // Edit button (only if found)
+                if let result = lookupResult, result.found {
+                    Button {
+                        isEditingFoundProduct.toggle()
                         if isEditingFoundProduct {
-                            Text("Edit the product details before adding to your pantry")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                            editedName = result.product?.name ?? ""
+                            editedBrand = result.product?.brand ?? ""
                         }
+                    } label: {
+                        Image(systemName: isEditingFoundProduct ? "checkmark.circle.fill" : "pencil.circle")
+                            .font(.title2)
+                            .foregroundColor(.ppPurple)
                     }
-                    .padding()
-                    .background(Color.ppGreen.opacity(0.05))
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.ppGreen.opacity(0.3), lineWidth: 1)
-                    )
-                } else {
-                    // Product not found - show inline custom product form
-                    VStack(spacing: 12) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(.ppPurple)
-                            
-                            Text("Add New Product")
-                                .font(.headline)
-                            
-                            Spacer()
-                        }
-                        
-                        Text("Enter the product details to add it to your pantry.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        TextField("Product Name *", text: $customName)
-                            .textFieldStyle(.roundedBorder)
-                        
-                        TextField("Brand (optional)", text: $customBrand)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                    .padding()
-                    .background(Color.gray.opacity(0.05))
-                    .cornerRadius(12)
                 }
             }
+            .padding(.horizontal)
+            
+            // Edit Fields (if editing or new)
+            if isEditingFoundProduct || isProductNotFound {
+                VStack(spacing: 12) {
+                    if isProductNotFound {
+                        TextField("Product Name", text: $customName)
+                            .textFieldStyle(.roundedBorder)
+                        TextField("Brand (optional)", text: $customBrand)
+                            .textFieldStyle(.roundedBorder)
+                    } else {
+                        TextField("Product Name", text: $editedName)
+                            .textFieldStyle(.roundedBorder)
+                        TextField("Brand (optional)", text: $editedBrand)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                }
+                .padding(.horizontal)
+            }
+            
+            // Options Container
+            VStack(spacing: 0) {
+                // Row 1: Location + Quantity
+                HStack {
+                    // Location Picker
+                    if !viewModel.locations.isEmpty {
+                        HStack(spacing: 4) {
+                            Text("Location")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Picker("Location", selection: $selectedLocationId) {
+                                Text("Select").tag(nil as String?)
+                                ForEach(viewModel.locations) { location in
+                                    Text(location.name).tag(location.id as String?)
+                                }
+                            }
+                            .labelsHidden()
+                            .tint(.primary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    // Quantity Stepper
+                    HStack(spacing: 8) {
+                        Text("Qty")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Stepper(value: $quantity, in: 1...99) {
+                            EmptyView()
+                        }
+                        .labelsHidden()
+                        
+                        Text("\(quantity)")
+                            .font(.headline)
+                            .monospacedDigit()
+                            .frame(minWidth: 20)
+                    }
+                }
+                .padding()
+                
+                Divider()
+                
+                // Row 2: Expiration
+                HStack {
+                    Toggle("Expiration", isOn: $showingDatePicker)
+                        .labelsHidden()
+                        .toggleStyle(SwitchToggleStyle(tint: .ppPurple))
+                    
+                    Text("Expiration")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    if showingDatePicker {
+                        DatePicker("", selection: $expirationDate, displayedComponents: .date)
+                            .labelsHidden()
+                    }
+                }
+                .padding()
+            }
+            .background(Color.gray.opacity(0.05))
+            .cornerRadius(12)
+            .padding(.horizontal)
+            
+            // CTAs
+            VStack(spacing: 12) {
+                // Primary: Add & Keep Scanning
+                Button(action: {
+                    Task { await addItem(keepScanning: true) }
+                }) {
+                    HStack {
+                        Image(systemName: "barcode.viewfinder")
+                        Text("Add & Keep Scanning")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.ppPurple)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .disabled(isAddingCustom || selectedLocationId == nil || (isProductNotFound && !canAddCustomProduct))
+                
+                HStack(spacing: 12) {
+                    // Secondary: Add (and close)
+                    Button(action: {
+                        Task { await addItem(keepScanning: false) }
+                    }) {
+                        Text("Add")
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.ppPurple.opacity(0.1))
+                            .foregroundColor(.ppPurple)
+                            .cornerRadius(12)
+                    }
+                    .disabled(isAddingCustom || selectedLocationId == nil || (isProductNotFound && !canAddCustomProduct))
+                    
+                    // Tertiary: Cancel
+                    Button(action: {
+                        resetScannerState()
+                    }) {
+                        Text("Cancel")
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .foregroundColor(.primary)
+                            .cornerRadius(12)
+                    }
+                }
+            }
+            .padding(.horizontal)
         }
-        .padding(.horizontal)
     }
-    
     private var isProductNotFound: Bool {
         if let result = lookupResult {
             return !result.found
@@ -787,7 +699,30 @@ struct ScannerSheet: View {
         !customName.trimmingCharacters(in: .whitespaces).isEmpty
     }
     
-    private func addCustomProduct(upc: String) async {
+    private func resetScannerState() {
+        scannedCode = nil
+        lookupResult = nil
+        quantity = 1
+        showingDatePicker = false
+        customName = ""
+        customBrand = ""
+        isEditingFoundProduct = false
+        editedName = ""
+        editedBrand = ""
+        isScanning = true // Resume scanning
+    }
+    
+    private func addItem(keepScanning: Bool) async {
+        guard let code = scannedCode else { return }
+        
+        if isProductNotFound {
+            await addCustomProduct(upc: code, keepScanning: keepScanning)
+        } else {
+            await addExistingProduct(upc: code, keepScanning: keepScanning)
+        }
+    }
+    
+    private func addCustomProduct(upc: String, keepScanning: Bool) async {
         isAddingCustom = true
         
         do {
@@ -817,14 +752,85 @@ struct ScannerSheet: View {
             )
             
             let productName = customName.trimmingCharacters(in: .whitespaces)
-            isPresented = false
-            onItemAdded?(productName)
+            onItemAdded?("Added \(productName)")
+            
+            if keepScanning {
+                resetScannerState()
+            } else {
+                isPresented = false
+            }
         } catch {
             viewModel.errorMessage = error.localizedDescription
             HapticService.shared.error()
         }
         
         isAddingCustom = false
+    }
+    
+    private func addExistingProduct(upc: String, keepScanning: Bool) async {
+        guard let locationId = selectedLocationId else { return }
+        UserPreferences.shared.lastUsedLocationId = locationId
+        
+        // Check if user edited the product
+        if !editedName.isEmpty {
+            // User edited - create/update custom product with edited values
+            isAddingCustom = true
+            do {
+                let product = try await APIService.shared.createProduct(
+                    upc: upc,
+                    name: editedName.trimmingCharacters(in: .whitespaces),
+                    brand: editedBrand.isEmpty ? nil : editedBrand.trimmingCharacters(in: .whitespaces),
+                    description: nil,
+                    category: lookupResult?.product?.category
+                )
+                
+                _ = await viewModel.addCustomItem(
+                    product: product,
+                    quantity: quantity,
+                    expirationDate: showingDatePicker ? expirationDate : nil,
+                    locationId: locationId
+                )
+                
+                onItemAdded?(editedName)
+                
+                if keepScanning {
+                    resetScannerState()
+                } else {
+                    isPresented = false
+                }
+            } catch {
+                viewModel.errorMessage = error.localizedDescription
+            }
+            isAddingCustom = false
+        } else {
+            // Use original product
+            let response = await viewModel.quickAdd(
+                upc: upc,
+                quantity: quantity,
+                expirationDate: showingDatePicker ? expirationDate : nil,
+                locationId: locationId
+            )
+            
+            if response?.requiresCustomProduct == true {
+                // This shouldn't happen now since we handle it inline
+                pendingUPC = upc
+                showingCustomProductForm = true
+            } else {
+                let productName = lookupResult?.product?.name ?? "Item"
+                
+                if let action = response?.action, action == "updated", let item = response?.item {
+                    onItemAdded?("Now \(item.quantity) in Pantry")
+                } else {
+                    onItemAdded?("Added \(productName)")
+                }
+                
+                if keepScanning {
+                    resetScannerState()
+                } else {
+                    isPresented = false
+                }
+            }
+        }
     }
     
     private func formatDate(_ date: Date) -> String {
@@ -1175,6 +1181,7 @@ struct UPCScannerSheet: View {
     @Binding var isPresented: Bool
     
     @State private var tempCode: String?
+    @State private var isScanning = true
     
     var body: some View {
         NavigationStack {
@@ -1198,6 +1205,7 @@ struct UPCScannerSheet: View {
                         HStack(spacing: 16) {
                             Button("Scan Again") {
                                 tempCode = nil
+                                isScanning = true
                             }
                             .buttonStyle(.ppSecondary)
                             
@@ -1210,7 +1218,7 @@ struct UPCScannerSheet: View {
                     }
                     .padding()
                 } else {
-                    BarcodeScannerView(scannedCode: $tempCode, isPresented: .constant(true)) { code in
+                    BarcodeScannerView(scannedCode: $tempCode, isPresented: .constant(true), isScanning: $isScanning) { code in
                         tempCode = code
                     }
                 }
