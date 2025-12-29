@@ -435,7 +435,7 @@ struct ActiveInvitesResponse: Codable, Sendable {
 
 struct GroceryItem: Codable, Identifiable, Sendable {
     let id: Int
-    let householdId: Int
+    let householdId: String
     let name: String
     let createdAt: String?
     
