@@ -198,44 +198,36 @@ struct InventoryListView: View {
     }
     
     private var emptyStateView: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                Spacer()
-                    .frame(height: 100)
-                
-                Image(systemName: "tray")
-                    .font(.system(size: 60))
-                    .foregroundColor(.ppGreen)
-                
-                Text("No items in your pantry")
-                    .font(.headline)
-                
-                Text("Scan a barcode or add items manually")
-                    .foregroundColor(.secondary)
-                
-                HStack(spacing: 16) {
-                    Button(action: { 
-                        if checkLimit() { showingScanner = true }
-                    }) {
-                        Label("Scan", systemImage: "barcode.viewfinder")
-                    }
-                    .buttonStyle(.ppPrimary)
-                    .frame(width: 140)
-                    
-                    Button(action: { 
-                        if checkLimit() { showingAddCustom = true }
-                    }) {
-                        Label("Add", systemImage: "plus")
-                    }
-                    .buttonStyle(.ppSecondary)
-                    .frame(width: 140)
+        VStack(spacing: 16) {
+            Image(systemName: "tray")
+                .font(.system(size: 60))
+                .foregroundColor(.ppGreen)
+            
+            Text("No items in your pantry")
+                .font(.headline)
+            
+            Text("Scan a barcode or add items manually")
+                .foregroundColor(.secondary)
+            
+            HStack(spacing: 16) {
+                Button(action: { 
+                    if checkLimit() { showingScanner = true }
+                }) {
+                    Label("Scan", systemImage: "barcode.viewfinder")
                 }
+                .buttonStyle(.ppPrimary)
+                .frame(width: 140)
                 
-                Spacer()
+                Button(action: { 
+                    if checkLimit() { showingAddCustom = true }
+                }) {
+                    Label("Add", systemImage: "plus")
+                }
+                .buttonStyle(.ppSecondary)
+                .frame(width: 140)
             }
-            .frame(maxWidth: .infinity)
-            .padding()
         }
+        .padding()
     }
     
     private var inventoryListContent: some View {
