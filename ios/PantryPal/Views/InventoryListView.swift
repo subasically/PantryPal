@@ -572,7 +572,7 @@ struct ScannerSheet: View {
                         .disabled(!canAddCustomProduct || isAddingCustom || selectedLocationId == nil)
                     } else {
                         // Add existing product button
-                        Button(existingItem != nil ? "Increase Quantity" : "Add to Pantry") {
+                        Button(action: {
                             Task {
                                 guard let locationId = selectedLocationId else { return }
                                 UserPreferences.shared.lastUsedLocationId = locationId
@@ -628,6 +628,10 @@ struct ScannerSheet: View {
                                     }
                                 }
                             }
+                        } label: {
+                            Text(existingItem != nil ? "Increase Quantity" : "Add to Pantry")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
                         }
                         .buttonStyle(.ppPrimary)
                         .frame(width: 150)
