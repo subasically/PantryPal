@@ -181,6 +181,16 @@ struct LoginView: View {
                     Spacer()
                 }
             }
+            
+            if authViewModel.isLoading {
+                Color.black.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                    .overlay(
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.5)
+                    )
+            }
         }
     }
     
