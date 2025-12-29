@@ -18,9 +18,9 @@ final class InventoryViewModel {
         self.modelContext = context
     }
     
-    func loadInventory() async {
+    func loadInventory(withLoadingState: Bool = true) async {
         guard let context = modelContext else { return }
-        isLoading = true
+        if withLoadingState { isLoading = true }
         errorMessage = nil
         
         // Load from local database
@@ -37,7 +37,7 @@ final class InventoryViewModel {
             errorMessage = "Failed to load local inventory: \(error.localizedDescription)"
         }
         
-        isLoading = false
+        if withLoadingState { isLoading = false }
     }
     
     func loadLocations() async {

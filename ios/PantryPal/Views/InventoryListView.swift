@@ -153,7 +153,8 @@ struct InventoryListView: View {
                 } catch {
                     print("❌ [InventoryListView] Initial sync failed: \(error)")
                 }
-                await viewModel.loadInventory()
+                // Reload without triggering full loading state to avoid flash
+                await viewModel.loadInventory(withLoadingState: false)
                 await viewModel.loadLocations()
             }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
