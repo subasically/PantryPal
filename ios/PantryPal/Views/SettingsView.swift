@@ -126,10 +126,12 @@ struct SettingsView: View {
                                         authViewModel.enableBiometricLogin()
                                         biometricEnabled = true
                                     } else {
+                                        biometricEnabled = false
                                         showingEnableError = true
                                     }
                                 } else {
                                     // Turning OFF
+                                    biometricEnabled = false
                                     showingDisableAlert = true
                                 }
                             }
@@ -219,10 +221,11 @@ struct SettingsView: View {
                 }
             }
             .alert("Disable \(authViewModel.biometricName)?", isPresented: $showingDisableAlert) {
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {
+                    biometricEnabled = true
+                }
                 Button("Disable", role: .destructive) {
                     authViewModel.disableBiometricLogin()
-                    biometricEnabled = false
                 }
             } message: {
                 Text("You will need to enter your email and password to sign in.")
