@@ -18,6 +18,7 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 - [x] Location management (hierarchical)
 - [x] Checkout/consumption tracking with history
 - [x] Consumption analytics/stats
+- [x] **Grocery List** (with Premium auto-add/remove)
 - [x] Full sync endpoint for offline support
 - [x] Docker containerization
 - [x] **74 automated tests** (Jest + Supertest)
@@ -58,7 +59,6 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 ### Nice to Have
 - [ ] Product image display
 - [ ] Barcode scan history
-- [ ] Shopping list generation
 - [ ] Low stock alerts
 - [ ] Category organization
 - [ ] Search by category
@@ -77,13 +77,16 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 ## 💰 Premium Model (Freemium)
 
 **Free Tier:**
-- Up to **30 items** (currently 3 for testing)
+- Up to **25 inventory items**
+- Up to **25 grocery items**
 - Single user (or read-only household)
 - All core features (scanning, expiration, offline)
 
 **Premium Tier ($4.99/mo or $49.99/yr):**
-- **Unlimited items**
+- **Unlimited inventory items**
+- **Unlimited grocery items**
 - **Household Sharing** (Collaborative editing)
+- **Auto-add to grocery** (when items run out)
 - Priority sync reliability
 
 ### Revenue Projections (after Apple's 15% cut)

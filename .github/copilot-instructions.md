@@ -36,9 +36,9 @@ We are currently in the **Revenue Validation** phase.
 - **Database:** Use `better-sqlite3` synchronously. It's fast enough.
 - **Schema:** `users.household_id` is **OPTIONAL** (NULL for new users).
 - **Premium Logic:**
-  - Free Tier: Hard limit of **30 items** (configurable).
-  - Premium: Unlimited items + Household Sharing (Write access).
-  - Check limits *before* INSERT/UPDATE.
+  - Free Tier: Hard limit of **25 inventory items** + **25 grocery items** (FREE_LIMIT = 25).
+  - Premium: Unlimited items + Household Sharing (Write access) + Auto-add to grocery.
+  - Check limits *before* INSERT/UPDATE using `checkInventoryLimit()` and `checkGroceryLimit()`.
 
 ### iOS
 - **Concurrency:** Use `async/await` and `@MainActor` for UI updates.
@@ -60,11 +60,12 @@ We are currently in the **Revenue Validation** phase.
 4. **Auth Middleware:** Server uses `module.exports = authenticateToken` (default export), NOT named export. Import as `const authenticateToken = require('../middleware/auth')`.
 5. **Server Deployment:** Server directory on VPS is `/root/pantrypal-server` (NOT a git repo). Use `scp` to copy files, then rebuild container.
 6. **iOS Properties:** AuthViewModel uses `currentUser` and `currentHousehold` (NOT `user` or `householdInfo`).
+7. **SwiftData Models:** Grocery items use `SDGroceryItem`. Inventory uses `SDInventoryItem`. Both are cached locally for offline support.
 
 ## 📝 Current Task Context
-- We just implemented the **New User Onboarding Flow**.
-- We just implemented the **Freemium Model** (30 item limit).
-- We just implemented the **Grocery List Feature** (with Premium auto-add).
+- ✅ New User Onboarding Flow complete
+- ✅ Freemium Model (25 item limits) complete
+- ✅ Grocery List Feature (with Premium auto-add + SwiftData cache) complete
 - The server database schema was recently updated to allow NULL `household_id`.
 
 ## 🚀 Server Deployment
