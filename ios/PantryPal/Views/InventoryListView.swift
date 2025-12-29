@@ -57,6 +57,7 @@ struct InventoryListView: View {
                     emptyStateView
                 } else {
                     inventoryListContent
+                        .searchable(text: $searchText, prompt: "Search items")
                 }
             }
             .navigationTitle("Pantry (\(viewModel.items.count))")
@@ -83,7 +84,6 @@ struct InventoryListView: View {
                     }
                 }
             }
-            .searchable(text: $searchText, prompt: "Search items")
             .refreshable {
                 print("🔄 [InventoryListView] User triggered refresh")
                 // 1. Upload pending changes first so they are included in the sync
@@ -419,6 +419,15 @@ struct ScannerSheet: View {
                     }
                 }
             }
+            .onAppear {
+                if selectedLocationId == nil {
+                    if let pantry = viewModel.locations.first(where: { $0.name == "Pantry" }) {
+                        selectedLocationId = pantry.id
+                    } else if let first = viewModel.locations.first {
+                        selectedLocationId = first.id
+                    }
+                }
+            }
         }
     }
     
@@ -713,11 +722,11 @@ struct ScannerSheet: View {
                     // Product not found - show inline custom product form
                     VStack(spacing: 12) {
                         HStack {
-                            Image(systemName: "questionmark.circle")
+                            Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 24))
-                                .foregroundColor(.ppOrange)
+                                .foregroundColor(.ppPurple)
                             
-                            Text("Product Not Found")
+                            Text("Add New Product")
                                 .font(.headline)
                             
                             Spacer()
@@ -735,12 +744,8 @@ struct ScannerSheet: View {
                             .textFieldStyle(.roundedBorder)
                     }
                     .padding()
-                    .background(Color.ppOrange.opacity(0.05))
+                    .background(Color.gray.opacity(0.05))
                     .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.ppOrange.opacity(0.3), lineWidth: 1)
-                    )
                 }
             }
         }
@@ -917,6 +922,15 @@ struct AddCustomItemView: View {
             .onAppear {
                 if let upc = prefilledUPC {
                     self.upc = upc
+                }
+                
+                // Auto-select location
+                if selectedLocationId == nil {
+                    if let pantry = viewModel.locations.first(where: { $0.name == "Pantry" }) {
+                        selectedLocationId = pantry.id
+                    } else if let first = viewModel.locations.first {
+                        selectedLocationId = first.id
+                    }
                 }
             }
             .sheet(isPresented: $showingScanner) {
