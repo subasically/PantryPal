@@ -6,6 +6,7 @@ struct HouseholdSetupView: View {
     @State private var showJoinSheet = false
     @State private var householdName = ""
     @State private var isRenaming = false
+    @State private var isCreating = false
     
     var body: some View {
         NavigationStack {
@@ -34,15 +35,23 @@ struct HouseholdSetupView: View {
                     // Option 1: Create New (Default)
                     Button {
                         Task {
+                            isCreating = true
                             await authViewModel.completeHouseholdSetup()
+                            isCreating = false
                         }
                     } label: {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Image(systemName: "plus.square.fill")
-                                    .font(.title2)
-                                    .foregroundColor(.white)
-                                Text("Create my household")
+                                if isCreating {
+                                    ProgressView()
+                                        .tint(.white)
+                                        .padding(.trailing, 4)
+                                } else {
+                                    Image(systemName: "plus.square.fill")
+                                        .font(.title2)
+                                        .foregroundColor(.white)
+                                }
+                                Text(isCreating ? "Creating..." : "Create my household")
                                     .font(.headline)
                                     .foregroundColor(.white)
                             }
@@ -55,8 +64,10 @@ struct HouseholdSetupView: View {
                         .padding()
                         .background(Color.ppPurple)
                         .cornerRadius(16)
+                        .opacity(isCreating ? 0.8 : 1.0)
                     }
                     .buttonStyle(.plain)
+                    .disabled(isCreating)
                     
                     // Option 2: Join Existing
                     Button {
@@ -84,20 +95,30 @@ struct HouseholdSetupView: View {
                             RoundedRectangle(cornerRadius: 16)
                                 .stroke(.quaternary, lineWidth: 1)
                         )
+                        .opacity(isCreating ? 0.5 : 1.0)
                     }
                     .buttonStyle(.plain)
+                    .disabled(isCreating)
                     
                     // Option 3: Skip (Single User)
                     Button {
                         Task {
+                            isCreating = true
                             await authViewModel.completeHouseholdSetup()
+                            isCreating = false
                         }
                     } label: {
-                        Text("Skip for now")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                        if isCreating {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        } else {
+                            Text("Skip for now")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     .padding(.top, 8)
+                    .disabled(isCreating)
                 }
                 .padding(.horizontal)
                 
