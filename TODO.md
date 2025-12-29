@@ -1,12 +1,14 @@
 # PantryPal MVP Plan
 
 ## Week 1: Core Revenue Features
-- [x] Implement 30 item free limit
-- [x] Household premium gate
+- [x] Implement 30 item free limit (currently 3 for testing)
+- [x] Household premium gate (invites & writes)
 - [x] Paywall UI + error handling
 - [x] Add structured 403 error codes
+- [x] New User Onboarding Flow (Create/Join/Skip)
+- [x] Manual Household Creation
 - [ ] One-time “household locked” banner
-- [ ] Restore purchases (if not already)
+- [ ] Restore purchases (StoreKit integration)
 
 ## Week 2: Polish & Launch Prep
 - [ ] App Store screenshots

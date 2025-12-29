@@ -24,6 +24,7 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 
 ### iOS App (Swift 6 / SwiftUI / iOS 18+)
 - [x] Login/Register screens
+- [x] **New User Onboarding Flow** (Create/Join/Skip)
 - [x] Face ID biometric authentication
 - [x] Sign in with Apple
 - [x] Splash Screen
@@ -41,6 +42,7 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 - [x] Swipe-to-delete items
 - [x] Custom color palette (Purple/Orange/Green)
 - [x] Household sharing with invite codes + QR
+- [x] **Premium Paywall & Limits**
 - [x] Settings view with version info
 - [x] Swift 6 strict concurrency compliance
 - [x] Local Caching (SwiftData) - Phase 1
@@ -50,6 +52,7 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 ### Core (Priority)
 - [ ] Push notifications for expiring items
 - [ ] Background sync when online
+- [ ] In-App Purchases (StoreKit integration)
 
 ### Nice to Have
 - [ ] Product image display
@@ -70,20 +73,17 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 - [ ] iOS Reminders grocery list integration
 - [ ] Amazon/Whole Foods cart links (affiliate revenue)
 
-## 💰 Future Premium Features (Subscription)
+## 💰 Premium Model (Freemium)
 
-Potential premium tier at **$2.99/month** or **$29.99/year**:
+**Free Tier:**
+- Up to **30 items** (currently 3 for testing)
+- Single user (or read-only household)
+- All core features (scanning, expiration, offline)
 
-| Feature | Description |
-|---------|-------------|
-| **Unlimited Households** | Free tier: 1 household, Premium: unlimited |
-| **Advanced Analytics** | Consumption trends, spending insights, waste tracking |
-| **Shopping List Sync** | Auto-generate shopping lists, sync with grocery apps |
-| **Recipe Integration** | Suggest recipes based on inventory, meal planning |
-| **Smart Notifications** | AI-powered restock reminders, price drop alerts |
-| **Priority Support** | Faster response times, feature requests |
-| **Cloud Backup** | Automatic backup and restore across devices |
-| **Bulk Import/Export** | CSV/spreadsheet import, data export |
+**Premium Tier ($4.99/mo or $49.99/yr):**
+- **Unlimited items**
+- **Household Sharing** (Collaborative editing)
+- Priority sync reliability
 
 ### Revenue Projections (after Apple's 15% cut)
 | Users | Monthly | Annual |
@@ -168,6 +168,7 @@ npm run dev           # Start with hot reload on port 3000
 | POST | /api/auth/register | Register new user |
 | POST | /api/auth/login | Login |
 | GET | /api/auth/me | Get current user |
+| POST | /api/auth/household | Create household |
 | POST | /api/auth/household/invite | Generate invite code |
 | GET | /api/auth/household/invite/:code | Validate invite |
 | POST | /api/auth/household/join | Join household |
