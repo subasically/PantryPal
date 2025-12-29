@@ -5,6 +5,7 @@ struct CheckoutView: View {
     @State private var viewModel = CheckoutViewModel()
     @State private var scannedCode: String?
     @State private var showHistory = false
+    @State private var isScanning = true
     
     // Toast state
     @State private var showToast = false
@@ -15,7 +16,8 @@ struct CheckoutView: View {
         NavigationStack {
             ZStack {
                 // Scanner
-                BarcodeScannerView(scannedCode: $scannedCode, isPresented: .constant(true)) { code in
+                BarcodeScannerView(scannedCode: $scannedCode, isScanning: $isScanning, isPresented: .constant(true)) { code in
+                    isScanning = false
                     Task {
                         await viewModel.processCheckout(upc: code)
                     }
@@ -134,6 +136,7 @@ struct CheckoutView: View {
                 withAnimation {
                     viewModel.lastCheckout = nil
                     scannedCode = nil
+                    isScanning = true
                 }
             }
             .buttonStyle(.ppSecondary)
@@ -161,6 +164,7 @@ struct CheckoutView: View {
                 withAnimation {
                     viewModel.errorMessage = nil
                     scannedCode = nil
+                    isScanning = true
                 }
             }
             .buttonStyle(.ppSecondary)
