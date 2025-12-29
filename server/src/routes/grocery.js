@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/database');
-const { authenticateToken } = require('../middleware/auth');
+const authenticateToken = require('../middleware/auth');
 
 // Helper: Normalize name for deduplication
 function normalizeName(name) {
