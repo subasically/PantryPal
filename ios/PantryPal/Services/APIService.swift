@@ -115,8 +115,10 @@ final class APIService: Sendable {
         let body = LoginRequest(email: email, password: password)
         let response: AuthResponse = try await request(endpoint: "/auth/login", method: "POST", body: body)
         setToken(response.token)
-        // Seed default locations if needed
-        try? await seedDefaultLocations()
+        // Only seed if we have a household
+        if response.user.householdId != nil {
+            try? await seedDefaultLocations()
+        }
         return response
     }
     
@@ -137,7 +139,9 @@ final class APIService: Sendable {
         
         let response: AuthResponse = try await request(endpoint: "/auth/apple", method: "POST", body: body)
         setToken(response.token)
-        try? await seedDefaultLocations()
+        if response.user.householdId != nil {
+            try? await seedDefaultLocations()
+        }
         return response
     }
     
@@ -146,7 +150,9 @@ final class APIService: Sendable {
         let response: AuthResponse = try await request(endpoint: "/auth/register", method: "POST", body: body)
         setToken(response.token)
         // Seed default locations for new households
-        try? await seedDefaultLocations()
+        if response.user.householdId != nil {
+            try? await seedDefaultLocations()
+        }
         return response
     }
     

@@ -73,6 +73,14 @@ struct LoginView: View {
                                 .frame(height: 50)
                                 .cornerRadius(10)
                                 
+                                if let error = authViewModel.errorMessage {
+                                    Text(error)
+                                        .foregroundColor(.red)
+                                        .font(.caption)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.top, 4)
+                                }
+                                
                                 Text("No spam. Just to sync your pantry.")
                                     .font(.caption)
                                     .foregroundColor(.secondary)

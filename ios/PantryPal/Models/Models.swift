@@ -6,7 +6,7 @@ struct User: Codable, Identifiable, Sendable {
     let id: String
     let email: String
     let name: String
-    let householdId: String
+    let householdId: String?
 }
 
 struct AuthResponse: Codable, Sendable {
