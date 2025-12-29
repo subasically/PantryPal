@@ -7,7 +7,10 @@ enum PaywallReason {
 
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var isLoading = false
+    @State private var showDebugAlert = false
+    @State private var debugErrorMessage: String?
     
     var limit: Int = 25
     var reason: PaywallReason = .itemLimit
@@ -137,9 +140,68 @@ struct PaywallView: View {
                     }
                     .disabled(isLoading)
                 }
+                
+                #if DEBUG
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        Task {
+                            await simulatePremiumUpgrade()
+                        }
+                    } label: {
+                        Label("Simulate Premium", systemImage: "ladybug.fill")
+                            .foregroundColor(.orange)
+                    }
+                    .disabled(isLoading)
+                }
+                #endif
+            }
+            .alert("Debug Error", isPresented: .constant(debugErrorMessage != nil)) {
+                Button("OK") {
+                    debugErrorMessage = nil
+                }
+            } message: {
+                if let error = debugErrorMessage {
+                    Text(error)
+                }
             }
         }
     }
+    
+    #if DEBUG
+    private func simulatePremiumUpgrade() async {
+        guard let householdId = authViewModel.currentUser?.householdId else {
+            debugErrorMessage = "No household ID found"
+            return
+        }
+        
+        // Admin key - in real app, would be in secure config or prompt user
+        // For dev/test, hardcode or read from environment
+        let adminKey = "dev-admin-key-change-me"
+        
+        isLoading = true
+        
+        do {
+            let success = try await APIService.shared.simulatePremiumUpgrade(
+                householdId: householdId,
+                adminKey: adminKey
+            )
+            
+            if success {
+                // Refresh user data to get updated household premium status
+                await authViewModel.refreshCurrentUser()
+                
+                // Dismiss paywall
+                dismiss()
+            } else {
+                debugErrorMessage = "Premium upgrade returned false"
+            }
+        } catch {
+            debugErrorMessage = "Failed: \(error.localizedDescription)"
+        }
+        
+        isLoading = false
+    }
+    #endif
 }
 
 struct FeatureRow: View {
@@ -167,4 +229,5 @@ struct FeatureRow: View {
 
 #Preview {
     PaywallView()
+        .environment(AuthViewModel())
 }

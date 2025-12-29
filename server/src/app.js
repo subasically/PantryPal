@@ -27,6 +27,13 @@ function createApp() {
     app.use('/api/notifications', notificationsRoutes);
     app.use('/api/sync', syncRoutes);
     app.use('/api/grocery', groceryRoutes);
+    
+    // Admin routes (DEV/TEST ONLY - protected by env var)
+    if (process.env.ENABLE_ADMIN_ROUTES === 'true') {
+        const adminRoutes = require('./routes/admin');
+        app.use('/api/admin', adminRoutes);
+        console.log('⚠️  [DEV] Admin routes enabled - do NOT use in production!');
+    }
 
     // Health check
     app.get('/health', (req, res) => {

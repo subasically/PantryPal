@@ -364,4 +364,53 @@ final class APIService: Sendable {
         }
         let _: DeleteResponse = try await request(endpoint: "/grocery/\(id)", method: "DELETE")
     }
+    
+    // MARK: - Admin (DEBUG ONLY)
+    
+    #if DEBUG
+    func simulatePremiumUpgrade(householdId: String, adminKey: String) async throws -> Bool {
+        struct AdminRequest: Codable, Sendable {
+            let isPremium: Bool
+        }
+        struct AdminResponse: Codable, Sendable {
+            let householdId: String
+            let name: String?
+            let isPremium: Bool
+        }
+        
+        // Custom request with admin key header
+        guard let url = URL(string: "\(baseURL)/admin/households/\(householdId)/premium") else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(adminKey, forHTTPHeaderField: "x-admin-key")
+        
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let body = AdminRequest(isPremium: true)
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.noData
+        }
+        
+        if httpResponse.statusCode >= 400 {
+            if let errorResponse = try? JSONDecoder().decode([String: String].self, from: data),
+               let errorMessage = errorResponse["error"] {
+                throw APIError.serverError(errorMessage)
+            }
+            throw APIError.serverError("Admin request failed with status \(httpResponse.statusCode)")
+        }
+        
+        let result = try JSONDecoder().decode(AdminResponse.self, from: data)
+        return result.isPremium
+    }
+    #endif
 }

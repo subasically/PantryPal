@@ -298,6 +298,11 @@ final class AuthViewModel {
         }
     }
     
+    func refreshCurrentUser() async {
+        // Force refresh user/household data (used after premium upgrade simulation)
+        await loadCurrentUser()
+    }
+    
     // MARK: - App Lock
     
     func handleScenePhaseChange(_ phase: ScenePhase) {
