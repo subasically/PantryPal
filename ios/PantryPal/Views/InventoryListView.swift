@@ -299,7 +299,7 @@ struct InventoryItemRow: View {
                     if let brand = item.productBrand {
                         Text(brand)
                             .font(.caption)
-                            .foregroundColor(.tertiary)
+                            .foregroundStyle(.tertiary)
                     }
                     
                     if let locationName = item.locationName {
@@ -309,7 +309,7 @@ struct InventoryItemRow: View {
                             Text(locationName)
                                 .font(.caption)
                         }
-                        .foregroundColor(.tertiary)
+                        .foregroundStyle(.tertiary)
                     }
                     
                     if let expDate = item.expirationDate {
