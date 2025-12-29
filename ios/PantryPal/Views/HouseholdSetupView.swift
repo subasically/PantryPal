@@ -43,10 +43,12 @@ struct HouseholdSetupView: View {
                             HStack {
                                 Image(systemName: "plus.square.fill")
                                     .font(.title2)
-                                Text("Create New Household")
+                                    .foregroundColor(.ppPurple)
+                                Text("Create my household")
                                     .font(.headline)
+                                    .foregroundColor(.primary)
                             }
-                            Text("Start fresh with a new pantry inventory for you and your family.")
+                            Text("Start fresh with a new pantry inventory.")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.leading)
@@ -66,10 +68,12 @@ struct HouseholdSetupView: View {
                             HStack {
                                 Image(systemName: "person.2.fill")
                                     .font(.title2)
-                                Text("Join Existing Household")
+                                    .foregroundColor(.ppOrange)
+                                Text("Join with invite code")
                                     .font(.headline)
+                                    .foregroundColor(.primary)
                             }
-                            Text("Have an invite code? Join an existing household to share inventory.")
+                            Text("Scan a QR code or enter an invite code.")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.leading)
@@ -80,6 +84,18 @@ struct HouseholdSetupView: View {
                         .cornerRadius(12)
                     }
                     .buttonStyle(.plain)
+                    
+                    // Option 3: Skip (Single User)
+                    Button {
+                        Task {
+                            await authViewModel.completeHouseholdSetup()
+                        }
+                    } label: {
+                        Text("Skip for now (Single user)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.top, 8)
                 }
                 .padding(.horizontal)
                 
