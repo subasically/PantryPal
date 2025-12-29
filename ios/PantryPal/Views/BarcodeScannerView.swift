@@ -35,6 +35,10 @@ class BarcodeScannerViewController: UIViewController {
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private var hasScanned = false
     
+    private var overlayView: UIView?
+    private var borderView: UIView?
+    private var instructionLabel: UILabel?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -126,14 +130,42 @@ class BarcodeScannerViewController: UIViewController {
             view.layer.addSublayer(previewLayer)
         }
         
-        addScanOverlay()
+        setupScanOverlay()
         startSession()
     }
     
-    private func addScanOverlay() {
-        let overlayView = UIView(frame: view.bounds)
-        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        overlayView.isUserInteractionEnabled = false
+    private func setupScanOverlay() {
+        let overlay = UIView()
+        overlay.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        overlay.isUserInteractionEnabled = false
+        view.addSubview(overlay)
+        self.overlayView = overlay
+        
+        let border = UIView()
+        border.layer.borderColor = UIColor.white.cgColor
+        border.layer.borderWidth = 2
+        border.layer.cornerRadius = 12
+        border.backgroundColor = .clear
+        view.addSubview(border)
+        self.borderView = border
+        
+        let label = UILabel()
+        label.text = "Align barcode within frame"
+        label.textColor = .white
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        view.addSubview(label)
+        self.instructionLabel = label
+        
+        updateOverlayLayout()
+    }
+    
+    private func updateOverlayLayout() {
+        guard let overlayView = overlayView,
+              let borderView = borderView,
+              let label = instructionLabel else { return }
+        
+        overlayView.frame = view.bounds
         
         let scanAreaSize = CGSize(width: 280, height: 140)
         let scanAreaOrigin = CGPoint(
@@ -152,32 +184,16 @@ class BarcodeScannerViewController: UIViewController {
         maskLayer.fillRule = .evenOdd
         overlayView.layer.mask = maskLayer
         
-        view.addSubview(overlayView)
+        borderView.frame = scanArea
         
-        let borderView = UIView(frame: scanArea)
-        borderView.layer.borderColor = UIColor.white.cgColor
-        borderView.layer.borderWidth = 2
-        borderView.layer.cornerRadius = 12
-        borderView.backgroundColor = .clear
-        view.addSubview(borderView)
-        
-        let label = UILabel()
-        label.text = "Align barcode within frame"
-        label.textColor = .white
-        label.textAlignment = .center
-        label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-        
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.topAnchor.constraint(equalTo: borderView.bottomAnchor, constant: 20)
-        ])
+        label.sizeToFit()
+        label.center = CGPoint(x: view.bounds.midX, y: scanArea.maxY + 20 + label.bounds.midY)
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         previewLayer?.frame = view.layer.bounds
+        updateOverlayLayout()
     }
 }
 
