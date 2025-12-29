@@ -19,9 +19,10 @@ router.post('/seed-defaults', (req, res) => {
 
         const now = new Date().toISOString();
         const defaultLocations = [
-            { name: 'Basement Pantry', sortOrder: 0 },
-            { name: 'Basement Chest Freezer', sortOrder: 1 },
-            { name: 'Kitchen Fridge', sortOrder: 2 }
+            { name: 'Pantry', sortOrder: 0 },
+            { name: 'Fridge', sortOrder: 1 },
+            { name: 'Freezer', sortOrder: 2 },
+            { name: 'Other', sortOrder: 3 }
         ];
 
         for (const loc of defaultLocations) {
@@ -43,6 +44,33 @@ router.post('/seed-defaults', (req, res) => {
 // Get all locations for household (with hierarchy)
 router.get('/', (req, res) => {
     try {
+        // Check if locations exist
+        const count = db.prepare('SELECT COUNT(*) as count FROM locations WHERE household_id = ?').get(req.user.householdId).count;
+        
+        if (count === 0) {
+            console.log(`[Locations] No locations found for household ${req.user.householdId}. Seeding defaults.`);
+            // Seed defaults
+            const now = new Date().toISOString();
+            const defaultLocations = [
+                { name: 'Pantry', sortOrder: 0 },
+                { name: 'Fridge', sortOrder: 1 },
+                { name: 'Freezer', sortOrder: 2 },
+                { name: 'Other', sortOrder: 3 }
+            ];
+
+            const insertLocation = db.prepare(`
+                INSERT INTO locations (id, household_id, name, parent_id, level, sort_order, created_at, updated_at)
+                VALUES (?, ?, ?, NULL, 0, ?, ?, ?)
+            `);
+
+            const transaction = db.transaction(() => {
+                for (const loc of defaultLocations) {
+                    insertLocation.run(uuidv4(), req.user.householdId, loc.name, loc.sortOrder, now, now);
+                }
+            });
+            transaction();
+        }
+
         const locations = db.prepare(`
             SELECT l.*, 
                    p.name as parent_name,
