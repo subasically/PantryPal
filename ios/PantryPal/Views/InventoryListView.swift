@@ -113,16 +113,19 @@ struct InventoryListView: View {
                             }
                         }
                     })
+                    .environment(authViewModel)
                 } else {
                     ScannerSheet(viewModel: $viewModel, isPresented: $showingScanner, onItemAdded: { message in
                         showSuccessToast(message.contains("Added") || message.contains("Updated") ? message : "Added \(message) to pantry!")
                     })
+                    .environment(authViewModel)
                 }
             }
             .sheet(isPresented: $showingAddCustom) {
                 AddCustomItemView(viewModel: $viewModel, isPresented: $showingAddCustom, onItemAdded: { name in
                     showSuccessToast("Added \(name) to pantry!")
                 })
+                .environment(authViewModel)
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
@@ -630,6 +633,7 @@ struct ScannerSheet: View {
                 Spacer()
             }
             .padding(.top, 30)
+            .padding(.bottom, 50)
         }
     }
     
