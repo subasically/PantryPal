@@ -1,7 +1,9 @@
 import SwiftUI
+import SwiftData
 
 struct GroceryListView: View {
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.modelContext) private var modelContext
     @State private var viewModel = GroceryViewModel()
     @State private var showingAddSheet = false
     @State private var newItemName = ""
@@ -37,6 +39,7 @@ struct GroceryListView: View {
                 addItemSheet
             }
             .task {
+                viewModel.setModelContext(modelContext)
                 if viewModel.items.isEmpty {
                     await viewModel.fetchItems()
                 }

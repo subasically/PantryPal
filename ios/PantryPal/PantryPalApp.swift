@@ -14,6 +14,7 @@ struct PantryPalApp: App {
             SDInventoryItem.self,
             SDLocation.self,
             SDPendingAction.self,
+            SDGroceryItem.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

@@ -3,6 +3,26 @@ const router = express.Router();
 const db = require('../models/database');
 const authenticateToken = require('../middleware/auth');
 
+const FREE_LIMIT = 25;
+
+// Check if user can write (Premium required for shared households)
+function checkWritePermission(householdId) {
+    if (!householdId) return true; // Single user, no household
+    const household = db.prepare('SELECT id FROM households WHERE id = ?').get(householdId);
+    return !household; // If household exists, need to be Premium (checked elsewhere)
+}
+
+// Check if grocery list is under limit
+function checkGroceryLimit(householdId) {
+    if (!householdId) return true; // No household = no limit check
+    
+    const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId);
+    if (household && household.is_premium) return true; // Premium = unlimited
+    
+    const count = db.prepare('SELECT COUNT(*) as count FROM grocery_items WHERE household_id = ?').get(householdId).count;
+    return count < FREE_LIMIT;
+}
+
 // Helper: Normalize name for deduplication
 function normalizeName(name) {
   return name.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -48,6 +68,25 @@ router.post('/', authenticateToken, (req, res) => {
       return res.status(400).json({ 
         error: 'Please create or join a household first',
         requiresHousehold: true
+      });
+    }
+    
+    // Check write permission (shared household)
+    if (!checkWritePermission(householdId)) {
+      return res.status(403).json({ 
+        error: 'Household sharing is a Premium feature. Upgrade to add items.',
+        code: 'PREMIUM_REQUIRED',
+        upgradeRequired: true
+      });
+    }
+    
+    // Check grocery limit
+    if (!checkGroceryLimit(householdId)) {
+      return res.status(403).json({ 
+        error: 'Grocery list limit reached',
+        code: 'LIMIT_REACHED',
+        limit: FREE_LIMIT,
+        upgradeRequired: true
       });
     }
     

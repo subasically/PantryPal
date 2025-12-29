@@ -131,3 +131,31 @@ final class SDInventoryItem {
         )
     }
 }
+
+@Model
+final class SDGroceryItem {
+    @Attribute(.unique) var id: Int
+    var householdId: String
+    var name: String
+    var normalizedName: String
+    var createdAt: Date
+    
+    init(id: Int, householdId: String, name: String, normalizedName: String, createdAt: Date) {
+        self.id = id
+        self.householdId = householdId
+        self.name = name
+        self.normalizedName = normalizedName
+        self.createdAt = createdAt
+    }
+    
+    // Convert to API model
+    func toGroceryItem() -> GroceryItem {
+        let formatter = ISO8601DateFormatter()
+        return GroceryItem(
+            id: id,
+            householdId: householdId,
+            name: name,
+            createdAt: formatter.string(from: createdAt)
+        )
+    }
+}
