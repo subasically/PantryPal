@@ -503,21 +503,13 @@ struct ScannerSheet: View {
                 // Product details card
                 productDetailsCard
                 
-                // Quantity and expiration controls
-                VStack(spacing: 16) {
-                    // Location picker
+                // Add Options Container
+                VStack(spacing: 0) {
+                    // Location Row
                     if !viewModel.locations.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("Location")
-                                    .font(.subheadline)
-                                    .foregroundColor(selectedLocationId == nil ? .red : .primary)
-                                if selectedLocationId == nil {
-                                    Text("(Required)")
-                                        .font(.caption)
-                                        .foregroundColor(.red)
-                                }
-                            }
+                        HStack {
+                            Text("Location")
+                            Spacer()
                             Picker("Location", selection: $selectedLocationId) {
                                 Text("Select Location").tag(nil as String?)
                                 ForEach(viewModel.locations) { location in
@@ -525,30 +517,36 @@ struct ScannerSheet: View {
                                 }
                             }
                             .pickerStyle(.menu)
-                            .padding(8)
-                            .background(selectedLocationId == nil ? Color.red.opacity(0.1) : Color.clear)
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(selectedLocationId == nil ? Color.red.opacity(0.5) : Color.clear, lineWidth: 1)
-                            )
+                            .labelsHidden()
+                            .tint(.primary)
                         }
-                        .padding(.horizontal)
+                        .padding()
+                        
+                        Divider()
+                            .padding(.leading)
                     }
                     
+                    // Quantity Row
                     Stepper(existingItem != nil ? "Adding: \(quantity)" : "Quantity: \(quantity)", value: $quantity, in: 1...99)
-                        .padding(.horizontal)
+                        .padding()
                     
+                    Divider()
+                        .padding(.leading)
+                    
+                    // Expiration Toggle Row
                     Toggle("Add expiration date", isOn: $showingDatePicker)
-                        .padding(.horizontal)
+                        .padding()
                     
+                    // Expiration Date Picker
                     if showingDatePicker {
+                        Divider()
+                            .padding(.leading)
+                        
                         DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
                             .datePickerStyle(.compact)
-                            .padding(.horizontal)
+                            .padding()
                     }
                 }
-                .padding()
                 .background(Color.gray.opacity(0.05))
                 .cornerRadius(12)
                 .padding(.horizontal)
