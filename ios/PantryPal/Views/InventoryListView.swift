@@ -114,11 +114,13 @@ struct InventoryListView: View {
                         }
                     })
                     .environment(authViewModel)
+                    .presentationDetents([.large])
                 } else {
                     ScannerSheet(viewModel: $viewModel, isPresented: $showingScanner, onItemAdded: { message in
                         showSuccessToast(message.contains("Added") || message.contains("Updated") ? message : "Added \(message) to pantry!")
                     })
                     .environment(authViewModel)
+                    .presentationDetents([.large])
                 }
             }
             .sheet(isPresented: $showingAddCustom) {
@@ -126,12 +128,14 @@ struct InventoryListView: View {
                     showSuccessToast("Added \(name) to pantry!")
                 })
                 .environment(authViewModel)
+                .presentationDetents([.large])
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
             }
             .sheet(isPresented: $showingPaywall) {
                 PaywallView(limit: authViewModel.freeLimit)
+                    .presentationDetents([.large])
             }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("OK") { 

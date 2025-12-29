@@ -61,73 +61,73 @@ struct PaywallView: View {
                     .background(Color.gray.opacity(0.05))
                     .cornerRadius(16)
                     .padding(.horizontal)
-                    
-                    Spacer()
-                    
-                    // Pricing
-                    VStack(spacing: 16) {
-                        // Yearly (Primary)
-                        Button(action: {
-                            isLoading = true
-                            // TODO: Implement In-App Purchase
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                isLoading = false
-                            }
-                        }) {
-                            VStack(spacing: 4) {
-                                Text("Subscribe for $49.99/year")
-                                    .font(.headline)
-                                Text("Save 17% • Best Value")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .opacity(0.9)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.ppPurple)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                        }
-                        .disabled(isLoading)
-                        
-                        // Monthly (Secondary)
-                        Button(action: {
-                            isLoading = true
-                            // TODO: Implement In-App Purchase
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                isLoading = false
-                            }
-                        }) {
-                            VStack(spacing: 4) {
-                                Text("Subscribe for $4.99/month")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color(uiColor: .secondarySystemBackground))
-                            .cornerRadius(12)
-                        }
-                        .disabled(isLoading)
-                        
-                        Text("No ads. No tracking. Cancel anytime.")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                            .padding(.top, 4)
-                        
-                        Button("Restore Purchases") {
-                            isLoading = true
-                            // TODO: Implement Restore
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                isLoading = false
-                            }
-                        }
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .disabled(isLoading)
-                    }
-                    .padding()
                 }
+                .padding(.bottom, 20)
+            }
+            .safeAreaInset(edge: .bottom) {
+                VStack(spacing: 16) {
+                    // Yearly (Primary)
+                    Button(action: {
+                        isLoading = true
+                        // TODO: Implement In-App Purchase
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            isLoading = false
+                        }
+                    }) {
+                        VStack(spacing: 4) {
+                            Text("Subscribe for $49.99/year")
+                                .font(.headline)
+                            Text("Save 17% • Best Value")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .opacity(0.9)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.ppPurple)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                    }
+                    .disabled(isLoading)
+                    
+                    // Monthly (Secondary)
+                    Button(action: {
+                        isLoading = true
+                        // TODO: Implement In-App Purchase
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            isLoading = false
+                        }
+                    }) {
+                        VStack(spacing: 4) {
+                            Text("Subscribe for $4.99/month")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(uiColor: .secondarySystemBackground))
+                        .cornerRadius(12)
+                    }
+                    .disabled(isLoading)
+                    
+                    Text("No ads. No tracking. Cancel anytime.")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
+                    
+                    Button("Restore Purchases") {
+                        isLoading = true
+                        // TODO: Implement Restore
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            isLoading = false
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .disabled(isLoading)
+                }
+                .padding()
+                .background(.regularMaterial)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
