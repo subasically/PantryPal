@@ -3,12 +3,14 @@ import AuthenticationServices
 
 struct LoginView: View {
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     @State private var email = ""
     @State private var password = ""
     @State private var name = ""
     @State private var isRegistering = false
     @State private var showEmailForm = false
+    @State private var showOtherOptions = false
     
     var body: some View {
         @Bindable var authViewModel = authViewModel
@@ -34,22 +36,9 @@ struct LoginView: View {
                     .padding(.bottom, 20)
                     
                     if !showEmailForm {
-                        // Primary Onboarding Flow
                         VStack(spacing: 16) {
-                            // Apple Sign In (Primary)
-                            SignInWithAppleButton(.continue) { request in
-                                request.requestedScopes = [.fullName, .email]
-                            } onCompletion: { result in
-                                Task {
-                                    await authViewModel.handleAppleSignIn(result: result)
-                                }
-                            }
-                            .signInWithAppleButtonStyle(.black)
-                            .frame(height: 50)
-                            .cornerRadius(10)
-                            
-                            // Biometric Login (if available)
-                            if authViewModel.canUseBiometricLogin {
+                            // Returning User Flow: Face ID Primary
+                            if authViewModel.canUseBiometricLogin && !showOtherOptions {
                                 Button(action: {
                                     Task {
                                         await authViewModel.loginWithBiometrics()
@@ -60,24 +49,57 @@ struct LoginView: View {
                                         Text("Sign in with \(authViewModel.biometricName)")
                                     }
                                 }
-                                .buttonStyle(.ppSecondary)
-                            }
-                            
-                            // Use Email Option
-                            Button(action: {
-                                withAnimation {
-                                    showEmailForm = true
+                                .buttonStyle(.ppPrimary)
+                                
+                                Button("Use a different account") {
+                                    withAnimation {
+                                        showOtherOptions = true
+                                    }
                                 }
-                            }) {
-                                Text("Use email instead")
-                                    .fontWeight(.medium)
+                                .font(.subheadline)
+                                .foregroundColor(.ppPurple)
+                                .padding(.top, 8)
+                                
+                            } else {
+                                // New User / Other Options Flow: Apple Primary
+                                SignInWithAppleButton(.continue) { request in
+                                    request.requestedScopes = [.fullName, .email]
+                                } onCompletion: { result in
+                                    Task {
+                                        await authViewModel.handleAppleSignIn(result: result)
+                                    }
+                                }
+                                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                                .frame(height: 50)
+                                .cornerRadius(10)
+                                
+                                Text("No spam. Just to sync your pantry.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                // Use Email Option
+                                Button(action: {
+                                    withAnimation {
+                                        showEmailForm = true
+                                    }
+                                }) {
+                                    Text("Continue with email")
+                                        .fontWeight(.medium)
+                                }
+                                .padding(.top, 8)
+                                
+                                // Back to Face ID if available
+                                if authViewModel.canUseBiometricLogin {
+                                    Button("Back to \(authViewModel.biometricName)") {
+                                        withAnimation {
+                                            showOtherOptions = false
+                                        }
+                                    }
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .padding(.top, 16)
+                                }
                             }
-                            .padding(.top, 8)
-                            
-                            Text("No spam. Just to sync your pantry.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .padding(.top, 16)
                         }
                         .padding(.horizontal, 32)
                     } else {
