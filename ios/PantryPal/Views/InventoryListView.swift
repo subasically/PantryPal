@@ -154,6 +154,7 @@ struct InventoryListView: View {
                     print("❌ [InventoryListView] Initial sync failed: \(error)")
                 }
                 await viewModel.loadInventory()
+                await viewModel.loadLocations()
             }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
                 showingPaywall = true
@@ -420,13 +421,20 @@ struct ScannerSheet: View {
                 }
             }
             .onAppear {
-                if selectedLocationId == nil {
-                    if let pantry = viewModel.locations.first(where: { $0.name == "Pantry" }) {
-                        selectedLocationId = pantry.id
-                    } else if let first = viewModel.locations.first {
-                        selectedLocationId = first.id
-                    }
-                }
+                selectDefaultLocation()
+            }
+            .onChange(of: viewModel.locations) { _, _ in
+                selectDefaultLocation()
+            }
+        }
+    }
+    
+    private func selectDefaultLocation() {
+        if selectedLocationId == nil {
+            if let pantry = viewModel.locations.first(where: { $0.name == "Pantry" }) {
+                selectedLocationId = pantry.id
+            } else if let first = viewModel.locations.first {
+                selectedLocationId = first.id
             }
         }
     }
@@ -476,16 +484,7 @@ struct ScannerSheet: View {
                 // Quantity and expiration controls
                 VStack(spacing: 16) {
                     // Location picker
-                    if viewModel.locations.isEmpty {
-                        HStack {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.ppOrange)
-                            Text("Set up locations in Settings first")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.horizontal)
-                    } else {
+                    if !viewModel.locations.isEmpty {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
                                 Text("Location")
@@ -875,15 +874,7 @@ struct AddCustomItemView: View {
                 }
                 
                 Section("Location") {
-                    if viewModel.locations.isEmpty {
-                        HStack {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.ppOrange)
-                            Text("Set up locations in Settings first")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    } else {
+                    if !viewModel.locations.isEmpty {
                         Picker("Storage Location *", selection: $selectedLocationId) {
                             Text("Select Location").tag(nil as String?)
                             ForEach(viewModel.locations) { location in
@@ -923,18 +914,23 @@ struct AddCustomItemView: View {
                 if let upc = prefilledUPC {
                     self.upc = upc
                 }
-                
-                // Auto-select location
-                if selectedLocationId == nil {
-                    if let pantry = viewModel.locations.first(where: { $0.name == "Pantry" }) {
-                        selectedLocationId = pantry.id
-                    } else if let first = viewModel.locations.first {
-                        selectedLocationId = first.id
-                    }
-                }
+                selectDefaultLocation()
+            }
+            .onChange(of: viewModel.locations) { _, _ in
+                selectDefaultLocation()
             }
             .sheet(isPresented: $showingScanner) {
                 UPCScannerSheet(scannedUPC: $upc, isPresented: $showingScanner)
+            }
+        }
+    }
+    
+    private func selectDefaultLocation() {
+        if selectedLocationId == nil {
+            if let pantry = viewModel.locations.first(where: { $0.name == "Pantry" }) {
+                selectedLocationId = pantry.id
+            } else if let first = viewModel.locations.first {
+                selectedLocationId = first.id
             }
         }
     }
