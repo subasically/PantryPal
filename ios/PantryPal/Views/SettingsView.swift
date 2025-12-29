@@ -50,6 +50,20 @@ struct SettingsView: View {
                     }
                 }
                 
+                // Household Section
+                Section("Household") {
+                    NavigationLink {
+                        HouseholdSharingView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "person.2.fill")
+                                .foregroundColor(.ppPurple)
+                                .frame(width: 24)
+                            Text("Household Sharing")
+                        }
+                    }
+                }
+                
                 // Notifications Section
                 Section("Notifications") {
                     if notificationService.isAuthorized {
@@ -100,28 +114,6 @@ struct SettingsView: View {
                     }
                 }
                 
-                // Scanner Section
-                /*
-                Section("Scanner") {
-                    Toggle(isOn: $smartScannerEnabled) {
-                        HStack {
-                            Image(systemName: "text.viewfinder")
-                                .foregroundColor(.ppPurple)
-                                .frame(width: 24)
-                            VStack(alignment: .leading) {
-                                Text("Smart Scanner")
-                                Text("Multi-step flow with OCR for product name and expiration date")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                    .onChange(of: smartScannerEnabled) { _, newValue in
-                        UserPreferences.shared.useSmartScanner = newValue
-                    }
-                }
-                */
-                
                 // Security Section
                 if authViewModel.isBiometricAvailable && (authViewModel.hasPendingCredentials || authViewModel.isBiometricEnabled) {
                     Section("Security") {
@@ -149,36 +141,6 @@ struct SettingsView: View {
                                     showingEnableError = true
                                 }
                             }
-                        }
-                    }
-                }
-                
-                // Locations Section
-                /*
-                Section("Storage Locations") {
-                    NavigationLink {
-                        LocationsSettingsView()
-                    } label: {
-                        HStack {
-                            Image(systemName: "mappin.and.ellipse")
-                                .foregroundColor(.ppGreen)
-                                .frame(width: 24)
-                            Text("Manage Locations")
-                        }
-                    }
-                }
-                */
-                
-                // Household Section
-                Section("Household") {
-                    NavigationLink {
-                        HouseholdSharingView()
-                    } label: {
-                        HStack {
-                            Image(systemName: "person.2.fill")
-                                .foregroundColor(.ppPurple)
-                                .frame(width: 24)
-                            Text("Household Sharing")
                         }
                     }
                 }
@@ -231,7 +193,7 @@ struct SettingsView: View {
                                 ProgressView()
                                     .tint(.red)
                             } else {
-                                Label("Reset All Data", systemImage: "trash.fill")
+                                Label("Delete Household Data", systemImage: "trash.fill")
                             }
                             Spacer()
                         }
