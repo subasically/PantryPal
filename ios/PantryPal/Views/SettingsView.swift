@@ -123,8 +123,8 @@ struct SettingsView: View {
                 */
                 
                 // Security Section
-                Section("Security") {
-                    if authViewModel.isBiometricAvailable {
+                if authViewModel.isBiometricAvailable && (authViewModel.hasPendingCredentials || authViewModel.isBiometricEnabled) {
+                    Section("Security") {
                         Toggle(isOn: $biometricEnabled) {
                             HStack {
                                 Image(systemName: authViewModel.biometricIcon)
@@ -149,14 +149,6 @@ struct SettingsView: View {
                                     showingEnableError = true
                                 }
                             }
-                        }
-                    } else {
-                        HStack {
-                            Image(systemName: "faceid")
-                                .foregroundColor(.secondary)
-                                .frame(width: 24)
-                            Text("Biometric login not available")
-                                .foregroundColor(.secondary)
                         }
                     }
                 }
