@@ -24,7 +24,7 @@ struct PaywallView: View {
                             .font(.title)
                             .fontWeight(.bold)
                         
-                        Text("You've reached the 50-item limit.")
+                        Text("You've reached the 30-item limit.")
                             .font(.headline)
                             .foregroundColor(.secondary)
                     }
