@@ -6,6 +6,7 @@ struct PantryPalApp: App {
     @State private var authViewModel = AuthViewModel()
     @StateObject private var notificationService = NotificationService.shared
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -32,6 +33,12 @@ struct PantryPalApp: App {
                 .task {
                     // Request notification permission on first launch
                     _ = await notificationService.requestAuthorization()
+                }
+                .onChange(of: scenePhase) { _, newPhase in
+                    authViewModel.handleScenePhaseChange(newPhase)
+                }
+                .fullScreenCover(isPresented: $authViewModel.isAppLocked) {
+                    LockOverlayView()
                 }
         }
     }
@@ -120,4 +127,45 @@ struct MainTabView: View {
 #Preview {
     ContentView()
         .environment(AuthViewModel())
+}
+
+struct LockOverlayView: View {
+    @Environment(AuthViewModel.self) private var authViewModel
+    
+    var body: some View {
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.ppPurple)
+                
+                Text("PantryPal Locked")
+                    .font(.title)
+                    .fontWeight(.bold)
+                
+                Button {
+                    Task {
+                        await authViewModel.unlockApp()
+                    }
+                } label: {
+                    Label("Unlock with \(authViewModel.biometricName)", systemImage: authViewModel.biometricIcon)
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: 280)
+                        .background(Color.ppPurple)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+            }
+        }
+        .onAppear {
+            // Auto-prompt on appear
+            Task {
+                await authViewModel.unlockApp()
+            }
+        }
+    }
 }
