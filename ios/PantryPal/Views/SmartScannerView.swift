@@ -10,6 +10,7 @@ struct SmartScannerView: View {
     @State private var expirationDate: Date?
     @State private var capturedImage: UIImage?
     @State private var isProcessing = false
+    @State private var isScanning = true
     
     enum ScanStep {
         case barcode
@@ -64,7 +65,7 @@ struct SmartScannerView: View {
     // MARK: - Steps
     
     private var barcodeStep: some View {
-        BarcodeScannerView(scannedCode: $scannedUPC, isPresented: .constant(true)) { code in
+        BarcodeScannerView(scannedCode: $scannedUPC, isPresented: .constant(true), isScanning: $isScanning) { code in
             scannedUPC = code
             // Try to lookup product first
             Task {
