@@ -571,15 +571,13 @@ struct ScannerSheet: View {
                                             category: lookupResult?.product?.category
                                         )
                                         
-                                        _ = try await APIService.shared.addToInventory(
-                                            productId: product.id,
+                                        let success = await viewModel.addCustomItem(
+                                            product: product,
                                             quantity: quantity,
-                                            expirationDate: showingDatePicker ? formatDate(expirationDate) : nil,
-                                            notes: nil,
+                                            expirationDate: showingDatePicker ? expirationDate : nil,
                                             locationId: locationId
                                         )
                                         
-                                        await viewModel.loadInventory()
                                         isPresented = false
                                         onItemAdded?(editedName)
                                     } catch {
@@ -785,15 +783,13 @@ struct ScannerSheet: View {
             
             UserPreferences.shared.lastUsedLocationId = locationId
             
-            _ = try await APIService.shared.addToInventory(
-                productId: product.id,
+            let success = await viewModel.addCustomItem(
+                product: product,
                 quantity: quantity,
-                expirationDate: showingDatePicker ? formatDate(expirationDate) : nil,
-                notes: nil,
+                expirationDate: showingDatePicker ? expirationDate : nil,
                 locationId: locationId
             )
             
-            await viewModel.loadInventory()
             let productName = customName.trimmingCharacters(in: .whitespaces)
             isPresented = false
             onItemAdded?(productName)
@@ -956,8 +952,8 @@ struct AddCustomItemView: View {
                 category: nil
             )
             
-            let success = await viewModel.addItem(
-                productId: product.id,
+            let success = await viewModel.addCustomItem(
+                product: product,
                 quantity: quantity,
                 expirationDate: showingDatePicker ? expirationDate : nil,
                 locationId: locationId

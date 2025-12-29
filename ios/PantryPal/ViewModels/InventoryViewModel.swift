@@ -54,6 +54,32 @@ final class InventoryViewModel {
     
     // ... (keep expiring/expired loaders if needed, or derive from items)
     
+    func addCustomItem(product: Product, quantity: Int, expirationDate: Date?, locationId: String) async -> Bool {
+        guard let context = modelContext else { return false }
+        
+        // 1. Ensure Product exists locally
+        let productId = product.id
+        let prodDesc = FetchDescriptor<SDProduct>(predicate: #Predicate<SDProduct> { $0.id == productId })
+        if (try? context.fetch(prodDesc).first) == nil {
+            let newProd = SDProduct(
+                id: product.id,
+                upc: product.upc,
+                name: product.name,
+                brand: product.brand,
+                details: product.description,
+                imageUrl: product.imageUrl,
+                category: product.category,
+                isCustom: true,
+                householdId: "current"
+            )
+            context.insert(newProd)
+            try? context.save() // Save to ensure it's available for addItem
+        }
+        
+        // 2. Call addItem
+        return await addItem(productId: productId, quantity: quantity, expirationDate: expirationDate, locationId: locationId)
+    }
+    
     func addItem(productId: String, quantity: Int = 1, expirationDate: Date? = nil, notes: String? = nil, locationId: String) async -> Bool {
         guard let context = modelContext else { return false }
         errorMessage = nil
