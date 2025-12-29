@@ -297,10 +297,21 @@ struct SettingsView: View {
             try await APIService.shared.resetHouseholdData()
             
             // 2. Wipe local data
-            try modelContext.delete(model: SDInventoryItem.self)
-            try modelContext.delete(model: SDProduct.self)
-            try modelContext.delete(model: SDLocation.self)
-            try modelContext.delete(model: SDPendingAction.self)
+            // We fetch and delete individually to ensure the UI updates immediately.
+            // Batch delete (modelContext.delete(model:)) operates on the store and leaves the context stale.
+            let items = try modelContext.fetch(FetchDescriptor<SDInventoryItem>())
+            for item in items { modelContext.delete(item) }
+            
+            let products = try modelContext.fetch(FetchDescriptor<SDProduct>())
+            for product in products { modelContext.delete(product) }
+            
+            let locations = try modelContext.fetch(FetchDescriptor<SDLocation>())
+            for location in locations { modelContext.delete(location) }
+            
+            let actions = try modelContext.fetch(FetchDescriptor<SDPendingAction>())
+            for action in actions { modelContext.delete(action) }
+            
+            try modelContext.save()
             
             // 3. Re-sync to get default locations
             try await SyncService.shared.syncFromRemote(modelContext: modelContext)
