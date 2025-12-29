@@ -10,13 +10,11 @@ function normalizeName(name) {
 
 // GET /api/grocery - Get all grocery items for household
 router.get('/', authenticateToken, (req, res) => {
-  const userId = req.user.userId;
+  const householdId = req.user.householdId;
   
   try {
-    const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
-    
     // If no household, return empty array (not an error)
-    if (!user || !user.household_id) {
+    if (!householdId) {
       return res.json([]);
     }
     
@@ -25,7 +23,7 @@ router.get('/', authenticateToken, (req, res) => {
       FROM grocery_items
       WHERE household_id = ?
       ORDER BY created_at DESC
-    `).all(user.household_id);
+    `).all(householdId);
     
     res.json(items);
   } catch (error) {
@@ -36,17 +34,17 @@ router.get('/', authenticateToken, (req, res) => {
 
 // POST /api/grocery - Add item to grocery list
 router.post('/', authenticateToken, (req, res) => {
-  const userId = req.user.userId;
+  const householdId = req.user.householdId;
   const { name } = req.body;
+  
+  console.log('[Grocery] POST request - householdId:', householdId, 'name:', name);
   
   if (!name?.trim()) {
     return res.status(400).json({ error: 'Item name required' });
   }
   
   try {
-    const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
-    
-    if (!user || !user.household_id) {
+    if (!householdId) {
       return res.status(400).json({ 
         error: 'Please create or join a household first',
         requiresHousehold: true
@@ -59,18 +57,21 @@ router.post('/', authenticateToken, (req, res) => {
     const existing = db.prepare(`
       SELECT id FROM grocery_items
       WHERE household_id = ? AND normalized_name = ?
-    `).get(user.household_id, normalizedName);
+    `).get(householdId, normalizedName);
     
     if (existing) {
+      console.log('[Grocery] Item already exists:', normalizedName);
       return res.status(409).json({ error: 'Item already on grocery list' });
     }
     
     const result = db.prepare(`
       INSERT INTO grocery_items (household_id, name, normalized_name)
       VALUES (?, ?, ?)
-    `).run(user.household_id, name.trim(), normalizedName);
+    `).run(householdId, name.trim(), normalizedName);
     
     const newItem = db.prepare('SELECT * FROM grocery_items WHERE id = ?').get(result.lastInsertRowid);
+    
+    console.log('[Grocery] Item added successfully:', newItem.id);
     
     res.status(201).json(newItem);
   } catch (error) {
@@ -81,13 +82,11 @@ router.post('/', authenticateToken, (req, res) => {
 
 // DELETE /api/grocery/:id - Remove item from grocery list
 router.delete('/:id', authenticateToken, (req, res) => {
-  const userId = req.user.userId;
+  const householdId = req.user.householdId;
   const itemId = parseInt(req.params.id);
   
   try {
-    const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
-    
-    if (!user || !user.household_id) {
+    if (!householdId) {
       return res.status(400).json({ 
         error: 'Please create or join a household first',
         requiresHousehold: true
@@ -98,7 +97,7 @@ router.delete('/:id', authenticateToken, (req, res) => {
     const item = db.prepare(`
       SELECT id FROM grocery_items
       WHERE id = ? AND household_id = ?
-    `).get(itemId, user.household_id);
+    `).get(itemId, householdId);
     
     if (!item) {
       return res.status(404).json({ error: 'Item not found' });

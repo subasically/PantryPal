@@ -35,11 +35,16 @@ final class GroceryViewModel {
             return true
         } catch {
             if let apiError = error as? APIError,
-               case .serverError(let message) = apiError,
-               message.contains("already on grocery list") {
-                errorMessage = "Already on your list"
+               case .serverError(let message) = apiError {
+                if message.contains("already on grocery list") {
+                    errorMessage = "Already on your list"
+                } else if message.contains("household") {
+                    errorMessage = "Please create or join a household first"
+                } else {
+                    errorMessage = message
+                }
             } else {
-                errorMessage = "Failed to add item"
+                errorMessage = "Failed to add item: \(error.localizedDescription)"
             }
             print("Add grocery error: \(error)")
             return false
