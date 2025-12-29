@@ -56,25 +56,47 @@ struct HouseholdSharingView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical)
                 } else {
-                    Button {
-                        Task {
-                            await viewModel.generateInvite()
+                    if !viewModel.isPremium {
+                        Button {
+                            NotificationCenter.default.post(name: .showPaywall, object: nil)
+                        } label: {
+                            HStack {
+                                Image(systemName: "lock.fill")
+                                Text("Invite Family Members (Premium)")
+                            }
+                            .frame(maxWidth: .infinity)
                         }
-                    } label: {
-                        HStack {
-                            Image(systemName: "qrcode")
-                            Text("Generate Invite Code")
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color.ppPrimary)
+                        .controlSize(.regular) // Standard height
+                        
+                        Text("Household sharing requires Premium.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Button {
+                            Task {
+                                await viewModel.generateInvite()
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "qrcode")
+                                Text("Generate Invite Code")
+                            }
+                            .frame(maxWidth: .infinity)
                         }
-                        .frame(maxWidth: .infinity)
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color.ppPrimary)
+                        .disabled(viewModel.isLoading)
+                        .controlSize(.regular)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.ppPrimary)
-                    .disabled(viewModel.isLoading)
                 }
             } header: {
-                Text("Invite Family Members")
+                Text("Household Sharing")
             } footer: {
-                Text("Share this code or QR with family members so they can join your household and share the pantry inventory.")
+                if viewModel.isPremium {
+                    Text("Share this code or QR with family members so they can join your household and share the pantry inventory.")
+                }
             }
             
             // Join Section
@@ -103,15 +125,29 @@ struct HouseholdSharingView: View {
                         Spacer()
                     }
                 } else {
-                    ForEach(viewModel.members) { member in
+                    ForEach(Array(viewModel.members.enumerated()), id: \.element.id) { index, member in
                         HStack {
                             Image(systemName: "person.circle.fill")
                                 .font(.title2)
                                 .foregroundColor(Color.ppPrimary)
                             
                             VStack(alignment: .leading) {
-                                Text(member.name)
-                                    .font(.headline)
+                                HStack {
+                                    Text(member.name)
+                                        .font(.headline)
+                                    
+                                    // Assume first member (creator) is owner
+                                    if index == 0 {
+                                        Text("Owner")
+                                            .font(.caption2)
+                                            .fontWeight(.medium)
+                                            .foregroundColor(.secondary)
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(Color(.systemGray5))
+                                            .cornerRadius(4)
+                                    }
+                                }
                                 Text(member.email)
                                     .font(.caption)
                                     .foregroundColor(.secondary)
@@ -129,6 +165,7 @@ struct HouseholdSharingView: View {
                 Task {
                     try? await SyncService.shared.syncFromRemote(modelContext: modelContext)
                     await viewModel.loadMembers()
+                    await viewModel.checkPremiumStatus()
                 }
             })
         }
@@ -138,6 +175,7 @@ struct HouseholdSharingView: View {
             Text(viewModel.errorMessage)
         }
         .task {
+            await viewModel.checkPremiumStatus()
             await viewModel.loadMembers()
         }
         .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
@@ -439,15 +477,22 @@ extension QRScannerViewController: @preconcurrency AVCaptureMetadataOutputObject
 class HouseholdSharingViewModel: ObservableObject {
     @Published var currentInvite: InviteCodeResponse?
     @Published var members: [HouseholdMember] = []
+    @Published var isPremium = false
     @Published var isLoading = false
     @Published var isLoadingMembers = false
     @Published var showError = false
     @Published var errorMessage = ""
     
+    func checkPremiumStatus() async {
+        if let household = try? await APIService.shared.getCurrentUser().1 {
+            isPremium = household.isPremium ?? false
+        }
+    }
+    
     func generateInvite() async {
         // Check premium status first
-        if let household = try? await APIService.shared.getCurrentUser().1,
-           let isPremium = household.isPremium, !isPremium {
+        await checkPremiumStatus()
+        if !isPremium {
             NotificationCenter.default.post(name: .showPaywall, object: nil)
             return
         }
