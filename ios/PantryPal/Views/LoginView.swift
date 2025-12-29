@@ -203,6 +203,14 @@ struct LoginView: View {
                     .zIndex(1)
             }
         }
+        .onAppear {
+            // Auto-login with Face ID if available and user hasn't just logged out
+            if authViewModel.canUseBiometricLogin && !authViewModel.hasLoggedOut {
+                Task {
+                    await authViewModel.loginWithBiometrics()
+                }
+            }
+        }
     }
     
     private var isFormValid: Bool {

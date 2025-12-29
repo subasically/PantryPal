@@ -11,6 +11,7 @@ final class AuthViewModel {
     var errorMessage: String?
     var showBiometricEnablePrompt = false
     var showHouseholdSetup = false
+    var hasLoggedOut = false
     
     private var pendingCredentials: (email: String, password: String)?
     private let biometricService = BiometricAuthService.shared
@@ -35,6 +36,10 @@ final class AuthViewModel {
         biometricService.isBiometricAvailable && 
         biometricService.isBiometricLoginEnabled && 
         biometricService.hasStoredCredentials
+    }
+    
+    var hasPendingCredentials: Bool {
+        pendingCredentials != nil
     }
     
     init() {
@@ -233,6 +238,7 @@ final class AuthViewModel {
         currentUser = nil
         currentHousehold = nil
         isAuthenticated = false
+        hasLoggedOut = true
     }
     
     func loadCurrentUser() async {

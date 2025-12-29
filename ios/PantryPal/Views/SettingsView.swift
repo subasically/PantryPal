@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var biometricEnabled: Bool
     @State private var smartScannerEnabled: Bool
     @State private var showingDisableAlert = false
+    @State private var showingEnableError = false
     @State private var showingResetConfirmation = false
     @State private var showingResetVerification = false
     @State private var resetVerificationText = ""
@@ -122,7 +123,6 @@ struct SettingsView: View {
                 */
                 
                 // Security Section
-                /*
                 Section("Security") {
                     if authViewModel.isBiometricAvailable {
                         Toggle(isOn: $biometricEnabled) {
@@ -130,12 +130,24 @@ struct SettingsView: View {
                                 Image(systemName: authViewModel.biometricIcon)
                                     .foregroundColor(.ppPurple)
                                     .frame(width: 24)
-                                Text("Sign in with \(authViewModel.biometricName)")
+                                VStack(alignment: .leading) {
+                                    Text("Use \(authViewModel.biometricName)")
+                                    Text("Secure access when opening the app")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                         .onChange(of: biometricEnabled) { oldValue, newValue in
                             if !newValue {
                                 showingDisableAlert = true
+                            } else {
+                                if authViewModel.hasPendingCredentials {
+                                    authViewModel.enableBiometricLogin()
+                                } else {
+                                    biometricEnabled = false
+                                    showingEnableError = true
+                                }
                             }
                         }
                     } else {
@@ -148,7 +160,6 @@ struct SettingsView: View {
                         }
                     }
                 }
-                */
                 
                 // Locations Section
                 /*
@@ -245,6 +256,11 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("You will need to enter your email and password to sign in.")
+            }
+            .alert("Cannot Enable \(authViewModel.biometricName)", isPresented: $showingEnableError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("For security, please log out and log in again to enable \(authViewModel.biometricName).")
             }
             .alert("Reset All Data?", isPresented: $showingResetConfirmation) {
                 Button("Cancel", role: .cancel) { }
