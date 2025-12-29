@@ -10,6 +10,7 @@ function createApp() {
     const checkoutRoutes = require('./routes/checkout');
     const notificationsRoutes = require('./routes/notifications');
     const syncRoutes = require('./routes/sync');
+    const groceryRoutes = require('./routes/grocery');
 
     const app = express();
 
@@ -25,6 +26,7 @@ function createApp() {
     app.use('/api/checkout', checkoutRoutes);
     app.use('/api/notifications', notificationsRoutes);
     app.use('/api/sync', syncRoutes);
+    app.use('/api/grocery', groceryRoutes);
 
     // Health check
     app.get('/health', (req, res) => {
@@ -43,7 +45,8 @@ function createApp() {
                 locations: '/api/locations',
                 checkout: '/api/checkout',
                 notifications: '/api/notifications',
-                sync: '/api/sync'
+                sync: '/api/sync',
+                grocery: '/api/grocery'
             }
         });
     });

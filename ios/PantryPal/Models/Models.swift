@@ -430,3 +430,19 @@ struct ActiveInvite: Codable, Sendable {
 struct ActiveInvitesResponse: Codable, Sendable {
     let invites: [ActiveInvite]
 }
+
+// MARK: - Grocery
+
+struct GroceryItem: Codable, Identifiable, Sendable {
+    let id: Int
+    let householdId: Int
+    let name: String
+    let createdAt: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case householdId = "household_id"
+        case name
+        case createdAt = "created_at"
+    }
+}

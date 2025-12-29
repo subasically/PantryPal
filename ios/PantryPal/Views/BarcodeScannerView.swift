@@ -4,15 +4,17 @@ import SwiftUI
 struct BarcodeScannerView: UIViewControllerRepresentable {
     @Binding var scannedCode: String?
     @Binding var isPresented: Bool
+    @Binding var isScanning: Bool
     var onScan: ((String) -> Void)?
     
     func makeUIViewController(context: Context) -> BarcodeScannerViewController {
         let viewController = BarcodeScannerViewController()
+        viewController.isScanning = isScanning
         viewController.onCodeFound = { [self] code in
             Task { @MainActor in
                 scannedCode = code
+                isScanning = false // Pause scanning
                 onScan?(code)
-                isPresented = false
             }
         }
         viewController.onError = { error in
@@ -24,12 +26,20 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         return viewController
     }
     
-    func updateUIViewController(_ uiViewController: BarcodeScannerViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: BarcodeScannerViewController, context: Context) {
+        if uiViewController.isScanning != isScanning {
+            uiViewController.isScanning = isScanning
+            if isScanning {
+                uiViewController.resetScanner()
+            }
+        }
+    }
 }
 
 class BarcodeScannerViewController: UIViewController {
     var onCodeFound: ((String) -> Void)?
     var onError: ((Error) -> Void)?
+    var isScanning: Bool = true
     
     private var captureSession: AVCaptureSession?
     private var previewLayer: AVCaptureVideoPreviewLayer?
@@ -40,6 +50,10 @@ class BarcodeScannerViewController: UIViewController {
     private var borderView: UIView?
     private var instructionLabel: UILabel?
     
+    func resetScanner() {
+        hasScanned = false
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -239,5 +253,5 @@ extension BarcodeScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
 }
 
 #Preview {
-    BarcodeScannerView(scannedCode: .constant(nil), isPresented: .constant(true))
+    BarcodeScannerView(scannedCode: .constant(nil), isPresented: .constant(true), isScanning: .constant(true))
 }

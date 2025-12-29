@@ -344,4 +344,24 @@ final class APIService: Sendable {
         }
         let _: ResetResponse = try await request(endpoint: "/auth/household/data", method: "DELETE")
     }
+    
+    // MARK: - Grocery
+    
+    func fetchGroceryItems() async throws -> [GroceryItem] {
+        return try await request(endpoint: "/grocery", method: "GET")
+    }
+    
+    func addGroceryItem(name: String) async throws -> GroceryItem {
+        struct AddRequest: Codable, Sendable {
+            let name: String
+        }
+        return try await request(endpoint: "/grocery", method: "POST", body: AddRequest(name: name))
+    }
+    
+    func removeGroceryItem(id: Int) async throws {
+        struct DeleteResponse: Codable, Sendable {
+            let success: Bool
+        }
+        let _: DeleteResponse = try await request(endpoint: "/grocery/\(id)", method: "DELETE")
+    }
 }

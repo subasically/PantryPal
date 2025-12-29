@@ -8,6 +8,45 @@ const router = express.Router();
 
 router.use(authenticateToken);
 
+// Helper: Auto-manage grocery list for Premium households
+function autoManageGrocery(householdId, productName, newQuantity, oldQuantity) {
+    try {
+        // Check if household is Premium
+        const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId);
+        if (!household || !household.is_premium) {
+            return; // Only auto-manage for Premium
+        }
+        
+        const normalizedName = productName.trim().toLowerCase().replace(/\s+/g, ' ');
+        
+        // If quantity went from >0 to 0, add to grocery
+        if (oldQuantity > 0 && newQuantity === 0) {
+            const existing = db.prepare(`
+                SELECT id FROM grocery_items
+                WHERE household_id = ? AND normalized_name = ?
+            `).get(householdId, normalizedName);
+            
+            if (!existing) {
+                db.prepare(`
+                    INSERT INTO grocery_items (household_id, name, normalized_name)
+                    VALUES (?, ?, ?)
+                `).run(householdId, productName.trim(), normalizedName);
+            }
+        }
+        
+        // If quantity went from 0 to >0, remove from grocery
+        if (oldQuantity === 0 && newQuantity > 0) {
+            db.prepare(`
+                DELETE FROM grocery_items
+                WHERE household_id = ? AND normalized_name = ?
+            `).run(householdId, normalizedName);
+        }
+    } catch (error) {
+        console.error('Auto-manage grocery error:', error);
+        // Don't fail the main operation if grocery management fails
+    }
+}
+
 // Get all inventory items for household
 router.get('/', (req, res) => {
     try {
@@ -471,7 +510,16 @@ router.patch('/:id/quantity', (req, res) => {
 
         const newQuantity = item.quantity + adjustment;
         
+        // Get product name for grocery management
+        const product = db.prepare('SELECT name FROM products WHERE id = ?').get(item.product_id);
+        const oldQuantity = item.quantity;
+        
         if (newQuantity <= 0) {
+            // Auto-add to grocery if going to 0
+            if (product) {
+                autoManageGrocery(householdId, product.name, 0, oldQuantity);
+            }
+            
             // Remove item if quantity reaches 0
             db.prepare('DELETE FROM inventory WHERE id = ?').run(req.params.id);
             
@@ -485,6 +533,11 @@ router.patch('/:id/quantity', (req, res) => {
             SET quantity = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `).run(newQuantity, req.params.id);
+        
+        // Auto-remove from grocery if coming back from 0
+        if (product) {
+            autoManageGrocery(householdId, product.name, newQuantity, oldQuantity);
+        }
 
         logSync(householdId, 'inventory', req.params.id, 'update', { 
             quantity: newQuantity,

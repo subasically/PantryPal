@@ -115,6 +115,11 @@ struct MainTabView: View {
                     Label("Pantry", systemImage: "refrigerator")
                 }
             
+            GroceryListView()
+                .tabItem {
+                    Label("Grocery", systemImage: "cart")
+                }
+            
             CheckoutView()
                 .tabItem {
                     Label("Checkout", systemImage: "barcode.viewfinder")
