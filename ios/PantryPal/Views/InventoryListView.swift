@@ -69,7 +69,7 @@ struct InventoryListView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
+                    HStack(spacing: 16) {
                         Button(action: { 
                             if checkLimit() { showingAddCustom = true }
                         }) {
@@ -80,6 +80,7 @@ struct InventoryListView: View {
                             if checkLimit() { showingScanner = true }
                         }) {
                             Image(systemName: "barcode.viewfinder")
+                                .fontWeight(.semibold)
                         }
                     }
                 }
@@ -298,7 +299,17 @@ struct InventoryItemRow: View {
                     if let brand = item.productBrand {
                         Text(brand)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.tertiary)
+                    }
+                    
+                    if let locationName = item.locationName {
+                        HStack(spacing: 4) {
+                            Image(systemName: "mappin.circle.fill")
+                                .font(.caption2)
+                            Text(locationName)
+                                .font(.caption)
+                        }
+                        .foregroundColor(.tertiary)
                     }
                     
                     if let expDate = item.expirationDate {
@@ -326,7 +337,7 @@ struct InventoryItemRow: View {
                         }
                     }) {
                         Image(systemName: "minus.circle.fill")
-                            .foregroundColor(.ppOrange)
+                            .foregroundColor(Color(uiColor: .systemGray4))
                             .font(.title2)
                     }
                     .buttonStyle(.plain)
@@ -553,7 +564,7 @@ struct ScannerSheet: View {
                         .disabled(!canAddCustomProduct || isAddingCustom || selectedLocationId == nil)
                     } else {
                         // Add existing product button
-                        Button("Add to Pantry") {
+                        Button(existingItem != nil ? "Increase Quantity" : "Add to Pantry") {
                             Task {
                                 guard let locationId = selectedLocationId else { return }
                                 UserPreferences.shared.lastUsedLocationId = locationId
@@ -601,8 +612,8 @@ struct ScannerSheet: View {
                                         let productName = lookupResult?.product?.name ?? "Item"
                                         isPresented = false
                                         
-                                        if let action = response?.action, action == "updated" {
-                                            onItemAdded?("Updated \(productName)")
+                                        if let action = response?.action, action == "updated", let item = response?.item {
+                                            onItemAdded?("Quantity updated: Now \(item.quantity)")
                                         } else {
                                             onItemAdded?("Added \(productName)")
                                         }
