@@ -47,6 +47,7 @@ final class AuthViewModel {
     func login(email: String, password: String) async {
         isLoading = true
         errorMessage = nil
+        let startTime = Date()
         
         do {
             let response = try await APIService.shared.login(email: email, password: password)
@@ -67,12 +68,19 @@ final class AuthViewModel {
             errorMessage = error.localizedDescription
         }
         
+        // Ensure minimum loading time of 1.5 seconds
+        let elapsed = Date().timeIntervalSince(startTime)
+        if elapsed < 1.5 {
+            try? await Task.sleep(nanoseconds: UInt64((1.5 - elapsed) * 1_000_000_000))
+        }
+        
         isLoading = false
     }
     
     func loginWithBiometrics() async {
         isLoading = true
         errorMessage = nil
+        let startTime = Date()
         
         guard let credentials = await biometricService.authenticateWithBiometrics() else {
             errorMessage = "Biometric authentication failed"
@@ -93,12 +101,19 @@ final class AuthViewModel {
             errorMessage = error.localizedDescription
         }
         
+        // Ensure minimum loading time of 1.5 seconds
+        let elapsed = Date().timeIntervalSince(startTime)
+        if elapsed < 1.5 {
+            try? await Task.sleep(nanoseconds: UInt64((1.5 - elapsed) * 1_000_000_000))
+        }
+        
         isLoading = false
     }
     
     func handleAppleSignIn(result: Result<ASAuthorization, Error>) async {
         isLoading = true
         errorMessage = nil
+        let startTime = Date()
         
         print("Starting Apple Sign In...")
         
@@ -146,6 +161,12 @@ final class AuthViewModel {
             }
         }
         
+        // Ensure minimum loading time of 1.5 seconds
+        let elapsed = Date().timeIntervalSince(startTime)
+        if elapsed < 1.5 {
+            try? await Task.sleep(nanoseconds: UInt64((1.5 - elapsed) * 1_000_000_000))
+        }
+        
         isLoading = false
     }
     
@@ -166,6 +187,7 @@ final class AuthViewModel {
     func register(email: String, password: String, name: String) async {
         isLoading = true
         errorMessage = nil
+        let startTime = Date()
         
         do {
             let response = try await APIService.shared.register(email: email, password: password, name: name)
@@ -179,6 +201,12 @@ final class AuthViewModel {
             errorMessage = error.localizedDescription
         } catch {
             errorMessage = error.localizedDescription
+        }
+        
+        // Ensure minimum loading time of 1.5 seconds
+        let elapsed = Date().timeIntervalSince(startTime)
+        if elapsed < 1.5 {
+            try? await Task.sleep(nanoseconds: UInt64((1.5 - elapsed) * 1_000_000_000))
         }
         
         isLoading = false
