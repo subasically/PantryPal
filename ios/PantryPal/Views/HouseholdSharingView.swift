@@ -140,7 +140,19 @@ struct HouseholdSharingView: View {
         .task {
             await viewModel.loadMembers()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
+            // We need to present the paywall. Since this view is likely in a NavigationStack,
+            // we might need a sheet.
+            // For now, let's assume the parent view handles it or we add a sheet here.
+            // Actually, let's add a sheet here to be safe.
+            showPaywall = true
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
     }
+    
+    @State private var showPaywall = false
     
     private func generateQRCode(from string: String) -> UIImage? {
         let context = CIContext()
@@ -433,12 +445,24 @@ class HouseholdSharingViewModel: ObservableObject {
     @Published var errorMessage = ""
     
     func generateInvite() async {
+        // Check premium status first
+        if let household = try? await APIService.shared.getCurrentUser().1,
+           let isPremium = household.isPremium, !isPremium {
+            NotificationCenter.default.post(name: .showPaywall, object: nil)
+            return
+        }
+        
         isLoading = true
         do {
             currentInvite = try await APIService.shared.generateInviteCode()
         } catch {
-            errorMessage = error.localizedDescription
-            showError = true
+            // If server returns 403, it will be caught here too, but we try to catch it early
+            if error.localizedDescription.contains("Premium") {
+                NotificationCenter.default.post(name: .showPaywall, object: nil)
+            } else {
+                errorMessage = error.localizedDescription
+                showError = true
+            }
         }
         isLoading = false
     }
