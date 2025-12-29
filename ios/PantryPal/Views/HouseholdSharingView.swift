@@ -8,6 +8,11 @@ struct HouseholdSharingView: View {
     @StateObject private var viewModel = HouseholdSharingViewModel()
     @State private var showJoinSheet = false
     
+    // Computed property to check Premium from AuthViewModel directly
+    private var isPremium: Bool {
+        authViewModel.currentHousehold?.isPremium == true
+    }
+    
     var body: some View {
         List {
             // Invite Section
@@ -56,7 +61,7 @@ struct HouseholdSharingView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical)
                 } else {
-                    if !viewModel.isPremium {
+                    if !isPremium {
                         Button {
                             showPaywall = true
                         } label: {
