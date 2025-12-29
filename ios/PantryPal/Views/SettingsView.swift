@@ -117,7 +117,23 @@ struct SettingsView: View {
                 // Security Section
                 if authViewModel.isBiometricAvailable && (authViewModel.hasPendingCredentials || authViewModel.isBiometricEnabled || authViewModel.isPasswordLogin) {
                     Section("Security") {
-                        Toggle(isOn: $biometricEnabled) {
+                        Toggle(isOn: Binding(
+                            get: { biometricEnabled },
+                            set: { newValue in
+                                if newValue {
+                                    // Turning ON
+                                    if authViewModel.hasPendingCredentials {
+                                        authViewModel.enableBiometricLogin()
+                                        biometricEnabled = true
+                                    } else {
+                                        showingEnableError = true
+                                    }
+                                } else {
+                                    // Turning OFF
+                                    showingDisableAlert = true
+                                }
+                            }
+                        )) {
                             HStack {
                                 Image(systemName: authViewModel.biometricIcon)
                                     .foregroundColor(.ppPurple)
@@ -127,18 +143,6 @@ struct SettingsView: View {
                                     Text("Secure access when opening the app")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
-                                }
-                            }
-                        }
-                        .onChange(of: biometricEnabled) { oldValue, newValue in
-                            if !newValue {
-                                showingDisableAlert = true
-                            } else {
-                                if authViewModel.hasPendingCredentials {
-                                    authViewModel.enableBiometricLogin()
-                                } else {
-                                    biometricEnabled = false
-                                    showingEnableError = true
                                 }
                             }
                         }
@@ -215,11 +219,10 @@ struct SettingsView: View {
                 }
             }
             .alert("Disable \(authViewModel.biometricName)?", isPresented: $showingDisableAlert) {
-                Button("Cancel", role: .cancel) {
-                    biometricEnabled = true
-                }
+                Button("Cancel", role: .cancel) { }
                 Button("Disable", role: .destructive) {
                     authViewModel.disableBiometricLogin()
+                    biometricEnabled = false
                 }
             } message: {
                 Text("You will need to enter your email and password to sign in.")
