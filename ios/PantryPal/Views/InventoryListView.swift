@@ -3,6 +3,7 @@ import SwiftUI
 struct InventoryListView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = InventoryViewModel()
     
     @State private var showingScanner = false
@@ -164,6 +165,22 @@ struct InventoryListView: View {
                 // Reload without triggering full loading state to avoid flash
                 await viewModel.loadInventory(withLoadingState: false)
                 await viewModel.loadLocations()
+            }
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                if newPhase == .active {
+                    print("🔄 [InventoryListView] App became active, syncing...")
+                    Task {
+                        await ActionQueueService.shared.processQueue(modelContext: modelContext)
+                        do {
+                            try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                            await viewModel.loadInventory(withLoadingState: false)
+                            await viewModel.loadLocations()
+                            print("✅ [InventoryListView] App active sync completed")
+                        } catch {
+                            print("❌ [InventoryListView] App active sync failed: \(error)")
+                        }
+                    }
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
                 // Only show paywall if we're not already showing settings (which handles its own paywall)
