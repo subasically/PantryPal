@@ -1,5 +1,6 @@
 import SwiftUI
 @preconcurrency import AVFoundation
+import CoreImage.CIFilterBuiltins
 
 struct HouseholdSharingView: View {
     @Environment(\.modelContext) private var modelContext
