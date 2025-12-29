@@ -21,15 +21,13 @@ struct HouseholdSetupView: View {
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
                     
-                    Text("Let's get your household set up so you can start tracking your pantry.")
+                    Text("Set up your household to start tracking your pantry.")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
                 .padding(.top, 40)
-                
-                Spacer()
                 
                 // Options
                 VStack(spacing: 20) {
@@ -43,20 +41,20 @@ struct HouseholdSetupView: View {
                             HStack {
                                 Image(systemName: "plus.square.fill")
                                     .font(.title2)
-                                    .foregroundColor(.ppPurple)
+                                    .foregroundColor(.white)
                                 Text("Create my household")
                                     .font(.headline)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(.white)
                             }
                             Text("Start fresh with a new pantry inventory.")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.white.opacity(0.8))
                                 .multilineTextAlignment(.leading)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
+                        .background(Color.ppPurple)
+                        .cornerRadius(16)
                     }
                     .buttonStyle(.plain)
                     
@@ -80,8 +78,12 @@ struct HouseholdSetupView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        )
                     }
                     .buttonStyle(.plain)
                     
@@ -91,24 +93,24 @@ struct HouseholdSetupView: View {
                             await authViewModel.completeHouseholdSetup()
                         }
                     } label: {
-                        Text("Skip for now (Single user)")
-                            .font(.subheadline)
+                        Text("Skip for now")
+                            .font(.footnote)
                             .foregroundColor(.secondary)
                     }
                     .padding(.top, 8)
                 }
                 .padding(.horizontal)
                 
-                Spacer()
-                
-                // Logout option in case they want to switch accounts
-                Button("Sign Out") {
-                    authViewModel.logout()
-                }
-                .foregroundColor(.red)
-                .padding(.bottom)
+                Spacer(minLength: 40)
             }
-            .navigationBarHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Sign Out") {
+                        authViewModel.logout()
+                    }
+                    .foregroundColor(.red)
+                }
+            }
             .sheet(isPresented: $showJoinSheet) {
                 JoinHouseholdOnboardingView(onJoinSuccess: {
                     Task {
