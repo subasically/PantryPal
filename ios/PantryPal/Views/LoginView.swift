@@ -117,18 +117,36 @@ struct LoginView: View {
                                 VStack(spacing: 16) {
                                     if isRegistering {
                                         TextField("Name", text: $name)
-                                            .textFieldStyle(.roundedBorder)
+                                            .padding()
+                                            .background(Color(UIColor.systemBackground))
+                                            .cornerRadius(10)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                                            )
                                             .textContentType(.name)
                                     }
                                     
                                     TextField("Email", text: $email)
-                                        .textFieldStyle(.roundedBorder)
+                                        .padding()
+                                        .background(Color(UIColor.systemBackground))
+                                        .cornerRadius(10)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                                        )
                                         .textContentType(.emailAddress)
                                         .autocapitalization(.none)
                                         .keyboardType(.emailAddress)
                                     
                                     SecureField("Password", text: $password)
-                                        .textFieldStyle(.roundedBorder)
+                                        .padding()
+                                        .background(Color(UIColor.systemBackground))
+                                        .cornerRadius(10)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                                        )
                                         .textContentType(isRegistering ? .newPassword : .password)
                                 }
                                 
