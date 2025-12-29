@@ -136,7 +136,8 @@ struct LoginView: View {
                                                 .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                                         )
                                         .textContentType(.emailAddress)
-                                        .autocapitalization(.none)
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled(true)
                                         .keyboardType(.emailAddress)
                                     
                                     SecureField("Password", text: $password)
@@ -148,6 +149,8 @@ struct LoginView: View {
                                                 .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                                         )
                                         .textContentType(isRegistering ? .newPassword : .password)
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled(true)
                                 }
                                 
                                 if let error = authViewModel.errorMessage {
@@ -158,6 +161,9 @@ struct LoginView: View {
                                 }
                                 
                                 Button(action: {
+                                    // Dismiss keyboard
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                    
                                     Task {
                                         if isRegistering {
                                             await authViewModel.register(
@@ -210,7 +216,7 @@ struct LoginView: View {
                 }
             }
             
-            if authViewModel.isLoading {
+            if authViewModel.isLoading && !showEmailForm {
                 Color.black.opacity(0.4)
                     .edgesIgnoringSafeArea(.all)
                     .overlay(
