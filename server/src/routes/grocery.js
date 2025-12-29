@@ -15,8 +15,9 @@ router.get('/', authenticateToken, (req, res) => {
   try {
     const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
     
+    // If no household, return empty array (not an error)
     if (!user || !user.household_id) {
-      return res.status(400).json({ error: 'No household assigned' });
+      return res.json([]);
     }
     
     const items = db.prepare(`
@@ -46,7 +47,10 @@ router.post('/', authenticateToken, (req, res) => {
     const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
     
     if (!user || !user.household_id) {
-      return res.status(400).json({ error: 'No household assigned' });
+      return res.status(400).json({ 
+        error: 'Please create or join a household first',
+        requiresHousehold: true
+      });
     }
     
     const normalizedName = normalizeName(name);
@@ -84,7 +88,10 @@ router.delete('/:id', authenticateToken, (req, res) => {
     const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
     
     if (!user || !user.household_id) {
-      return res.status(400).json({ error: 'No household assigned' });
+      return res.status(400).json({ 
+        error: 'Please create or join a household first',
+        requiresHousehold: true
+      });
     }
     
     // Verify item belongs to user's household
