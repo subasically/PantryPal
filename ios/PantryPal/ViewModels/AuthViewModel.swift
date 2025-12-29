@@ -342,7 +342,7 @@ final class AuthViewModel {
         let success = await biometricService.authenticateUser()
         if success {
             isAppLocked = false
-            lastBackgroundedAt = nil // Reset
+            lastBackgroundedAt = Date() // Reset to now to prevent immediate re-lock
         }
     }
 }
