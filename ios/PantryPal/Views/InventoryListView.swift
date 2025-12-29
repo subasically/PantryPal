@@ -406,7 +406,7 @@ struct ScannerSheet: View {
     @State private var pendingUPC: String?
     @State private var lookupResult: UPCLookupResponse?
     @State private var isLookingUp = false
-    @State private var selectedLocationId: String? = UserPreferences.shared.lastUsedLocationId
+    @State private var selectedLocationId: String?
     
     // Custom product fields for inline entry
     @State private var customName = ""
@@ -443,6 +443,9 @@ struct ScannerSheet: View {
                 }
             }
             .onAppear {
+                if selectedLocationId == nil {
+                    selectedLocationId = UserPreferences.shared.lastUsedLocationId
+                }
                 selectDefaultLocation()
             }
             .onChange(of: viewModel.locations) { _, _ in
@@ -518,7 +521,6 @@ struct ScannerSheet: View {
                             }
                             .pickerStyle(.menu)
                             .labelsHidden()
-                            .tint(.primary)
                         }
                         .padding()
                         
