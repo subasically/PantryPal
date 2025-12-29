@@ -115,7 +115,7 @@ struct SettingsView: View {
                 }
                 
                 // Security Section
-                if authViewModel.isBiometricAvailable && (authViewModel.hasPendingCredentials || authViewModel.isBiometricEnabled) {
+                if authViewModel.isBiometricAvailable && (authViewModel.hasPendingCredentials || authViewModel.isBiometricEnabled || authViewModel.isPasswordLogin) {
                     Section("Security") {
                         Toggle(isOn: $biometricEnabled) {
                             HStack {

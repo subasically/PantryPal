@@ -15,6 +15,7 @@ final class AuthViewModel {
     
     private var pendingCredentials: (email: String, password: String)?
     private let biometricService = BiometricAuthService.shared
+    private let lastLoginMethodKey = "lastLoginMethod"
     
     var isBiometricAvailable: Bool {
         biometricService.isBiometricAvailable
@@ -22,6 +23,10 @@ final class AuthViewModel {
     
     var isBiometricEnabled: Bool {
         biometricService.isBiometricLoginEnabled
+    }
+    
+    var isPasswordLogin: Bool {
+        UserDefaults.standard.string(forKey: lastLoginMethodKey) == "password"
     }
     
     var biometricName: String {
@@ -64,6 +69,8 @@ final class AuthViewModel {
                 pendingCredentials = (email, password)
                 showBiometricEnablePrompt = true
             }
+            
+            UserDefaults.standard.set("password", forKey: lastLoginMethodKey)
             
             // Load full household info (for premium status)
             await loadCurrentUser()
@@ -148,6 +155,8 @@ final class AuthViewModel {
                 currentUser = response.user
                 isAuthenticated = true
                 
+                UserDefaults.standard.set("apple", forKey: lastLoginMethodKey)
+                
                 // Load full household info
                 await loadCurrentUser()
             } catch let error as APIError {
@@ -199,6 +208,15 @@ final class AuthViewModel {
             currentUser = response.user
             isAuthenticated = true
             showHouseholdSetup = true
+            
+            // Store credentials temporarily to allow enabling biometrics
+            if biometricService.isBiometricAvailable && !biometricService.isBiometricLoginEnabled {
+                pendingCredentials = (email, password)
+                // We don't auto-prompt here to avoid interrupting the onboarding flow (household setup)
+                // But the option will now be visible in Settings
+            }
+            
+            UserDefaults.standard.set("password", forKey: lastLoginMethodKey)
             
             // Load full household info
             await loadCurrentUser()
