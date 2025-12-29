@@ -794,7 +794,7 @@ struct ScannerSheet: View {
             
             UserPreferences.shared.lastUsedLocationId = locationId
             
-            let success = await viewModel.addCustomItem(
+            _ = await viewModel.addCustomItem(
                 product: product,
                 quantity: quantity,
                 expirationDate: showingDatePicker ? expirationDate : nil,
