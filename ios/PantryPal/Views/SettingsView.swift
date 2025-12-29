@@ -38,7 +38,7 @@ struct SettingsView: View {
                                 .foregroundColor(.ppPurple)
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(user.name)
+                                Text(user.displayName)
                                     .font(.headline)
                                 Text(user.email)
                                     .font(.caption)
@@ -100,6 +100,7 @@ struct SettingsView: View {
                 }
                 
                 // Scanner Section
+                /*
                 Section("Scanner") {
                     Toggle(isOn: $smartScannerEnabled) {
                         HStack {
@@ -118,6 +119,7 @@ struct SettingsView: View {
                         UserPreferences.shared.useSmartScanner = newValue
                     }
                 }
+                */
                 
                 // Security Section
                 Section("Security") {
@@ -147,6 +149,7 @@ struct SettingsView: View {
                 }
                 
                 // Locations Section
+                /*
                 Section("Storage Locations") {
                     NavigationLink {
                         LocationsSettingsView()
@@ -159,6 +162,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                */
                 
                 // Household Section
                 Section("Household") {
