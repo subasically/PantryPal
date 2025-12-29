@@ -2,6 +2,9 @@ import SwiftUI
 
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var isLoading = false
+    
+    var limit: Int = 30
     
     var body: some View {
         NavigationStack {
@@ -20,11 +23,11 @@ struct PaywallView: View {
                         .padding(.top, 40)
                     
                     VStack(spacing: 8) {
-                        Text("Unlock Unlimited Pantry")
+                        Text("Unlock Unlimited Items")
                             .font(.title)
                             .fontWeight(.bold)
                         
-                        Text("You've reached the 30-item limit.")
+                        Text("You've reached the \(limit)-item limit.")
                             .font(.headline)
                             .foregroundColor(.secondary)
                     }
@@ -33,7 +36,7 @@ struct PaywallView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         FeatureRow(icon: "infinity", title: "Unlimited Items", description: "Store as many items as you need")
                         FeatureRow(icon: "person.2.fill", title: "Household Sharing", description: "Sync with your family in real-time")
-                        FeatureRow(icon: "icloud.fill", title: "Priority Sync", description: "Faster, more reliable cloud backup")
+                        FeatureRow(icon: "icloud.fill", title: "Cloud Sync Across Devices", description: "Reliable backup for all your devices")
                     }
                     .padding(.vertical, 20)
                     .padding(.horizontal)
@@ -45,46 +48,65 @@ struct PaywallView: View {
                     
                     // Pricing
                     VStack(spacing: 16) {
+                        // Yearly (Primary)
                         Button(action: {
+                            isLoading = true
                             // TODO: Implement In-App Purchase
-                        }) {
-                            VStack(spacing: 4) {
-                                Text("Subscribe for $4.99/month")
-                                    .font(.headline)
-                                Text("Cancel anytime")
-                                    .font(.caption)
-                                    .opacity(0.8)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                isLoading = false
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.ppPrimary)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                        }
-                        
-                        Button(action: {
-                            // TODO: Implement In-App Purchase
                         }) {
                             VStack(spacing: 4) {
                                 Text("Subscribe for $49.99/year")
                                     .font(.headline)
-                                Text("Save 17%")
+                                Text("Save 17% • Best Value")
                                     .font(.caption)
-                                    .foregroundColor(.ppGreen)
                                     .fontWeight(.bold)
+                                    .opacity(0.9)
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.ppSecondary)
-                            .foregroundColor(.ppPrimary)
+                            .background(Color.ppPurple)
+                            .foregroundColor(.white)
                             .cornerRadius(12)
                         }
+                        .disabled(isLoading)
+                        
+                        // Monthly (Secondary)
+                        Button(action: {
+                            isLoading = true
+                            // TODO: Implement In-App Purchase
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                isLoading = false
+                            }
+                        }) {
+                            VStack(spacing: 4) {
+                                Text("Subscribe for $4.99/month")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(uiColor: .secondarySystemBackground))
+                            .cornerRadius(12)
+                        }
+                        .disabled(isLoading)
+                        
+                        Text("No ads. No tracking. Cancel anytime.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 4)
                         
                         Button("Restore Purchases") {
+                            isLoading = true
                             // TODO: Implement Restore
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                isLoading = false
+                            }
                         }
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .disabled(isLoading)
                     }
                     .padding()
                 }
@@ -95,6 +117,7 @@ struct PaywallView: View {
                     Button("Close") {
                         dismiss()
                     }
+                    .disabled(isLoading)
                 }
             }
         }

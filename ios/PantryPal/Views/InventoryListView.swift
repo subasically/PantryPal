@@ -127,7 +127,7 @@ struct InventoryListView: View {
                 SettingsView()
             }
             .sheet(isPresented: $showingPaywall) {
-                PaywallView()
+                PaywallView(limit: 30)
             }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("OK") { 

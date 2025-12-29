@@ -186,7 +186,7 @@ struct HouseholdSharingView: View {
             showPaywall = true
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(limit: 30)
         }
     }
     
