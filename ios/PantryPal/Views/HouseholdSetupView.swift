@@ -9,7 +9,7 @@ struct HouseholdSetupView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 32) {
+            VStack(spacing: 24) {
                 // Header
                 VStack(spacing: 16) {
                     Image(systemName: "house.fill")
@@ -46,7 +46,7 @@ struct HouseholdSetupView: View {
                                     .font(.headline)
                                     .foregroundColor(.white)
                             }
-                            Text("Start fresh with a new pantry inventory.")
+                            Text("Start a new pantry.")
                                 .font(.caption)
                                 .foregroundColor(.white.opacity(0.8))
                                 .multilineTextAlignment(.leading)
@@ -82,7 +82,7 @@ struct HouseholdSetupView: View {
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                                .stroke(.quaternary, lineWidth: 1)
                         )
                     }
                     .buttonStyle(.plain)
@@ -95,7 +95,7 @@ struct HouseholdSetupView: View {
                     } label: {
                         Text("Skip for now")
                             .font(.footnote)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.top, 8)
                 }
@@ -105,10 +105,9 @@ struct HouseholdSetupView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Sign Out") {
+                    Button("Sign Out", role: .destructive) {
                         authViewModel.logout()
                     }
-                    .foregroundColor(.red)
                 }
             }
             .sheet(isPresented: $showJoinSheet) {
