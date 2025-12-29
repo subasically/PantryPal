@@ -285,17 +285,17 @@ struct SettingsView: View {
                 Text("This action cannot be undone. All data will be wiped from all devices in your household.")
             }
             .alert("Verify Reset", isPresented: $showingResetVerification) {
-                TextField("Type 'delete all data'", text: $resetVerificationText)
+                TextField("Type 'RESET'", text: $resetVerificationText)
                     .textInputAutocapitalization(.never)
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
-                    if resetVerificationText == "delete all data" {
+                    if resetVerificationText == "RESET" {
                         Task { await performReset() }
                     }
                 }
-                .disabled(resetVerificationText != "delete all data")
+                .disabled(resetVerificationText != "RESET")
             } message: {
-                Text("Type 'delete all data' to confirm.")
+                Text("Type 'RESET' to confirm.")
             }
             .alert("Error", isPresented: Binding(get: { resetError != nil }, set: { if !$0 { resetError = nil } })) {
                 Button("OK") { resetError = nil }
