@@ -51,16 +51,28 @@ struct InventoryListView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
+            List {
                 if viewModel.isLoading && viewModel.items.isEmpty {
-                    ProgressView("Loading inventory...")
+                    Section {
+                        HStack {
+                            Spacer()
+                            ProgressView("Loading inventory...")
+                            Spacer()
+                        }
+                    }
+                    .listRowBackground(Color.clear)
                 } else if viewModel.items.isEmpty {
-                    emptyStateView
+                    Section {
+                        emptyStateContent
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 } else {
-                    inventoryListContent
-                        .searchable(text: $searchText, prompt: "Search items")
+                    inventoryListSections
                 }
             }
+            .listStyle(.plain)
+            .searchable(text: $searchText, prompt: "Search items")
             .navigationTitle("Pantry (\(viewModel.items.count))")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -138,6 +150,9 @@ struct InventoryListView: View {
                 PaywallView(limit: authViewModel.freeLimit)
                     .presentationDetents([.large])
             }
+            .sheet(item: $editingItem) { item in
+                EditItemView(item: item, viewModel: $viewModel, editingItem: $editingItem)
+            }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("OK") { 
                     if viewModel.errorMessage?.contains("limit reached") == true {
@@ -214,8 +229,11 @@ struct InventoryListView: View {
         return true
     }
     
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
+    private var emptyStateContent: some View {
+        VStack(spacing: 20) {
+            Spacer()
+                .frame(height: 60)
+            
             Image(systemName: "tray")
                 .font(.system(size: 60))
                 .foregroundColor(.ppGreen)
@@ -225,6 +243,7 @@ struct InventoryListView: View {
             
             Text("Scan a barcode or add items manually")
                 .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
             
             HStack(spacing: 16) {
                 Button(action: { 
@@ -243,33 +262,37 @@ struct InventoryListView: View {
                 .buttonStyle(.ppSecondary)
                 .frame(width: 140)
             }
+            
+            Spacer()
         }
-        .padding()
+        .frame(maxWidth: .infinity)
     }
     
-    private var inventoryListContent: some View {
-        VStack(spacing: 0) {
-            // Filter picker
-            Picker("Filter", selection: $selectedFilter) {
-                ForEach(InventoryFilter.allCases, id: \.self) { filter in
-                    Text(filter.rawValue).tag(filter)
+    private var inventoryListSections: some View {
+        Group {
+            // Filter picker section
+            Section {
+                Picker("Filter", selection: $selectedFilter) {
+                    ForEach(InventoryFilter.allCases, id: \.self) { filter in
+                        Text(filter.rawValue).tag(filter)
+                    }
                 }
+                .pickerStyle(.segmented)
             }
-            .pickerStyle(.segmented)
-            .padding()
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
             
             // Success message
             if let success = viewModel.successMessage {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.ppGreen)
-                    Text(success)
+                Section {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.ppGreen)
+                        Text(success)
+                    }
+                    .padding(.vertical, 4)
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color.ppGreen.opacity(0.15))
-                .cornerRadius(8)
-                .padding(.horizontal)
+                .listRowBackground(Color.ppGreen.opacity(0.15))
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         viewModel.successMessage = nil
@@ -277,7 +300,8 @@ struct InventoryListView: View {
                 }
             }
             
-            List {
+            // Inventory items
+            Section {
                 ForEach(filteredItems) { item in
                     InventoryItemRow(item: item, viewModel: $viewModel, onEdit: {
                         editingItem = item
@@ -291,10 +315,6 @@ struct InventoryListView: View {
                     }
                 }
             }
-            .listStyle(.plain)
-        }
-        .sheet(item: $editingItem) { item in
-            EditItemView(item: item, viewModel: $viewModel, editingItem: $editingItem)
         }
     }
 }
