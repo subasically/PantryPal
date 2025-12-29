@@ -8,136 +8,153 @@ struct LoginView: View {
     @State private var password = ""
     @State private var name = ""
     @State private var isRegistering = false
+    @State private var showEmailForm = false
     
     var body: some View {
         @Bindable var authViewModel = authViewModel
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 32) {
                     // Logo/Title
-                    VStack(spacing: 8) {
+                    VStack(spacing: 16) {
                         Image(systemName: "refrigerator.fill")
-                            .font(.system(size: 60))
+                            .font(.system(size: 80))
                             .foregroundStyle(LinearGradient.ppPrimaryGradient)
+                            .padding(.bottom, 8)
                         
                         Text("PantryPal")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
+                            .font(.system(size: 40, weight: .bold))
                             .foregroundColor(.ppPurple)
                         
                         Text("Track your pantry inventory")
+                            .font(.title3)
                             .foregroundColor(.ppSecondaryText)
                     }
-                    .padding(.top, 40)
+                    .padding(.top, 60)
                     .padding(.bottom, 20)
                     
-                    // Apple Sign In
-                    SignInWithAppleButton(.signIn) { request in
-                        request.requestedScopes = [.fullName, .email]
-                    } onCompletion: { result in
-                        Task {
-                            await authViewModel.handleAppleSignIn(result: result)
-                        }
-                    }
-                    .signInWithAppleButtonStyle(.whiteOutline)
-                    .frame(height: 50)
-                    .padding(.horizontal)
-                    
-                    // Biometric Login Button (if available and enabled)
-                    if !isRegistering && authViewModel.canUseBiometricLogin {
-                        Button(action: {
-                            Task {
-                                await authViewModel.loginWithBiometrics()
-                            }
-                        }) {
-                            HStack {
-                                Image(systemName: authViewModel.biometricIcon)
-                                    .font(.title2)
-                                Text("Sign in with \(authViewModel.biometricName)")
-                            }
-                        }
-                        .buttonStyle(.ppPrimary)
-                        .padding(.horizontal)
-                        
-                        HStack {
-                            Rectangle()
-                                .fill(Color.ppSecondaryText.opacity(0.3))
-                                .frame(height: 1)
-                            Text("or")
-                                .foregroundColor(.ppSecondaryText)
-                                .font(.caption)
-                            Rectangle()
-                                .fill(Color.ppSecondaryText.opacity(0.3))
-                                .frame(height: 1)
-                        }
-                        .padding(.horizontal, 40)
-                    }
-                    
-                    // Form
-                    VStack(spacing: 16) {
-                        if isRegistering {
-                            TextField("Name", text: $name)
-                                .textFieldStyle(.roundedBorder)
-                                .textContentType(.name)
-                        }
-                        
-                        TextField("Email", text: $email)
-                            .textFieldStyle(.roundedBorder)
-                            .textContentType(.emailAddress)
-                            .autocapitalization(.none)
-                            .keyboardType(.emailAddress)
-                        
-                        SecureField("Password", text: $password)
-                            .textFieldStyle(.roundedBorder)
-                            .textContentType(isRegistering ? .newPassword : .password)
-                    }
-                    .padding(.horizontal)
-                    
-                    // Error message
-                    if let error = authViewModel.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .font(.caption)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    
-                    // Buttons
-                    VStack(spacing: 12) {
-                        Button(action: {
-                            Task {
-                                if isRegistering {
-                                    await authViewModel.register(
-                                        email: email,
-                                        password: password,
-                                        name: name
-                                    )
-                                } else {
-                                    await authViewModel.login(email: email, password: password)
+                    if !showEmailForm {
+                        // Primary Onboarding Flow
+                        VStack(spacing: 16) {
+                            // Apple Sign In (Primary)
+                            SignInWithAppleButton(.continue) { request in
+                                request.requestedScopes = [.fullName, .email]
+                            } onCompletion: { result in
+                                Task {
+                                    await authViewModel.handleAppleSignIn(result: result)
                                 }
                             }
-                        }) {
-                            if authViewModel.isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            } else {
-                                Text(isRegistering ? "Create Account" : "Sign In")
+                            .signInWithAppleButtonStyle(.black)
+                            .frame(height: 50)
+                            .cornerRadius(10)
+                            
+                            // Biometric Login (if available)
+                            if authViewModel.canUseBiometricLogin {
+                                Button(action: {
+                                    Task {
+                                        await authViewModel.loginWithBiometrics()
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: authViewModel.biometricIcon)
+                                        Text("Sign in with \(authViewModel.biometricName)")
+                                    }
+                                }
+                                .buttonStyle(.ppSecondary)
                             }
-                        }
-                        .buttonStyle(.ppPrimary)
-                        .disabled(authViewModel.isLoading || !isFormValid)
-                        
-                        Button(action: {
-                            withAnimation {
-                                isRegistering.toggle()
-                                authViewModel.errorMessage = nil
+                            
+                            // Use Email Option
+                            Button(action: {
+                                withAnimation {
+                                    showEmailForm = true
+                                }
+                            }) {
+                                Text("Use email instead")
+                                    .fontWeight(.medium)
                             }
-                        }) {
-                            Text(isRegistering ? "Already have an account? Sign In" : "Don't have an account? Register")
-                                .foregroundColor(.ppPurple)
+                            .padding(.top, 8)
+                            
+                            Text("No spam. Just to sync your pantry.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.top, 16)
                         }
+                        .padding(.horizontal, 32)
+                    } else {
+                        // Email Form
+                        VStack(spacing: 20) {
+                            VStack(spacing: 16) {
+                                if isRegistering {
+                                    TextField("Name", text: $name)
+                                        .textFieldStyle(.roundedBorder)
+                                        .textContentType(.name)
+                                }
+                                
+                                TextField("Email", text: $email)
+                                    .textFieldStyle(.roundedBorder)
+                                    .textContentType(.emailAddress)
+                                    .autocapitalization(.none)
+                                    .keyboardType(.emailAddress)
+                                
+                                SecureField("Password", text: $password)
+                                    .textFieldStyle(.roundedBorder)
+                                    .textContentType(isRegistering ? .newPassword : .password)
+                            }
+                            
+                            if let error = authViewModel.errorMessage {
+                                Text(error)
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                                    .multilineTextAlignment(.center)
+                            }
+                            
+                            Button(action: {
+                                Task {
+                                    if isRegistering {
+                                        await authViewModel.register(
+                                            email: email,
+                                            password: password,
+                                            name: name
+                                        )
+                                    } else {
+                                        await authViewModel.login(email: email, password: password)
+                                    }
+                                }
+                            }) {
+                                if authViewModel.isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text(isRegistering ? "Create Account" : "Sign In")
+                                }
+                            }
+                            .buttonStyle(.ppPrimary)
+                            .disabled(authViewModel.isLoading || !isFormValid)
+                            
+                            HStack {
+                                Button(isRegistering ? "Sign In" : "Register") {
+                                    withAnimation {
+                                        isRegistering.toggle()
+                                        authViewModel.errorMessage = nil
+                                    }
+                                }
+                                
+                                Text("•")
+                                    .foregroundColor(.secondary)
+                                
+                                Button("Back") {
+                                    withAnimation {
+                                        showEmailForm = false
+                                        authViewModel.errorMessage = nil
+                                    }
+                                }
+                            }
+                            .font(.subheadline)
+                            .foregroundColor(.ppPurple)
+                        }
+                        .padding(.horizontal, 32)
+                        .transition(.move(edge: .trailing))
                     }
-                    .padding(.horizontal)
                     
                     Spacer()
                 }
