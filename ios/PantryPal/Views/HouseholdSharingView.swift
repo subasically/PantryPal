@@ -223,9 +223,15 @@ struct HouseholdSharingView: View {
 
 struct JoinHouseholdView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthViewModel.self) private var authViewModel
     @StateObject private var viewModel = JoinHouseholdViewModel()
     @State private var showScanner = false
+    @State private var showSwitchConfirmation = false
     var onJoinSuccess: (() -> Void)?
+    
+    private var hasExistingHousehold: Bool {
+        authViewModel.currentHousehold != nil
+    }
     
     var body: some View {
         NavigationStack {
@@ -286,14 +292,21 @@ struct JoinHouseholdView: View {
                             .foregroundColor(.secondary)
                         
                         Button {
-                            Task {
-                                await viewModel.joinHousehold()
-                                if viewModel.showSuccess {
-                                    onJoinSuccess?()
+                            if hasExistingHousehold {
+                                // Show confirmation dialog first
+                                showSwitchConfirmation = true
+                            } else {
+                                // No household, join directly
+                                Task {
+                                    await viewModel.joinHousehold()
+                                    if viewModel.showSuccess {
+                                        onJoinSuccess?()
+                                        await authViewModel.refreshCurrentUser()
+                                    }
                                 }
                             }
                         } label: {
-                            Text("Join Household")
+                            Text(hasExistingHousehold ? "Switch Household" : "Join Household")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
@@ -330,6 +343,25 @@ struct JoinHouseholdView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage)
+            }
+            .alert("Switch Household?", isPresented: $showSwitchConfirmation) {
+                Button("Cancel", role: .cancel) {}
+                Button("Switch", role: .destructive) {
+                    Task {
+                        await viewModel.joinHousehold()
+                        if viewModel.showSuccess {
+                            onJoinSuccess?()
+                            await authViewModel.refreshCurrentUser()
+                            dismiss()
+                        }
+                    }
+                }
+            } message: {
+                if let currentHousehold = authViewModel.currentHousehold {
+                    Text("You'll leave '\(currentHousehold.name)' and join '\(viewModel.validationResult?.householdName ?? "this household")'. Your local inventory will be replaced with the new household's items.")
+                } else {
+                    Text("You'll join '\(viewModel.validationResult?.householdName ?? "this household")'.")
+                }
             }
             .alert("Success", isPresented: $viewModel.showSuccess) {
                 Button("OK") {
