@@ -48,12 +48,16 @@ struct HouseholdSharingView: View {
                         
                         // Share Button
                         ShareLink(
-                            item: "Join my PantryPal household '\(invite.householdName)' with code: \(invite.code)",
+                            item: "Join my PantryPal household with code: \(invite.code)",
                             subject: Text("Join my PantryPal household"),
                             message: Text("Use this code to join: \(invite.code)")
                         ) {
-                            Label("Share Invite", systemImage: "square.and.arrow.up")
-                                .frame(maxWidth: .infinity)
+                            HStack {
+                                Image(systemName: "square.and.arrow.up")
+                                    .foregroundColor(.white)
+                                Text("Share Invite")
+                            }
+                            .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(Color.ppPrimary)
