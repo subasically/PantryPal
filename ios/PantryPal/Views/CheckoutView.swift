@@ -16,7 +16,7 @@ struct CheckoutView: View {
         NavigationStack {
             ZStack {
                 // Scanner
-                BarcodeScannerView(scannedCode: $scannedCode, isScanning: $isScanning, isPresented: .constant(true)) { code in
+                BarcodeScannerView(scannedCode: $scannedCode, isPresented: .constant(true), isScanning: $isScanning) { code in
                     isScanning = false
                     Task {
                         await viewModel.processCheckout(upc: code)
