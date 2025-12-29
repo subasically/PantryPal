@@ -74,17 +74,8 @@ router.post('/apple', async (req, res) => {
         if (!user) {
             // Create new user
             const userId = uuidv4();
-            let householdId;
-
-            // Create household
-            const newHouseholdId = uuidv4();
-            const finalHouseholdName = householdName || (name ? `${name.firstName}'s Household` : 'My Household');
-            
-            db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(newHouseholdId, finalHouseholdName);
-            householdId = newHouseholdId;
-            
-            // Create default locations
-            createDefaultLocations(householdId);
+            // Household will be created later via /household/create
+            // let householdId = null; 
 
             const finalEmail = email || appleEmail || `${appleId}@privaterelay.appleid.com`;
             const finalName = name ? `${name.firstName} ${name.lastName}`.trim() : 'Apple User';
@@ -95,8 +86,8 @@ router.post('/apple', async (req, res) => {
 
             db.prepare(`
                 INSERT INTO users (id, email, password_hash, name, household_id, apple_id)
-                VALUES (?, ?, ?, ?, ?, ?)
-            `).run(userId, finalEmail, placeholderHash, finalName, householdId, appleId);
+                VALUES (?, ?, ?, ?, NULL, ?)
+            `).run(userId, finalEmail, placeholderHash, finalName, appleId);
 
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
         }
@@ -135,23 +126,15 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const userId = uuidv4();
-        let finalHouseholdId;
-
-        // Create household
-        const newHouseholdId = uuidv4();
-        const finalHouseholdName = householdName || `${name}'s Household`;
         
-        db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(newHouseholdId, finalHouseholdName);
-        finalHouseholdId = newHouseholdId;
-        
-        // Create default locations
-        createDefaultLocations(finalHouseholdId);
+        // Household will be created later
+        // let finalHouseholdId = null;
 
         // Create user
         db.prepare(`
             INSERT INTO users (id, email, password_hash, name, household_id)
-            VALUES (?, ?, ?, ?, ?)
-        `).run(userId, email, hashedPassword, name, finalHouseholdId);
+            VALUES (?, ?, ?, ?, NULL)
+        `).run(userId, email, hashedPassword, name);
 
         const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
         const token = generateToken(user);
@@ -161,10 +144,10 @@ router.post('/register', async (req, res) => {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                householdId: user.household_id
+                householdId: null
             },
             token,
-            householdId: finalHouseholdId
+            householdId: null
         });
     } catch (error) {
         console.error('Registration error:', error);
@@ -215,7 +198,16 @@ router.get('/me', authenticateToken, (req, res) => {
         return res.status(404).json({ error: 'User not found' });
     }
     
-    const household = db.prepare('SELECT * FROM households WHERE id = ?').get(user.household_id);
+    let household = null;
+    if (user.household_id) {
+        const h = db.prepare('SELECT * FROM households WHERE id = ?').get(user.household_id);
+        if (h) {
+            household = {
+                ...h,
+                isPremium: Boolean(h.is_premium)
+            };
+        }
+    }
     
     res.json({
         user: {
@@ -224,11 +216,45 @@ router.get('/me', authenticateToken, (req, res) => {
             name: user.name,
             householdId: user.household_id
         },
-        household: {
-            ...household,
-            isPremium: Boolean(household.is_premium)
-        }
+        household
     });
+});
+
+// Create a new household
+router.post('/household', authenticateToken, (req, res) => {
+    try {
+        const { name } = req.body;
+        
+        // Check if user already has a household
+        if (req.user.householdId) {
+            return res.status(400).json({ error: 'User already belongs to a household' });
+        }
+
+        const householdId = uuidv4();
+        const householdName = name || 'My Household';
+        
+        const transaction = db.transaction(() => {
+            // Create household
+            db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(householdId, householdName);
+            
+            // Update user
+            db.prepare('UPDATE users SET household_id = ? WHERE id = ?').run(householdId, req.user.id);
+            
+            // Create default locations
+            createDefaultLocations(householdId);
+        });
+        
+        transaction();
+        
+        res.status(201).json({
+            id: householdId,
+            name: householdName,
+            isPremium: false
+        });
+    } catch (error) {
+        console.error('Create household error:', error);
+        res.status(500).json({ error: 'Failed to create household' });
+    }
 });
 
 // Generate household invite code (6-character alphanumeric, expires in 24 hours)

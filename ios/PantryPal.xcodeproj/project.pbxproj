@@ -33,6 +33,7 @@
 		2F37800C2EFC7274006F4E33 /* ActionQueueService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */; };
 		2F37800E2EFC743A006F4E33 /* barcode-beep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2F37800D2EFC743A006F4E33 /* barcode-beep.mp3 */; };
 		2F3780112EFC7A7E006F4E33 /* HouseholdSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */; };
+		2F3780132F01F56F006F4E33 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780122F01F56F006F4E33 /* PaywallView.swift */; };
 		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
 		933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */; };
 		A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */; };
@@ -69,6 +70,7 @@
 		2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionQueueService.swift; sourceTree = "<group>"; };
 		2F37800D2EFC743A006F4E33 /* barcode-beep.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "barcode-beep.mp3"; sourceTree = "<group>"; };
 		2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdSetupView.swift; sourceTree = "<group>"; };
+		2F3780122F01F56F006F4E33 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		2F74C56F2EDE639E006E985C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationsSettingsView.swift; sourceTree = "<group>"; };
 		52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CheckoutView.swift; sourceTree = "<group>"; };
@@ -132,6 +134,7 @@
 		304 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2F3780122F01F56F006F4E33 /* PaywallView.swift */,
 				2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */,
 				2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */,
 				2F377FF92EFB7975006F4E33 /* SplashView.swift */,
@@ -282,6 +285,7 @@
 				2F377FFC2EFC65D4006F4E33 /* SwiftDataModels.swift in Sources */,
 				2F3780022EFC6A97006F4E33 /* OCRService.swift in Sources */,
 				2F3780112EFC7A7E006F4E33 /* HouseholdSetupView.swift in Sources */,
+				2F3780132F01F56F006F4E33 /* PaywallView.swift in Sources */,
 				B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */,
 				A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */,
 				933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */,
