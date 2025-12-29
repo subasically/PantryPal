@@ -193,6 +193,25 @@ class BarcodeScannerViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         previewLayer?.frame = view.layer.bounds
+        
+        // Update video orientation based on interface orientation
+        if let connection = previewLayer?.connection, connection.isVideoOrientationSupported {
+            if let windowScene = view.window?.windowScene {
+                switch windowScene.interfaceOrientation {
+                case .portrait:
+                    connection.videoOrientation = .portrait
+                case .portraitUpsideDown:
+                    connection.videoOrientation = .portraitUpsideDown
+                case .landscapeLeft:
+                    connection.videoOrientation = .landscapeLeft
+                case .landscapeRight:
+                    connection.videoOrientation = .landscapeRight
+                default:
+                    connection.videoOrientation = .portrait
+                }
+            }
+        }
+        
         updateOverlayLayout()
     }
 }
