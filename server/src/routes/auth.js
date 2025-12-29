@@ -201,7 +201,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-const FREE_LIMIT = 30;
+const FREE_LIMIT = 3;
 
 // Get current user
 router.get('/me', authenticateToken, (req, res) => {

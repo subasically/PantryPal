@@ -82,7 +82,7 @@ router.get('/expired', (req, res) => {
     }
 });
 
-const FREE_LIMIT = 30;
+const FREE_LIMIT = 3;
 
 // Helper to check inventory limit
 function checkInventoryLimit(householdId) {

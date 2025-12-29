@@ -12,7 +12,7 @@ final class AuthViewModel {
     var showBiometricEnablePrompt = false
     var showHouseholdSetup = false
     var hasLoggedOut = false
-    var freeLimit: Int = 30
+    var freeLimit: Int = 3
     
     private var pendingCredentials: (email: String, password: String)?
     private let biometricService = BiometricAuthService.shared

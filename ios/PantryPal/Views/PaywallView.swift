@@ -9,7 +9,7 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isLoading = false
     
-    var limit: Int = 30
+    var limit: Int = 3
     var reason: PaywallReason = .itemLimit
     
     var body: some View {
