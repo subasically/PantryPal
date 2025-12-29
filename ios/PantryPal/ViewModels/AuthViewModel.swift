@@ -185,6 +185,16 @@ final class AuthViewModel {
     }
     
     func completeHouseholdSetup() async {
+        // If user doesn't have a household yet, create one now
+        if currentHousehold == nil {
+            do {
+                _ = try await APIService.shared.createHousehold()
+            } catch {
+                errorMessage = "Failed to create household: \(error.localizedDescription)"
+                return
+            }
+        }
+        
         showHouseholdSetup = false
         // Refresh current user to ensure we have the latest household info
         await loadCurrentUser()
@@ -202,6 +212,11 @@ final class AuthViewModel {
             let (user, household) = try await APIService.shared.getCurrentUser()
             currentUser = user
             currentHousehold = household
+            
+            // If user has no household, show setup
+            if household == nil {
+                showHouseholdSetup = true
+            }
         } catch {
             logout()
         }

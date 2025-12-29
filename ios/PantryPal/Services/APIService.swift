@@ -314,6 +314,14 @@ final class APIService: Sendable {
         return try await request(endpoint: "/auth/household/join", method: "POST", body: body)
     }
     
+    func createHousehold(name: String? = nil) async throws -> Household {
+        struct CreateHouseholdRequest: Codable, Sendable {
+            let name: String?
+        }
+        let body = CreateHouseholdRequest(name: name)
+        return try await request(endpoint: "/auth/household", method: "POST", body: body)
+    }
+    
     func getHouseholdMembers() async throws -> HouseholdMembersResponse {
         try await request(endpoint: "/auth/household/members")
     }
