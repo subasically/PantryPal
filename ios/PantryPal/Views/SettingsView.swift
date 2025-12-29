@@ -199,6 +199,19 @@ struct SettingsView: View {
                         Text(appVersion)
                             .foregroundColor(.secondary)
                     }
+                    
+                    Link(destination: URL(string: "https://world.openfoodfacts.org")!) {
+                        HStack {
+                            Text("Product data provided by Open Food Facts (ODbL)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
                 
                 // Sign Out Section
