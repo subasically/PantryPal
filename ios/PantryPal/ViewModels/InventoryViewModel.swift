@@ -227,7 +227,82 @@ final class InventoryViewModel {
         }
         
         do {
-            return try await APIService.shared.quickAdd(upc: upc, quantity: quantity, expirationDate: dateString, locationId: locationId)
+            let response = try await APIService.shared.quickAdd(upc: upc, quantity: quantity, expirationDate: dateString, locationId: locationId)
+            
+            // Update local database immediately with the result
+            if let item = response.item, let context = modelContext {
+                print("✅ [InventoryViewModel] Quick add success, updating local DB for item: \(item.id)")
+                
+                // 1. Ensure Product exists
+                let productId = item.productId
+                let prodDesc = FetchDescriptor<SDProduct>(predicate: #Predicate { $0.id == productId })
+                if (try? context.fetch(prodDesc).first) == nil {
+                    let newProd = SDProduct(
+                        id: productId,
+                        upc: item.productUpc,
+                        name: item.productName ?? "Unknown",
+                        brand: item.productBrand,
+                        details: nil,
+                        imageUrl: item.productImageUrl,
+                        category: item.productCategory,
+                        isCustom: false,
+                        householdId: item.householdId
+                    )
+                    context.insert(newProd)
+                }
+                
+                // 2. Update/Insert Inventory Item
+                let itemId = item.id
+                let itemDesc = FetchDescriptor<SDInventoryItem>(predicate: #Predicate { $0.id == itemId })
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                let expDate = item.expirationDate.flatMap { dateFormatter.date(from: $0) }
+                
+                if let existing = try? context.fetch(itemDesc).first {
+                    existing.quantity = item.quantity
+                    existing.expirationDate = expDate
+                    existing.notes = item.notes
+                    existing.locationId = item.locationId
+                    
+                    // Link Product
+                    let prodDesc = FetchDescriptor<SDProduct>(predicate: #Predicate { $0.id == productId })
+                    existing.product = try? context.fetch(prodDesc).first
+                    
+                    // Link Location
+                    if let locId = item.locationId {
+                        let locDesc = FetchDescriptor<SDLocation>(predicate: #Predicate { $0.id == locId })
+                        existing.location = try? context.fetch(locDesc).first
+                    }
+                } else {
+                    let newItem = SDInventoryItem(
+                        id: itemId,
+                        householdId: item.householdId,
+                        quantity: item.quantity,
+                        expirationDate: expDate,
+                        notes: item.notes,
+                        productId: productId,
+                        locationId: item.locationId
+                    )
+                    
+                    // Link Product
+                    let prodDesc = FetchDescriptor<SDProduct>(predicate: #Predicate { $0.id == productId })
+                    newItem.product = try? context.fetch(prodDesc).first
+                    
+                    // Link Location
+                    if let locId = item.locationId {
+                        let locDesc = FetchDescriptor<SDLocation>(predicate: #Predicate { $0.id == locId })
+                        newItem.location = try? context.fetch(locDesc).first
+                    }
+                    
+                    context.insert(newItem)
+                }
+                
+                try? context.save()
+                await loadInventory()
+            }
+            
+            return response
         } catch {
             errorMessage = error.localizedDescription
             return nil
