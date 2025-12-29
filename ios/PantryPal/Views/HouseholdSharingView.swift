@@ -133,7 +133,7 @@ struct HouseholdSharingView: View {
                             
                             VStack(alignment: .leading) {
                                 HStack {
-                                    Text(member.name)
+                                    Text(member.displayName)
                                         .font(.headline)
                                     
                                     // Assume first member (creator) is owner

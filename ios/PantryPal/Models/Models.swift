@@ -7,6 +7,16 @@ struct User: Codable, Identifiable, Sendable {
     let email: String
     let name: String
     let householdId: String?
+    
+    var displayName: String {
+        if !name.isEmpty && name != "Apple User" && name != "undefined undefined" {
+            return name
+        }
+        if !email.isEmpty {
+            return email
+        }
+        return "Member"
+    }
 }
 
 struct AuthResponse: Codable, Sendable {
@@ -384,6 +394,16 @@ struct HouseholdMember: Codable, Identifiable, Sendable {
     enum CodingKeys: String, CodingKey {
         case id, email, name
         case createdAt = "created_at"
+    }
+    
+    var displayName: String {
+        if !name.isEmpty && name != "Apple User" && name != "undefined undefined" {
+            return name
+        }
+        if !email.isEmpty {
+            return email
+        }
+        return "Member"
     }
 }
 
