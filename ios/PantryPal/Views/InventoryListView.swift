@@ -526,7 +526,7 @@ struct ScannerSheet: View {
                         .padding(.horizontal)
                     }
                     
-                    Stepper("Quantity: \(quantity)", value: $quantity, in: 1...99)
+                    Stepper(existingItem != nil ? "Adding: \(quantity)" : "Quantity: \(quantity)", value: $quantity, in: 1...99)
                         .padding(.horizontal)
                     
                     Toggle("Add expiration date", isOn: $showingDatePicker)
@@ -613,7 +613,7 @@ struct ScannerSheet: View {
                                         isPresented = false
                                         
                                         if let action = response?.action, action == "updated", let item = response?.item {
-                                            onItemAdded?("Quantity updated: Now \(item.quantity)")
+                                            onItemAdded?("Now \(item.quantity) in Pantry")
                                         } else {
                                             onItemAdded?("Added \(productName)")
                                         }
