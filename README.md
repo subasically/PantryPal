@@ -43,6 +43,7 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 - [x] Custom color palette (Purple/Orange/Green)
 - [x] Household sharing with invite codes + QR
 - [x] **Premium Paywall & Limits**
+- [x] **Grocery List** (with Premium auto-add)
 - [x] Settings view with version info
 - [x] Swift 6 strict concurrency compliance
 - [x] Local Caching (SwiftData) - Phase 1
@@ -99,6 +100,8 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 - **Auth:** JWT tokens, bcrypt password hashing, Face ID
 - **Containerization:** Docker
 - **Testing:** Jest, Supertest
+- **Production:** VPS (62.146.177.62) via Docker Compose
+- **API URL:** https://api-pantrypal.subasically.me
 
 ## Running Tests
 
@@ -158,9 +161,27 @@ npm run dev           # Start with hot reload on port 3000
 
 ### iOS App
 1. Open `ios/PantryPal.xcodeproj` in Xcode
-2. Update server IP in `Services/APIService.swift`
+2. Server is pre-configured to `https://api-pantrypal.subasically.me`
 3. Select your device/simulator
 4. Build and run (⌘R)
+
+### Production Server
+```bash
+# SSH to production
+ssh root@62.146.177.62
+
+# Navigate to server
+cd /root/pantrypal-server
+
+# View logs
+docker-compose logs -f pantrypal-api
+
+# Restart server
+docker-compose restart pantrypal-api
+
+# Rebuild after code changes
+docker-compose up -d --build --force-recreate
+```
 
 ## API Endpoints
 | Method | Endpoint | Description |
@@ -193,6 +214,9 @@ npm run dev           # Start with hot reload on port 3000
 | GET | /api/checkout/history | Checkout history |
 | GET | /api/checkout/stats | Consumption stats |
 | GET | /api/sync/full | Full sync for offline |
+| GET | /api/grocery | Get grocery list |
+| POST | /api/grocery | Add item to grocery |
+| DELETE | /api/grocery/:id | Remove from grocery |
 
 ## Color Palette
 | Role | Color | Hex |
