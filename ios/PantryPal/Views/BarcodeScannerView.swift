@@ -193,26 +193,52 @@ class BarcodeScannerViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         previewLayer?.frame = view.layer.bounds
+        updateVideoOrientation()
+        updateOverlayLayout()
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: { _ in
+            self.updateVideoOrientation()
+            self.updateOverlayLayout()
+        })
+    }
+    
+    private func updateVideoOrientation() {
+        guard let connection = previewLayer?.connection, connection.isVideoOrientationSupported else { return }
         
-        // Update video orientation based on interface orientation
-        if let connection = previewLayer?.connection, connection.isVideoOrientationSupported {
+        let currentDeviceOrientation = UIDevice.current.orientation
+        let videoOrientation: AVCaptureVideoOrientation
+        
+        switch currentDeviceOrientation {
+        case .portrait:
+            videoOrientation = .portrait
+        case .portraitUpsideDown:
+            videoOrientation = .portraitUpsideDown
+        case .landscapeLeft:
+            videoOrientation = .landscapeRight // Camera orientation is mirrored for landscape
+        case .landscapeRight:
+            videoOrientation = .landscapeLeft  // Camera orientation is mirrored for landscape
+        default:
+            // Fallback to interface orientation if device orientation is flat/unknown
             if let windowScene = view.window?.windowScene {
                 switch windowScene.interfaceOrientation {
-                case .portrait:
-                    connection.videoOrientation = .portrait
-                case .portraitUpsideDown:
-                    connection.videoOrientation = .portraitUpsideDown
                 case .landscapeLeft:
-                    connection.videoOrientation = .landscapeLeft
+                    videoOrientation = .landscapeLeft
                 case .landscapeRight:
-                    connection.videoOrientation = .landscapeRight
+                    videoOrientation = .landscapeRight
+                case .portraitUpsideDown:
+                    videoOrientation = .portraitUpsideDown
                 default:
-                    connection.videoOrientation = .portrait
+                    videoOrientation = .portrait
                 }
+            } else {
+                videoOrientation = .portrait
             }
         }
         
-        updateOverlayLayout()
+        connection.videoOrientation = videoOrientation
     }
 }
 
