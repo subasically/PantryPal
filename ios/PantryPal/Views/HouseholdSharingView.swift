@@ -1,7 +1,5 @@
 import SwiftUI
-import UIKit
-import CoreImage.CIFilterBuiltins
-import AVFoundation
+@preconcurrency import AVFoundation
 
 struct HouseholdSharingView: View {
     @Environment(\.modelContext) private var modelContext
@@ -364,8 +362,6 @@ struct QRScannerView: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: QRScannerViewController, context: Context) {}
 }
-
-import AVFoundation
 
 class QRScannerViewController: UIViewController {
     private var captureSession: AVCaptureSession?
