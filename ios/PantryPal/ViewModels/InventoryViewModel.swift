@@ -130,6 +130,9 @@ final class InventoryViewModel {
             body: body
         )
         
+        // 3. Process queue immediately to upload the new item
+        await ActionQueueService.shared.processQueue(modelContext: context)
+        
         successMessage = "Added \(newItem.product?.name ?? "item")"
         HapticService.shared.itemAdded()
         await loadInventory()
@@ -177,6 +180,9 @@ final class InventoryViewModel {
             body: body
         )
         
+        // 3. Process queue immediately
+        await ActionQueueService.shared.processQueue(modelContext: context)
+        
         await loadInventory()
     }
     
@@ -198,6 +204,9 @@ final class InventoryViewModel {
             endpoint: "/inventory/\(id)",
             method: "DELETE"
         )
+        
+        // 3. Process queue immediately
+        await ActionQueueService.shared.processQueue(modelContext: context)
         
         items.removeAll { $0.id == id }
         HapticService.shared.itemDeleted()
@@ -238,6 +247,9 @@ final class InventoryViewModel {
             method: "PATCH",
             body: QuantityAdjustRequest(adjustment: adjustment)
         )
+        
+        // 3. Process queue immediately
+        await ActionQueueService.shared.processQueue(modelContext: context)
     }
 
     // ... (keep other methods, adapting them similarly)
