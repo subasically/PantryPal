@@ -630,7 +630,7 @@ struct ScannerSheet: View {
                                     }
                                 }
                             }
-                        } label: {
+                        }, label: {
                             Text(existingItem != nil ? "Increase Quantity" : "Add to Pantry")
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.5)
