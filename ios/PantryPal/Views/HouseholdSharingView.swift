@@ -19,12 +19,9 @@ struct HouseholdSharingView: View {
             Section {
                 if let invite = viewModel.currentInvite {
                     VStack(spacing: 16) {
-                        // Invite Link
-                        let inviteURL = "https://pantrypal.app/join/\(invite.code)"
-                        
                         VStack(spacing: 12) {
-                            // QR Code (encodes the full URL)
-                            if let qrImage = generateQRCode(from: inviteURL) {
+                            // QR Code (encodes just the code for scanner compatibility)
+                            if let qrImage = generateQRCode(from: invite.code) {
                                 Image(uiImage: qrImage)
                                     .interpolation(.none)
                                     .resizable()
@@ -34,35 +31,15 @@ struct HouseholdSharingView: View {
                                     .cornerRadius(12)
                             }
                             
-                            // Invite URL (tappable/copyable)
-                            Button {
-                                UIPasteboard.general.string = inviteURL
-                            } label: {
-                                Text(inviteURL)
-                                    .font(.system(size: 14, design: .monospaced))
-                                    .foregroundColor(.ppPrimary)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Color.ppPurple.opacity(0.1))
-                                    .cornerRadius(8)
-                                    .multilineTextAlignment(.center)
-                            }
-                            
-                            // Manual code entry (secondary)
-                            VStack(spacing: 4) {
-                                Text("Or enter code manually:")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                
-                                HStack(spacing: 4) {
-                                    ForEach(Array(invite.code), id: \.self) { char in
-                                        Text(String(char))
-                                            .font(.system(size: 20, weight: .bold, design: .monospaced))
-                                            .frame(width: 28, height: 36)
-                                            .background(Color.ppPurple.opacity(0.2))
-                                            .foregroundColor(Color.ppPrimary)
-                                            .cornerRadius(6)
-                                    }
+                            // Code Display
+                            HStack(spacing: 4) {
+                                ForEach(Array(invite.code), id: \.self) { char in
+                                    Text(String(char))
+                                        .font(.system(size: 24, weight: .bold, design: .monospaced))
+                                        .frame(width: 32, height: 40)
+                                        .background(Color.ppPurple.opacity(0.2))
+                                        .foregroundColor(Color.ppPrimary)
+                                        .cornerRadius(6)
                                 }
                             }
                         }
@@ -71,11 +48,11 @@ struct HouseholdSharingView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                         
-                        // Share Button
+                        // Share Button (shares code only)
                         ShareLink(
-                            item: inviteURL,
+                            item: "Join my PantryPal with code: \(invite.code)",
                             subject: Text("Join my PantryPal"),
-                            message: Text("Join my PantryPal:\n\(inviteURL)")
+                            message: Text("Use this code to join: \(invite.code)")
                         ) {
                             HStack {
                                 Image(systemName: "square.and.arrow.up")
