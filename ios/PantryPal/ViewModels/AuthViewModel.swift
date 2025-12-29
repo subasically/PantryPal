@@ -13,8 +13,10 @@ final class AuthViewModel {
     var showHouseholdSetup = false
     var hasLoggedOut = false
     var freeLimit: Int = 3
+    var isAppLocked = false
     
     private var pendingCredentials: (email: String, password: String)?
+    private var lastBackgroundedAt: Date?
     private let biometricService = BiometricAuthService.shared
     private let lastLoginMethodKey = "lastLoginMethod"
     
@@ -24,6 +26,11 @@ final class AuthViewModel {
     
     var isBiometricEnabled: Bool {
         biometricService.isBiometricLoginEnabled
+    }
+    
+    var appLockEnabled: Bool {
+        get { UserPreferences.shared.appLockEnabled }
+        set { UserPreferences.shared.appLockEnabled = newValue }
     }
     
     var isPasswordLogin: Bool {
@@ -113,6 +120,8 @@ final class AuthViewModel {
             let response = try await APIService.shared.login(email: credentials.email, password: credentials.password)
             currentUser = response.user
             isAuthenticated = true
+            
+            UserDefaults.standard.set("password", forKey: lastLoginMethodKey)
             
             // Load full household info
             await loadCurrentUser()
@@ -286,6 +295,54 @@ final class AuthViewModel {
             }
         } catch {
             logout()
+        }
+    }
+    
+    // MARK: - App Lock
+    
+    func handleScenePhaseChange(_ phase: ScenePhase) {
+        switch phase {
+        case .background:
+            lastBackgroundedAt = Date()
+        case .active:
+            checkAppLock()
+        default:
+            break
+        }
+    }
+    
+    private func checkAppLock() {
+        guard appLockEnabled, isBiometricAvailable else { return }
+        
+        // If already locked, do nothing
+        if isAppLocked { return }
+        
+        // Check grace period or cold launch
+        let shouldLock: Bool
+        if let lastBackgroundedAt = lastBackgroundedAt {
+            let elapsed = Date().timeIntervalSince(lastBackgroundedAt)
+            shouldLock = elapsed > 30
+        } else {
+            // Cold launch
+            shouldLock = true
+        }
+        
+        if shouldLock {
+            isAppLocked = true
+            // Attempt unlock immediately
+            Task {
+                await unlockApp()
+            }
+        }
+    }
+    
+    func unlockApp() async {
+        guard isAppLocked else { return }
+        
+        let success = await biometricService.authenticateUser()
+        if success {
+            isAppLocked = false
+            lastBackgroundedAt = nil // Reset
         }
     }
 }

@@ -8,6 +8,7 @@ struct SettingsView: View {
     
     @State private var biometricEnabled: Bool
     @State private var smartScannerEnabled: Bool
+    @State private var appLockEnabled: Bool
     @State private var showingDisableAlert = false
     @State private var showingEnableError = false
     @State private var showingResetConfirmation = false
@@ -25,6 +26,7 @@ struct SettingsView: View {
     init() {
         _biometricEnabled = State(initialValue: BiometricAuthService.shared.isBiometricLoginEnabled)
         _smartScannerEnabled = State(initialValue: UserPreferences.shared.useSmartScanner)
+        _appLockEnabled = State(initialValue: UserPreferences.shared.appLockEnabled)
     }
     
     var body: some View {
@@ -115,34 +117,56 @@ struct SettingsView: View {
                 }
                 
                 // Security Section
-                if authViewModel.isBiometricAvailable && (authViewModel.hasPendingCredentials || authViewModel.isBiometricEnabled || authViewModel.isPasswordLogin) {
+                if authViewModel.isBiometricAvailable {
                     Section("Security") {
-                        Toggle(isOn: Binding(
-                            get: { biometricEnabled },
-                            set: { newValue in
-                                if newValue {
-                                    // Turning ON
-                                    if authViewModel.hasPendingCredentials {
-                                        authViewModel.enableBiometricLogin()
-                                        biometricEnabled = true
+                        if authViewModel.isPasswordLogin {
+                            Toggle(isOn: Binding(
+                                get: { biometricEnabled },
+                                set: { newValue in
+                                    if newValue {
+                                        // Turning ON
+                                        if authViewModel.hasPendingCredentials {
+                                            authViewModel.enableBiometricLogin()
+                                            biometricEnabled = true
+                                        } else {
+                                            biometricEnabled = false
+                                            showingEnableError = true
+                                        }
                                     } else {
+                                        // Turning OFF
                                         biometricEnabled = false
-                                        showingEnableError = true
+                                        showingDisableAlert = true
                                     }
-                                } else {
-                                    // Turning OFF
-                                    biometricEnabled = false
-                                    showingDisableAlert = true
                                 }
+                            )) {
+                                HStack {
+                                    Image(systemName: authViewModel.biometricIcon)
+                                        .foregroundColor(.ppPurple)
+                                        .frame(width: 24)
+                                    VStack(alignment: .leading) {
+                                        Text("Use \(authViewModel.biometricName)")
+                                        Text("Log in with \(authViewModel.biometricName)")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        Toggle(isOn: Binding(
+                            get: { appLockEnabled },
+                            set: { newValue in
+                                appLockEnabled = newValue
+                                authViewModel.appLockEnabled = newValue
                             }
                         )) {
                             HStack {
-                                Image(systemName: authViewModel.biometricIcon)
+                                Image(systemName: "lock.shield")
                                     .foregroundColor(.ppPurple)
                                     .frame(width: 24)
                                 VStack(alignment: .leading) {
-                                    Text("Use \(authViewModel.biometricName)")
-                                    Text("Secure access when opening the app")
+                                    Text("Require \(authViewModel.biometricName) to Open")
+                                    Text("Lock app when backgrounded")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
