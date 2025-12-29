@@ -634,7 +634,7 @@ struct ScannerSheet: View {
                             Text(existingItem != nil ? "Increase Quantity" : "Add to Pantry")
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.5)
-                        }
+                        })
                         .buttonStyle(.ppPrimary)
                         .frame(width: 150)
                         .disabled(selectedLocationId == nil || isAddingCustom)
