@@ -89,6 +89,67 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 - **Auto-add to grocery** (when items run out)
 - Priority sync reliability
 
+### Premium Architecture
+
+**Storage:** Premium status is stored on the `households` table, NOT on individual users.
+
+```sql
+-- households.is_premium = 0 (Free) or 1 (Premium)
+CREATE TABLE households (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    is_premium INTEGER DEFAULT 0,
+    created_at DATETIME
+);
+```
+
+**Benefits:**
+- **Household-wide:** One Premium subscription benefits all household members
+- **Family Sharing:** Spouse/family members automatically get Premium when they join
+- **Simple Billing:** One payment per household, not per user
+
+**Example:**
+```
+Household: "Smith Family" (is_premium = 1)
+    ├── User: John (pays $4.99/mo)     ← Premium ✓
+    ├── User: Jane (joins household)   ← Premium ✓ (automatic)
+    └── User: Kids (join household)    ← Premium ✓ (automatic)
+```
+
+**Enforcement:**
+- Server checks `household.is_premium` before operations
+- Free tier: `checkInventoryLimit()` and `checkGroceryLimit()` enforce 25 item limits
+- Premium: Bypasses all limits
+
+### Auto-Add to Grocery (Premium Feature)
+
+When a Premium household runs out of an item, it's automatically added to the grocery list:
+
+```javascript
+// Triggered when inventory quantity reaches 0
+function autoManageGrocery(householdId, productName, newQuantity, oldQuantity) {
+    // Premium check
+    if (!household.is_premium) return;
+    
+    // Item ran out (qty: 1 → 0)
+    if (oldQuantity > 0 && newQuantity === 0) {
+        // ✅ Auto-add to grocery list
+    }
+    
+    // Item restocked (qty: 0 → 1+)
+    if (oldQuantity === 0 && newQuantity > 0) {
+        // ✅ Auto-remove from grocery list
+    }
+}
+```
+
+**User Experience:**
+1. User taps [-] on "Milk" in Pantry (qty: 1 → 0)
+2. Item removed from Pantry
+3. **"Milk" automatically appears in Grocery tab** 🎉
+4. User buys milk, scans barcode to add back
+5. **"Milk" automatically removed from Grocery tab** 🎉
+
 ### Revenue Projections (after Apple's 15% cut)
 | Users | Monthly | Annual |
 |-------|---------|--------|
