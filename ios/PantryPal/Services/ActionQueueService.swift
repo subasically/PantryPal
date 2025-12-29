@@ -5,48 +5,65 @@ import SwiftData
 final class ActionQueueService: Sendable {
     static let shared = ActionQueueService()
     
+    private var isProcessing = false
+    
     private init() {}
     
     func processQueue(modelContext: ModelContext) async {
-        // Fetch all pending actions sorted by creation date
-        let descriptor = FetchDescriptor<SDPendingAction>(sortBy: [SortDescriptor(\.createdAt)])
+        if isProcessing { return }
+        isProcessing = true
+        defer { isProcessing = false }
         
-        guard let actions = try? modelContext.fetch(descriptor), !actions.isEmpty else {
-            return
-        }
-        
-        print("Processing \(actions.count) pending actions...")
-        
-        for action in actions {
-            do {
-                try await sendAction(action)
-                // If successful, delete from queue
-                modelContext.delete(action)
-                try? modelContext.save()
-                print("Action \(action.type) processed successfully")
-            } catch {
-                print("Failed to process action \(action.type): \(error)")
+        while true {
+            // Fetch all pending actions sorted by creation date
+            let descriptor = FetchDescriptor<SDPendingAction>(sortBy: [SortDescriptor(\.createdAt)])
+            
+            guard let actions = try? modelContext.fetch(descriptor), !actions.isEmpty else {
+                break
+            }
+            
+            print("Processing \(actions.count) pending actions...")
+            
+            for action in actions {
+                // Re-check if action is still valid/exists in context to be safe
+                if action.isDeleted { continue }
                 
-                // Handle permanent errors (403 Forbidden - Limit Reached)
-                if let apiError = error as? APIError, 
-                   case .serverError(let msg) = apiError, 
-                   msg.contains("limit reached") || msg.contains("Status 403") {
-                    print("Action rejected by server (Limit Reached). Removing from queue.")
+                let actionType = action.type // Capture value before async
+                
+                do {
+                    try await sendAction(action)
+                    // If successful, delete from queue
                     modelContext.delete(action)
                     try? modelContext.save()
+                    print("Action \(actionType) processed successfully")
+                } catch {
+                    print("Failed to process action \(actionType): \(error)")
                     
-                    // Trigger Paywall
-                    NotificationCenter.default.post(name: .showPaywall, object: nil)
+                    // Handle permanent errors (403 Forbidden - Limit Reached)
+                    if let apiError = error as? APIError, 
+                       case .serverError(let msg) = apiError, 
+                       msg.contains("limit reached") || msg.contains("Status 403") {
+                        print("Action rejected by server (Limit Reached). Removing from queue.")
+                        modelContext.delete(action)
+                        try? modelContext.save()
+                        
+                        // Trigger Paywall
+                        NotificationCenter.default.post(name: .showPaywall, object: nil)
+                        
+                        continue
+                    }
                     
-                    continue
+                    action.retryCount += 1
+                    // If it's a permanent error (e.g. 400), maybe we should delete it or move to a "failed" queue?
+                    // For now, we just leave it to retry later (simple exponential backoff could be added)
+                    
+                    // Stop processing queue on error to preserve order dependency
+                    // But we return from the function entirely? 
+                    // If we break, we hit the outer while loop, which fetches again.
+                    // If the error persists, we will infinite loop trying to process the same failing action.
+                    // So we should probably return if we encounter an error that stops the queue.
+                    return 
                 }
-                
-                action.retryCount += 1
-                // If it's a permanent error (e.g. 400), maybe we should delete it or move to a "failed" queue?
-                // For now, we just leave it to retry later (simple exponential backoff could be added)
-                
-                // Stop processing queue on error to preserve order dependency
-                break
             }
         }
     }
