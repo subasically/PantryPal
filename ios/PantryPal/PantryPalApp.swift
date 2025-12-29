@@ -38,7 +38,7 @@ struct PantryPalApp: App {
                     authViewModel.handleScenePhaseChange(newPhase)
                 }
                 .fullScreenCover(isPresented: $authViewModel.isAppLocked) {
-                    LockOverlayView()
+                    LockOverlayView(authViewModel: authViewModel)
                 }
         }
     }
@@ -130,7 +130,7 @@ struct MainTabView: View {
 }
 
 struct LockOverlayView: View {
-    @Environment(AuthViewModel.self) private var authViewModel
+    var authViewModel: AuthViewModel
     
     var body: some View {
         ZStack {
