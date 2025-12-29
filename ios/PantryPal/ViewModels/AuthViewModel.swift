@@ -65,9 +65,14 @@ final class AuthViewModel {
             isAuthenticated = true
             
             // After successful login, prompt to enable biometrics if available and not already enabled
-            if biometricService.isBiometricAvailable && !biometricService.isBiometricLoginEnabled {
-                pendingCredentials = (email, password)
-                showBiometricEnablePrompt = true
+            if biometricService.isBiometricAvailable {
+                if !biometricService.isBiometricLoginEnabled {
+                    pendingCredentials = (email, password)
+                    showBiometricEnablePrompt = true
+                } else {
+                    // Already enabled, update credentials in case password changed
+                    _ = biometricService.enableBiometricLogin(email: email, password: password)
+                }
             }
             
             UserDefaults.standard.set("password", forKey: lastLoginMethodKey)
