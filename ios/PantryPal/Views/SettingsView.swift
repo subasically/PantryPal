@@ -122,6 +122,7 @@ struct SettingsView: View {
                 */
                 
                 // Security Section
+                /*
                 Section("Security") {
                     if authViewModel.isBiometricAvailable {
                         Toggle(isOn: $biometricEnabled) {
@@ -147,6 +148,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                */
                 
                 // Locations Section
                 /*
