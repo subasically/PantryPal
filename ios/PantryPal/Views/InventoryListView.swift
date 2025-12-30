@@ -943,6 +943,41 @@ struct AddCustomItemView: View {
         return nil
     }
     
+    private var showLocationFooter: Bool {
+        !viewModel.locations.isEmpty && selectedLocationId == nil
+    }
+    
+    @ViewBuilder
+    private var emptyLocationsView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                Text("No storage locations available")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            Text("Go to Settings → Storage Locations to create locations")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+    
+    @ViewBuilder
+    private var locationValidationView: some View {
+        if let message = validationMessage {
+            HStack {
+                Image(systemName: "exclamationmark.circle.fill")
+                    .foregroundColor(.red)
+                    .font(.caption)
+                Text(message)
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -962,19 +997,7 @@ struct AddCustomItemView: View {
                 
                 Section {
                     if viewModel.locations.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundColor(.orange)
-                                Text("No storage locations available")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            Text("Go to Settings → Storage Locations to create locations")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.vertical, 4)
+                        emptyLocationsView
                     } else {
                         Picker("Storage Location *", selection: $selectedLocationId) {
                             Text("Select Location").tag(nil as String?)
@@ -983,21 +1006,12 @@ struct AddCustomItemView: View {
                             }
                         }
                         
-                        if let message = validationMessage {
-                            HStack {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                                Text(message)
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                            }
-                        }
+                        locationValidationView
                     }
                 } header: {
                     Text("Location")
                 } footer: {
-                    if !viewModel.locations.isEmpty && selectedLocationId == nil {
+                    if showLocationFooter {
                         Text("Location is required to add items to your inventory")
                             .font(.caption)
                     }
