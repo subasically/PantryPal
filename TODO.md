@@ -51,16 +51,33 @@
 - [ ] Device token registration
 - [ ] Household join notifications (notify owner)
 - [ ] Household leave notifications
-- [ ] Low stock alerts
-- [ ] Expiration reminders (3 days, 1 day, expired)
+- [ ] Low stock alerts (when qty = 0)
+- [ ] Expiration reminders:
+  - [ ] 30 days before expiration
+  - [ ] 14 days before expiration
+  - [ ] 7 days before expiration
+  - [ ] Day of expiration (expired)
+  - [ ] Server-side scheduled job for notifications
+  - [ ] User preference settings (enable/disable per type)
+
+### Item Organization
+- [ ] **Tagging System:**
+  - [ ] Database: `tags` table + `item_tags` junction table
+  - [ ] UI: Multi-select tag picker in Add/Edit item
+  - [ ] Tag management in Settings (create, edit, delete custom tags)
+  - [ ] Predefined tags: "Organic", "Frozen", "Bulk", "Sale Item"
+  - [ ] Filter inventory by tag
+  - [ ] Tag-based search
+  - [ ] Color-coded tag badges
+  - [ ] Household-scoped tags (shared across household)
+- [ ] Category organization
+- [ ] Search by category/tag
 
 ### Engagement Features
 - [ ] Recipe suggestions based on inventory
 - [ ] Nutrition information
 - [ ] Barcode scan history
-- [ ] Product image display
-- [ ] Category organization
-- [ ] Search by category
+- [ ] Product image display (from UPC API)
 - [ ] Shopping list from recipes
 
 ### Polish
