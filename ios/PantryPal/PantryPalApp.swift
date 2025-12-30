@@ -27,20 +27,25 @@ struct PantryPalApp: App {
     
     var body: some Scene {
         WindowGroup {
-            SplashView()
-                .environment(authViewModel)
-                .environmentObject(notificationService)
-                .modelContainer(sharedModelContainer)
-                .task {
-                    // Request notification permission on first launch
-                    _ = await notificationService.requestAuthorization()
-                }
-                .onChange(of: scenePhase) { _, newPhase in
-                    authViewModel.handleScenePhaseChange(newPhase)
-                }
-                .fullScreenCover(isPresented: $authViewModel.isAppLocked) {
-                    LockOverlayView(authViewModel: authViewModel)
-                }
+            ZStack {
+                SplashView()
+                    .environment(authViewModel)
+                    .environmentObject(notificationService)
+                    .modelContainer(sharedModelContainer)
+                    .task {
+                        // Request notification permission on first launch
+                        _ = await notificationService.requestAuthorization()
+                    }
+                    .onChange(of: scenePhase) { _, newPhase in
+                        authViewModel.handleScenePhaseChange(newPhase)
+                    }
+                    .fullScreenCover(isPresented: $authViewModel.isAppLocked) {
+                        LockOverlayView(authViewModel: authViewModel)
+                    }
+                
+                // Global toast overlay
+                ToastHostView()
+            }
         }
     }
 }

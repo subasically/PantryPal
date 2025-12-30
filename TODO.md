@@ -21,6 +21,29 @@
 - [ ] Restore purchases (StoreKit integration)
 
 ## Week 2: Polish & Launch Prep
+- [x] **Location & TextField Standardization** ✨ COMPLETED
+  - [x] Remove "Select Location" placeholder everywhere
+  - [x] Location always defaults to valid value (sticky + fallback)
+  - [x] No ability to save items with invalid location
+  - [x] Server validates location on all endpoints
+  - [x] Standardized TextField component (AppTextField/AppSecureField)
+  - [x] Consistent 44pt minimum height across all text inputs
+  - [x] Applied to Login, Household Setup, Household Sharing, Grocery List
+- [x] **Centralized Toast System** ✨ COMPLETED
+  - [x] ToastCenter singleton with queue management
+  - [x] Toast types: success, info, warning, error
+  - [x] Top-aligned with slide-down animation
+  - [x] Haptic feedback (success/error only)
+  - [x] Auto-dismiss with configurable duration
+  - [x] iPad: centered with max width constraint
+  - [x] Applied globally via app root overlay
+- [x] **Grocery Auto-Remove on Restock** ✨ COMPLETED
+  - [x] Schema: Added brand + upc to grocery_items
+  - [x] API: DELETE /by-upc/:upc and /by-name/:normalizedName
+  - [x] iOS: GroceryViewModel.attemptAutoRemove() with UPC-first matching
+  - [x] UI: Display brand + name in grocery list
+  - [x] Hooks: Auto-remove on barcode scan, custom add, quantity increase
+  - [x] Toast: Show "Removed X from grocery list" on success
 - [ ] **In-App Purchases (StoreKit 2)** ← NEXT
   - [ ] Product configuration
   - [ ] Purchase flow
@@ -28,9 +51,10 @@
   - [ ] Set premium_expires_at on purchase/renewal
   - [ ] Handle subscription cancellation
   - [ ] Restore purchases
-- [ ] Last-item confirmation UX (Free households)
-  - [ ] Alert: "Add to grocery list?" when qty → 0
-  - [ ] Premium: Silent auto-add with toast
+- [x] Last-item confirmation UX
+  - [x] Alert: "Add to grocery list?" when qty → 0
+  - [x] Works for both manual decrement and barcode checkout
+  - [x] All users get confirmation (Premium and Free)
 - [ ] Premium expiration warnings
   - [ ] Alert 7 days before expiration
   - [ ] Banner on expiration day
@@ -101,6 +125,17 @@
 - [ ] Search by category/tag
 
 ### Engagement Features
+- [ ] **Receipt Scanner (OCR):**
+  - [ ] Camera-based receipt scanning
+  - [ ] OCR text extraction (Vision framework or ML Kit)
+  - [ ] Parse item names, quantities, prices from receipt
+  - [ ] Present editable list of detected items for user review
+  - [ ] Bulk add to inventory with adjustable quantities
+  - [ ] Smart matching: Link detected items to existing products
+  - [ ] Location assignment for all scanned items
+  - [ ] Optional: Price tracking per item
+  - [ ] Error handling: Manual entry fallback for OCR failures
+  - [ ] Privacy: Process receipts on-device, no cloud storage
 - [ ] Recipe suggestions based on inventory
 - [ ] Nutrition information
 - [ ] Barcode scan history

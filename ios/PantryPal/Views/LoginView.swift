@@ -116,41 +116,27 @@ struct LoginView: View {
                             VStack(spacing: 20) {
                                 VStack(spacing: 16) {
                                     if isRegistering {
-                                        TextField("Name", text: $name)
-                                            .padding()
-                                            .background(Color(UIColor.systemBackground))
-                                            .cornerRadius(10)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 10)
-                                                    .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                                            )
-                                            .textContentType(.name)
+                                        AppTextField(
+                                            placeholder: "Name",
+                                            text: $name,
+                                            textContentType: .name
+                                        )
                                     }
                                     
-                                    TextField("Email", text: $email)
-                                        .padding()
-                                        .background(Color(UIColor.systemBackground))
-                                        .cornerRadius(10)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                                        )
-                                        .textContentType(.emailAddress)
-                                        .textInputAutocapitalization(.never)
-                                        .autocorrectionDisabled(true)
-                                        .keyboardType(.emailAddress)
+                                    AppTextField(
+                                        placeholder: "Email",
+                                        text: $email,
+                                        keyboardType: .emailAddress,
+                                        textContentType: .emailAddress,
+                                        autocapitalization: .never,
+                                        autocorrectionDisabled: true
+                                    )
                                     
-                                    SecureField("Password", text: $password)
-                                        .padding()
-                                        .background(Color(UIColor.systemBackground))
-                                        .cornerRadius(10)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                                        )
-                                        .textContentType(isRegistering ? .newPassword : .password)
-                                        .textInputAutocapitalization(.never)
-                                        .autocorrectionDisabled(true)
+                                    AppSecureField(
+                                        placeholder: "Password",
+                                        text: $password,
+                                        textContentType: isRegistering ? .newPassword : .password
+                                    )
                                 }
                                 
                                 if let error = authViewModel.errorMessage {

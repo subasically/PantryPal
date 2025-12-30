@@ -1,0 +1,158 @@
+# PantryPal Development Rules
+
+## Project Context
+PantryPal is a pantry inventory app with Node.js/Express server and iOS SwiftUI app.
+**Current Phase:** Revenue Validation (MVP complete, preparing for StoreKit 2)
+
+## Core Philosophy: Ruthless MVP
+- **DO NOT** implement nice-to-have features (recipes, nutrition, analytics) until we have revenue
+- **FOCUS:** Reliability, Sync, and Paywall
+- **GOAL:** Validate that users will pay for Premium (household sharing + unlimited items)
+
+## Tech Stack
+
+### Server
+- Node.js 20 + Express + SQLite (better-sqlite3)
+- JWT Auth + Apple Sign In
+- Docker Compose deployment
+- Production: https://api-pantrypal.subasically.me
+
+### iOS
+- Swift 6 (Strict Concurrency) + SwiftUI (iOS 18+)
+- MVVM architecture
+- SwiftData for local caching
+- AVFoundation for barcode scanning
+
+## Critical Import Rules (iOS)
+
+### SwiftData Import
+**ALWAYS import SwiftData when using:**
+- `@Query` property wrapper
+- `FetchDescriptor<T>`
+- `modelContext.fetch()`
+- `@Model` macro
+
+**Common error if missing:** "Cannot find type 'FetchDescriptor' in scope"
+
+Example:
+```swift
+import SwiftUI
+import SwiftData  // ← REQUIRED for @Query
+
+struct MyView: View {
+    @Query var items: [SDInventoryItem]  // Needs SwiftData
+}
+```
+
+### APIError Usage
+**APIError is file-level, NOT nested in APIService**
+
+✅ Correct:
+```swift
+throw APIError.unauthorized
+catch let error as APIError
+```
+
+❌ Wrong:
+```swift
+throw APIService.APIError.unauthorized  // Won't compile
+```
+
+## Premium Model (Freemium)
+
+### Free Tier Limits
+- 25 inventory items max
+- 25 grocery items max
+- Read-only household sharing
+- Manual grocery list
+
+### Premium Tier ($4.99/mo or $49.99/yr)
+- Unlimited items
+- Full household collaboration
+- Auto-add to grocery list
+- Premium is **household-level** (not per-user)
+
+### Enforcement
+- Client checks `household.isPremiumActive` before actions
+- Server validates limits with `checkInventoryLimit()` and `checkGroceryLimit()`
+- 403 errors trigger paywall: `Notification.Name("showPaywall")`
+
+## Common Patterns
+
+### iOS Concurrency
+- Use `async/await` everywhere
+- Mark UI updates with `@MainActor`
+- ViewModels are `@MainActor` classes
+- Services can be `Sendable` actors
+
+### Server Database
+- Use `better-sqlite3` synchronously (it's fast enough)
+- Always use `household_id` in queries (NOT `user_id`)
+- `users.household_id` is nullable (new users don't have household yet)
+
+### Loading States
+- Minimum 1.5s loading spinner to prevent UI flashing
+- Use optimistic updates for better UX
+- Sync immediately after actions (no artificial delay)
+
+## File Locations
+
+### iOS Key Files
+- API Service: `ios/PantryPal/Services/APIService.swift`
+- SwiftData Models: `ios/PantryPal/Models/SwiftDataModels.swift`
+- Auth ViewModel: `ios/PantryPal/ViewModels/AuthViewModel.swift`
+- Inventory ViewModel: `ios/PantryPal/ViewModels/InventoryViewModel.swift`
+
+### Server Key Files
+- Auth Routes: `server/src/routes/auth.js`
+- Inventory Routes: `server/src/routes/inventory.js`
+- Premium Helper: `server/src/utils/premiumHelper.js`
+- Database: `server/src/models/database.js`
+
+## Deployment
+
+### Server Quick Deploy
+```bash
+ssh root@62.146.177.62
+cd /root/pantrypal-server
+docker-compose up -d --build --force-recreate
+docker-compose logs -f pantrypal-api
+```
+
+### iOS Build
+- TestFlight builds via Xcode Archive
+- Production API: https://api-pantrypal.subasically.me
+- Debug admin endpoint available with `ENABLE_ADMIN_ROUTES=true`
+
+## Testing Guidelines
+- Server: 74 automated tests (Jest + Supertest)
+- iOS: Manual testing on device + simulator
+- Test multi-household sync scenarios
+- Verify Premium limits on both client and server
+
+## Known Issues to Avoid
+1. Missing SwiftData import → "Cannot find type" errors
+2. Using `APIService.APIError` → compilation failure
+3. Querying by `user_id` instead of `household_id` → sync issues
+4. Not checking Premium before writes → 403 errors
+5. Forgetting to import `AuthenticationServices` for Apple Sign In
+
+## Next Priorities (Week 2)
+1. StoreKit 2 integration (In-App Purchases)
+2. Receipt validation
+3. Restore purchases flow
+4. TestFlight beta testing
+
+## Post-MVP (Deferred)
+- Push notifications
+- Real-time sync (polling sufficient for now)
+- Recipe suggestions
+- Nutrition info
+- Advanced analytics
+
+## When in Doubt
+- Prefer minimal changes over rewrites
+- Check existing patterns in similar files
+- Validate on both client AND server
+- Test with multiple household members
+- Document breaking changes in DEPLOYMENT.md

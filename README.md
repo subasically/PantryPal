@@ -52,9 +52,10 @@ A pantry inventory management app with barcode scanning, expiration tracking, an
 ## 🚧 TODO Features
 
 ### Core (Priority)
+- [ ] **In-App Purchases (StoreKit 2 integration)** ← NEXT
+  - See [STOREKIT_PLAN.md](./STOREKIT_PLAN.md) for implementation details
 - [ ] Push notifications for expiring items
 - [ ] Background sync when online
-- [ ] In-App Purchases (StoreKit integration)
 
 ### Nice to Have
 - [ ] Product image display

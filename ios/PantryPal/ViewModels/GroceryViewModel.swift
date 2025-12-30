@@ -48,7 +48,9 @@ final class GroceryViewModel {
                         id: item.id,
                         householdId: item.householdId,
                         name: item.name,
-                        normalizedName: item.name.lowercased().trimmingCharacters(in: .whitespaces),
+                        brand: item.brand,
+                        upc: item.upc,
+                        normalizedName: item.normalizedName,
                         createdAt: ISO8601DateFormatter().date(from: item.createdAt ?? "") ?? Date()
                     )
                     context.insert(sdItem)
@@ -81,7 +83,9 @@ final class GroceryViewModel {
                     id: newItem.id,
                     householdId: newItem.householdId,
                     name: newItem.name,
-                    normalizedName: name.lowercased().trimmingCharacters(in: .whitespaces),
+                    brand: newItem.brand,
+                    upc: newItem.upc,
+                    normalizedName: newItem.normalizedName,
                     createdAt: ISO8601DateFormatter().date(from: newItem.createdAt ?? "") ?? Date()
                 )
                 context.insert(sdItem)
@@ -138,7 +142,9 @@ final class GroceryViewModel {
                         id: item.id,
                         householdId: item.householdId,
                         name: item.name,
-                        normalizedName: item.name.lowercased().trimmingCharacters(in: .whitespaces),
+                        brand: item.brand,
+                        upc: item.upc,
+                        normalizedName: item.normalizedName,
                         createdAt: ISO8601DateFormatter().date(from: item.createdAt ?? "") ?? Date()
                     )
                     context.insert(sdItem)
@@ -147,6 +153,55 @@ final class GroceryViewModel {
             }
             errorMessage = "Failed to remove item"
             print("Remove grocery error: \(error)")
+        }
+    }
+    
+    // MARK: - Auto-Remove on Restock
+    
+    /// Attempts to remove a grocery item when inventory is restocked
+    /// - Parameters:
+    ///   - upc: UPC code if available (preferred matching)
+    ///   - name: Product name for fallback matching
+    ///   - brand: Product brand for fallback matching
+    /// - Returns: True if an item was removed
+    @discardableResult
+    func attemptAutoRemove(upc: String?, name: String, brand: String?) async -> Bool {
+        print("🛒 [AutoRemove] Called - UPC: \(upc ?? "nil"), Name: \(name), Brand: \(brand ?? "nil")")
+        
+        do {
+            var removed = false
+            
+            // Priority 1: Try UPC match if available
+            if let upc = upc, !upc.isEmpty {
+                print("🛒 [AutoRemove] Attempting UPC match...")
+                removed = try await APIService.shared.removeGroceryItemByUPC(upc: upc)
+                if removed {
+                    print("🛒 [AutoRemove] ✅ Removed by UPC")
+                    await fetchItems() // Refresh list
+                    return true
+                }
+                print("🛒 [AutoRemove] No match by UPC")
+            }
+            
+            // Priority 2: Fallback to name match
+            let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
+                .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            
+            print("🛒 [AutoRemove] Attempting name match with: \(normalizedName)")
+            removed = try await APIService.shared.removeGroceryItemByName(normalizedName: normalizedName)
+            
+            if removed {
+                print("🛒 [AutoRemove] ✅ Removed by name")
+                await fetchItems() // Refresh list
+                return true
+            }
+            
+            print("🛒 [AutoRemove] No match found")
+            return false
+        } catch {
+            print("🛒 [AutoRemove] ❌ Error: \(error)")
+            return false
         }
     }
 }

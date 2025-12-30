@@ -362,15 +362,14 @@ struct AddLocationSheet: View {
 
 // Location picker for use in forms
 struct LocationPicker: View {
-    @Binding var selectedLocationId: String?
+    @Binding var selectedLocationId: String
     let locations: [LocationFlat]
     
     var body: some View {
         Picker("Location", selection: $selectedLocationId) {
-            Text("Select Location").tag(nil as String?)
             ForEach(locations) { location in
                 Text(location.fullPath)
-                    .tag(location.id as String?)
+                    .tag(location.id)
             }
         }
     }

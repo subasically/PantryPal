@@ -107,17 +107,31 @@ router.post('/scan', (req, res) => {
             });
         }
 
-        const now = new Date().toISOString();
-        const checkoutId = uuidv4();
-        
         const oldQuantity = inventoryItem.quantity;
         const newQuantity = oldQuantity - 1;
+        const now = new Date().toISOString();
+        const checkoutId = uuidv4();
 
-        // Record checkout in history
-        db.prepare(`
-            INSERT INTO checkout_history (id, inventory_id, product_id, household_id, user_id, quantity, checked_out_at)
-            VALUES (?, ?, ?, ?, ?, 1, ?)
-        `).run(checkoutId, inventoryItem.id, product.id, req.user.householdId, req.user.id, now);
+        // Record checkout in history (with de-dupe protection)
+        // Check for recent duplicate (within 2 seconds)
+        const recentDuplicate = db.prepare(`
+            SELECT id FROM checkout_history
+            WHERE household_id = ? 
+            AND product_id = ? 
+            AND user_id = ?
+            AND checked_out_at > datetime('now', '-2 seconds')
+        `).get(req.user.householdId, product.id, req.user.id);
+        
+        if (!recentDuplicate) {
+            db.prepare(`
+                INSERT INTO checkout_history (id, inventory_id, product_id, household_id, user_id, quantity, checked_out_at)
+                VALUES (?, ?, ?, ?, ?, 1, ?)
+            `).run(checkoutId, inventoryItem.id, product.id, req.user.householdId, req.user.id, now);
+            
+            console.log(`[CheckoutHistory] ✅ Logged checkout for product: ${product.name} by user: ${req.user.id}`);
+        } else {
+            console.log(`[CheckoutHistory] ⚠️ Skipped duplicate checkout for product: ${product.name} (within 2s)`);
+        }
 
         // Reduce quantity or delete if last one
         if (inventoryItem.quantity <= 1) {
@@ -169,14 +183,8 @@ router.post('/scan', (req, res) => {
             itemDeleted: inventoryItem.quantity <= 1,
             inventoryItem: updatedItem,
             checkoutId: checkoutId,
-            addedToGrocery: addedToGrocery // Flag for client to show confirmation or toast
-        });
-            },
-            previousQuantity: inventoryItem.quantity,
-            newQuantity: inventoryItem.quantity - 1,
-            itemDeleted: inventoryItem.quantity <= 1,
-            inventoryItem: updatedItem,
-            checkoutId: checkoutId
+            addedToGrocery: addedToGrocery, // Flag for client to show confirmation or toast
+            productName: productFullName // Full product name for grocery add prompt
         });
 
         // Send push notification to household members (async, don't wait)
@@ -226,6 +234,11 @@ router.get('/history', (req, res) => {
         params.push(parseInt(limit), parseInt(offset));
 
         const history = db.prepare(query).all(...params);
+        
+        console.log(`[CheckoutHistory] 📊 Fetched ${history.length} history items for household: ${req.user.householdId}`);
+        if (history.length > 0) {
+            console.log(`[CheckoutHistory] 📊 First item - user_name: '${history[0].user_name}', user_id: '${history[0].user_id}'`);
+        }
 
         // Get total count
         let countQuery = `

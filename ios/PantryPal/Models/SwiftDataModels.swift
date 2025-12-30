@@ -137,13 +137,17 @@ final class SDGroceryItem {
     @Attribute(.unique) var id: Int
     var householdId: String
     var name: String
+    var brand: String?
+    var upc: String?
     var normalizedName: String
     var createdAt: Date
     
-    init(id: Int, householdId: String, name: String, normalizedName: String, createdAt: Date) {
+    init(id: Int, householdId: String, name: String, brand: String? = nil, upc: String? = nil, normalizedName: String, createdAt: Date) {
         self.id = id
         self.householdId = householdId
         self.name = name
+        self.brand = brand
+        self.upc = upc
         self.normalizedName = normalizedName
         self.createdAt = createdAt
     }
@@ -155,6 +159,8 @@ final class SDGroceryItem {
             id: id,
             householdId: householdId,
             name: name,
+            brand: brand,
+            upc: upc,
             createdAt: formatter.string(from: createdAt)
         )
     }

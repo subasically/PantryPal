@@ -163,18 +163,20 @@ struct JoinHouseholdOnboardingView: View {
                         }
                     }
                     
-                    TextField("Enter or paste code", text: $viewModel.code)
-                        .textFieldStyle(.roundedBorder)
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
-                        .onChange(of: viewModel.code) { _, newValue in
-                            viewModel.code = String(newValue.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6))
-                            if viewModel.code.count == 6 {
-                                Task {
-                                    await viewModel.validateCode()
-                                }
+                    AppTextField(
+                        placeholder: "Enter or paste code",
+                        text: $viewModel.code,
+                        autocapitalization: .characters,
+                        autocorrectionDisabled: true
+                    )
+                    .onChange(of: viewModel.code) { _, newValue in
+                        viewModel.code = String(newValue.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6))
+                        if viewModel.code.count == 6 {
+                            Task {
+                                await viewModel.validateCode()
                             }
                         }
+                    }
                 }
                 
                 Button {

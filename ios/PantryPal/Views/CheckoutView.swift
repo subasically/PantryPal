@@ -2,15 +2,15 @@ import SwiftUI
 
 struct CheckoutView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var viewModel = CheckoutViewModel()
     @State private var scannedCode: String?
     @State private var showHistory = false
     @State private var isScanning = true
     
-    // Toast state
-    @State private var showToast = false
-    @State private var toastMessage = ""
-    @State private var toastType: ToastView.ToastType = .success
+    // Grocery add confirmation (for Free users)
+    @State private var showGroceryPrompt = false
+    @State private var pendingGroceryItem: String?
     
     var body: some View {
         NavigationStack {
@@ -63,7 +63,6 @@ struct CheckoutView: View {
             .sheet(isPresented: $showHistory) {
                 CheckoutHistoryView()
             }
-            .toast(isShowing: $showToast, message: toastMessage, type: toastType)
             .onAppear {
                 viewModel.setContext(modelContext)
             }
@@ -73,12 +72,59 @@ struct CheckoutView: View {
                 viewModel.errorMessage = nil
             }
             .onChange(of: viewModel.lastCheckout) { _, newValue in
-                if let response = newValue, response.success == true {
-                    toastMessage = "Checked out \(response.product?.name ?? "item")"
-                    toastType = .success
-                    showToast = true
+                handleCheckoutResponse(newValue)
+            }
+            .alert("Add to Grocery List?", isPresented: $showGroceryPrompt) {
+                Button("Not now", role: .cancel) {
+                    pendingGroceryItem = nil
+                }
+                Button("Add", role: .none) {
+                    if let itemName = pendingGroceryItem {
+                        Task {
+                            await addToGroceryList(itemName)
+                        }
+                    }
+                    pendingGroceryItem = nil
+                }
+            } message: {
+                if let itemName = pendingGroceryItem {
+                    Text("You're out of \(itemName). Add it to your grocery list?")
                 }
             }
+        }
+    }
+    
+    private func handleCheckoutResponse(_ response: CheckoutScanResponse?) {
+        guard let response = response, response.success == true else { return }
+        
+        let isPremium = authViewModel.currentHousehold?.isPremiumActive ?? false
+        
+        print("🛒 [CheckoutGrocery] handleCheckoutResponse called")
+        print("🛒 [CheckoutGrocery] - itemDeleted: \(response.itemDeleted == true)")
+        print("🛒 [CheckoutGrocery] - productName: \(response.productName ?? "nil")")
+        print("🛒 [CheckoutGrocery] - isPremium: \(isPremium)")
+        print("🛒 [CheckoutGrocery] - addedToGrocery (server): \(response.addedToGrocery == true)")
+        
+        // Check if item was deleted (quantity went to 0)
+        if response.itemDeleted == true, let productName = response.productName {
+            print("🛒 [CheckoutGrocery] Item hit zero during checkout")
+            // Show confirmation prompt for ALL users
+            print("🛒 [CheckoutGrocery] Showing confirmation prompt")
+            pendingGroceryItem = productName
+            showGroceryPrompt = true
+        } else {
+            // Normal checkout (item still in stock)
+            print("🛒 [CheckoutGrocery] Regular checkout, item not deleted")
+            ToastCenter.shared.show("Checked out \(response.product?.name ?? "item")", type: .success)
+        }
+    }
+    
+    private func addToGroceryList(_ itemName: String) async {
+        do {
+            _ = try await APIService.shared.addGroceryItem(name: itemName)
+            ToastCenter.shared.show("✓ Added to grocery list", type: .success)
+        } catch {
+            ToastCenter.shared.show("Failed to add to grocery list", type: .error)
         }
     }
     
@@ -177,6 +223,7 @@ struct CheckoutView: View {
 }
 
 struct CheckoutHistoryView: View {
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var history: [CheckoutHistoryItem] = []
     @State private var isLoading = true
     @Environment(\.dismiss) private var dismiss
@@ -205,7 +252,8 @@ struct CheckoutHistoryView: View {
                                         .foregroundColor(.secondary)
                                 }
                                 
-                                Text("by \(item.userName)")
+                                // Smart actor display
+                                Text(getActorDisplay(for: item))
                                     .font(.caption)
                                     .foregroundColor(.ppPurple)
                             }
@@ -239,9 +287,28 @@ struct CheckoutHistoryView: View {
         }
     }
     
+    private func getActorDisplay(for item: CheckoutHistoryItem) -> String {
+        // Check if this checkout was by current user
+        if item.userId == authViewModel.currentUser?.id {
+            return "by You"
+        }
+        // Otherwise show the name (with fallback handled in model)
+        return "by \(item.userName)"
+    }
+    
     private func loadHistory() async {
+        isLoading = true
         do {
             let response = try await APIService.shared.getCheckoutHistory()
+            
+            #if DEBUG
+            print("📦 [CheckoutHistory] Fetched \(response.history.count) items")
+            if let first = response.history.first {
+                print("📦 [CheckoutHistory] First item - userId: \(first.userId), userName: '\(first.userName)'")
+            }
+            #endif
+            
+            // CRITICAL: Replace array, don't append
             history = response.history
         } catch {
             print("Failed to load history: \(error)")

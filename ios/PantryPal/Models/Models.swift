@@ -332,6 +332,8 @@ struct CheckoutScanResponse: Codable, Sendable, Equatable {
     let itemDeleted: Bool?
     let inventoryItem: InventoryItem?
     let checkoutId: String?
+    let addedToGrocery: Bool? // True if Premium auto-added to grocery
+    let productName: String? // Full product name for grocery add prompt
     
     // Error responses
     let error: String?
@@ -363,7 +365,17 @@ struct CheckoutHistoryItem: Codable, Identifiable, Sendable {
     let productName: String
     let productBrand: String?
     let productImage: String?
-    let userName: String
+    private let userNameRaw: String?
+    
+    // Computed property with fallback logic
+    var userName: String {
+        // If we have a valid name, use it
+        if let name = userNameRaw, !name.trimmingCharacters(in: .whitespaces).isEmpty {
+            return name
+        }
+        // Fallback to generic text
+        return "Household member"
+    }
     
     enum CodingKeys: String, CodingKey {
         case id, quantity
@@ -375,7 +387,7 @@ struct CheckoutHistoryItem: Codable, Identifiable, Sendable {
         case productName = "product_name"
         case productBrand = "product_brand"
         case productImage = "product_image"
-        case userName = "user_name"
+        case userNameRaw = "user_name"
     }
 }
 
@@ -459,12 +471,29 @@ struct GroceryItem: Codable, Identifiable, Sendable {
     let id: Int
     let householdId: String
     let name: String
+    let brand: String?
+    let upc: String?
     let createdAt: String?
     
     enum CodingKeys: String, CodingKey {
         case id
         case householdId = "household_id"
         case name
+        case brand
+        case upc
         case createdAt = "created_at"
+    }
+    
+    var displayName: String {
+        if let brand = brand, !brand.isEmpty {
+            return "\(brand) – \(name)"
+        }
+        return name
+    }
+    
+    var normalizedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
     }
 }

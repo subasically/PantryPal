@@ -445,12 +445,23 @@ router.put('/:id', (req, res) => {
             return res.status(404).json({ error: 'Inventory item not found' });
         }
 
-        // Verify location if provided
-        if (locationId) {
-            const location = db.prepare('SELECT id FROM locations WHERE id = ? AND household_id = ?').get(locationId, householdId);
-            if (!location) {
-                return res.status(404).json({ error: 'Location not found' });
-            }
+        // Location is REQUIRED for all inventory items
+        const finalLocationId = locationId !== undefined ? locationId : item.location_id;
+        if (!finalLocationId) {
+            return res.status(400).json({ 
+                error: 'Location is required for inventory items',
+                code: 'LOCATION_REQUIRED'
+            });
+        }
+
+        // Verify location exists and belongs to household
+        const location = db.prepare('SELECT id FROM locations WHERE id = ? AND household_id = ?')
+            .get(finalLocationId, householdId);
+        if (!location) {
+            return res.status(400).json({ 
+                error: 'Invalid location or location does not belong to this household',
+                code: 'INVALID_LOCATION'
+            });
         }
 
         db.prepare(`

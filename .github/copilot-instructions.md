@@ -50,8 +50,15 @@ We are currently in the **Revenue Validation** phase.
 - **Paywalls:**
   - Trigger immediately on client-side when hitting limits (don't wait for server 403 if possible).
   - Listen for `Notification.Name("showPaywall")`.
-- **SwiftData Models:** Always import `SwiftData` when using `FetchDescriptor`, `@Query`, or `modelContext.fetch()`.
-- **API Errors:** `APIError` enum is defined at file level (NOT inside APIService class). Import and use as `APIError`, not `APIService.APIError`.
+- **SwiftData Import:** 
+  - **ALWAYS** add `import SwiftData` when using `FetchDescriptor`, `@Query`, or `modelContext.fetch()`.
+  - Common error: "Cannot find type 'FetchDescriptor' in scope" = missing SwiftData import.
+  - Files that need it: ViewModels with `@Query`, Services with `modelContext`, Models with `@Model`.
+- **API Errors:** 
+  - `APIError` enum is defined at **FILE LEVEL** (NOT inside APIService class).
+  - **Correct:** `import Foundation` then use `APIError.unauthorized`
+  - **Wrong:** `APIService.APIError.unauthorized` (will not compile)
+  - Definition location: `ios/PantryPal/Services/APIService.swift` (lines 3-21, before class definition)
 
 ## ⚠️ Known "Gotchas"
 1. **New Users:** A new user created via Apple Sign In does **NOT** have a household immediately. They must create or join one.
@@ -61,6 +68,8 @@ We are currently in the **Revenue Validation** phase.
 5. **Server Deployment:** Server directory on VPS is `/root/pantrypal-server` (NOT a git repo). Use `scp` to copy files, then rebuild container.
 6. **iOS Properties:** AuthViewModel uses `currentUser` and `currentHousehold` (NOT `user` or `householdInfo`).
 7. **SwiftData Models:** Grocery items use `SDGroceryItem`. Inventory uses `SDInventoryItem`. Both are cached locally for offline support.
+8. **SwiftData Import Required:** Files using `@Query`, `FetchDescriptor`, or `modelContext` MUST import SwiftData. Missing this import causes "Cannot find type" errors.
+9. **APIError is File-Level:** `APIError` enum is NOT nested in `APIService` class. Use `APIError.unauthorized`, not `APIService.APIError.unauthorized`.
 
 ## 📝 Current Task Context
 - ✅ New User Onboarding Flow complete

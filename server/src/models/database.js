@@ -43,6 +43,28 @@ function initializeDatabase() {
     } catch (error) {
         console.error('Migration error (premium_expires_at):', error);
     }
+    
+    // Migration: Add brand and upc to grocery_items if they don't exist
+    try {
+        const tableInfo = db.prepare("PRAGMA table_info(grocery_items)").all();
+        const hasBrand = tableInfo.some(col => col.name === 'brand');
+        const hasUpc = tableInfo.some(col => col.name === 'upc');
+        
+        if (!hasBrand) {
+            console.log('Migrating: Adding brand column to grocery_items table...');
+            db.prepare('ALTER TABLE grocery_items ADD COLUMN brand TEXT').run();
+            console.log('Migration successful: brand added');
+        }
+        
+        if (!hasUpc) {
+            console.log('Migrating: Adding upc column to grocery_items table...');
+            db.prepare('ALTER TABLE grocery_items ADD COLUMN upc TEXT').run();
+            db.prepare('CREATE INDEX IF NOT EXISTS idx_grocery_items_upc ON grocery_items(upc)').run();
+            console.log('Migration successful: upc added');
+        }
+    } catch (error) {
+        console.error('Migration error (grocery_items brand/upc):', error);
+    }
 
     console.log('Database initialized successfully');
 }

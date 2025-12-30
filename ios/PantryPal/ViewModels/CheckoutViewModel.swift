@@ -59,6 +59,8 @@ final class CheckoutViewModel {
                 itemDeleted: false,
                 inventoryItem: nil,
                 checkoutId: nil,
+                addedToGrocery: nil,
+                productName: product.name,
                 error: "Item not in inventory",
                 found: true,
                 inStock: false,
@@ -101,6 +103,8 @@ final class CheckoutViewModel {
             itemDeleted: itemDeleted,
             inventoryItem: itemDeleted ? nil : item.toDomain(),
             checkoutId: UUID().uuidString, // Local ID
+            addedToGrocery: nil, // Client-side doesn't know yet, server will handle
+            productName: product.name,
             error: nil,
             found: true,
             inStock: true,

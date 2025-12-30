@@ -38,9 +38,12 @@
 		2F3780172F031DCB006F4E33 /* GroceryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780162F031DCB006F4E33 /* GroceryListView.swift */; };
 		2F3780192F0431EB006F4E33 /* LastUsedLocationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780182F0431EB006F4E33 /* LastUsedLocationStore.swift */; };
 		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
+		7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */; };
 		933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */; };
 		A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */; };
 		B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4A7C84F0B02C27FF31131A /* ToastView.swift */; };
+		BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */; };
+		EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60392A419ED813B3C8B0683E /* ToastCenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,8 +81,11 @@
 		2F3780162F031DCB006F4E33 /* GroceryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListView.swift; sourceTree = "<group>"; };
 		2F3780182F0431EB006F4E33 /* LastUsedLocationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastUsedLocationStore.swift; sourceTree = "<group>"; };
 		2F74C56F2EDE639E006E985C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastHostView.swift; sourceTree = "<group>"; };
 		3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationsSettingsView.swift; sourceTree = "<group>"; };
 		52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CheckoutView.swift; sourceTree = "<group>"; };
+		6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppTextField.swift; sourceTree = "<group>"; };
+		60392A419ED813B3C8B0683E /* ToastCenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastCenter.swift; sourceTree = "<group>"; };
 		ED4A7C84F0B02C27FF31131A /* ToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -153,6 +159,8 @@
 				52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */,
 				3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */,
 				116 /* HouseholdSharingView.swift */,
+				6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */,
+				3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -180,6 +188,7 @@
 				112 /* BiometricAuthService.swift */,
 				113 /* UserPreferences.swift */,
 				114 /* NotificationService.swift */,
+				60392A419ED813B3C8B0683E /* ToastCenter.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -303,6 +312,9 @@
 				933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */,
 				2F377FFA2EFB7975006F4E33 /* SplashView.swift in Sources */,
 				115 /* HouseholdSharingView.swift in Sources */,
+				7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */,
+				EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */,
+				BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -439,7 +451,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20251229173000;
+				CURRENT_PROJECT_VERSION = 7;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -454,7 +466,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -474,7 +486,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20251229173000;
+				CURRENT_PROJECT_VERSION = 7;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -489,7 +501,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

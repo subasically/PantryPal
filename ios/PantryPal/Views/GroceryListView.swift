@@ -10,7 +10,7 @@ struct GroceryListView: View {
     @FocusState private var isInputFocused: Bool
     
     private var isPremium: Bool {
-        authViewModel.currentUser?.householdId != nil && authViewModel.currentHousehold?.isPremium == true
+        authViewModel.currentHousehold?.isPremiumActive ?? false
     }
     
     var body: some View {
@@ -57,7 +57,7 @@ struct GroceryListView: View {
                     Image(systemName: "cart")
                         .foregroundStyle(.secondary)
                     
-                    Text(item.name)
+                    Text(item.displayName)
                         .font(.body)
                     
                     Spacer()
@@ -89,28 +89,36 @@ struct GroceryListView: View {
             
             if isPremium {
                 VStack(spacing: 8) {
-                    Text("Add items manually or let PantryPal auto-add them when you run out.")
+                    Text("PantryPal will auto-add items to your Grocery List when you run out.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            } else {
+                VStack(spacing: 12) {
+                    Text("Add items manually, or upgrade to Premium to auto-add them when you run out.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                     
-                    HStack(spacing: 4) {
-                        Image(systemName: "sparkles")
-                            .font(.caption)
-                        Text("Premium Auto-Add Active")
-                            .font(.caption)
+                    Button {
+                        // Trigger paywall
+                        NotificationCenter.default.post(name: .showPaywall, object: nil)
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "star.fill")
+                                .font(.caption)
+                            Text("Auto-add is a Premium feature")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.ppPurple)
+                        .clipShape(Capsule())
                     }
-                    .foregroundStyle(.blue)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(.blue.opacity(0.1))
-                    .clipShape(Capsule())
                 }
-            } else {
-                Text("Add items manually to your list.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
             }
             
             Button {
@@ -128,15 +136,17 @@ struct GroceryListView: View {
     private var addItemSheet: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                TextField("Item name", text: $newItemName)
-                    .textFieldStyle(.roundedBorder)
-                    .focused($isInputFocused)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.words)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        addItem()
-                    }
+                AppTextField(
+                    placeholder: "Item name",
+                    text: $newItemName,
+                    autocapitalization: .words,
+                    autocorrectionDisabled: true
+                )
+                .focused($isInputFocused)
+                .submitLabel(.done)
+                .onSubmit {
+                    addItem()
+                }
                 
                 if let error = viewModel.errorMessage {
                     Text(error)

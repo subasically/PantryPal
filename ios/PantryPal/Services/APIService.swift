@@ -351,11 +351,13 @@ final class APIService: Sendable {
         return try await request(endpoint: "/grocery", method: "GET")
     }
     
-    func addGroceryItem(name: String) async throws -> GroceryItem {
+    func addGroceryItem(name: String, brand: String? = nil, upc: String? = nil) async throws -> GroceryItem {
         struct AddRequest: Codable, Sendable {
             let name: String
+            let brand: String?
+            let upc: String?
         }
-        return try await request(endpoint: "/grocery", method: "POST", body: AddRequest(name: name))
+        return try await request(endpoint: "/grocery", method: "POST", body: AddRequest(name: name, brand: brand, upc: upc))
     }
     
     func removeGroceryItem(id: Int) async throws {
@@ -363,6 +365,27 @@ final class APIService: Sendable {
             let success: Bool
         }
         let _: DeleteResponse = try await request(endpoint: "/grocery/\(id)", method: "DELETE")
+    }
+    
+    func removeGroceryItemByUPC(upc: String) async throws -> Bool {
+        struct DeleteResponse: Codable, Sendable {
+            let success: Bool
+            let removed: Bool
+            let count: Int
+        }
+        let response: DeleteResponse = try await request(endpoint: "/grocery/by-upc/\(upc)", method: "DELETE")
+        return response.removed
+    }
+    
+    func removeGroceryItemByName(normalizedName: String) async throws -> Bool {
+        struct DeleteResponse: Codable, Sendable {
+            let success: Bool
+            let removed: Bool
+            let count: Int
+        }
+        let encodedName = normalizedName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? normalizedName
+        let response: DeleteResponse = try await request(endpoint: "/grocery/by-name/\(encodedName)", method: "DELETE")
+        return response.removed
     }
     
     // MARK: - Admin (DEBUG ONLY)

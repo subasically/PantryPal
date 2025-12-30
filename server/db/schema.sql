@@ -115,6 +115,8 @@ CREATE TABLE IF NOT EXISTS grocery_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     household_id TEXT NOT NULL,
     name TEXT NOT NULL,
+    brand TEXT,
+    upc TEXT,
     normalized_name TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (household_id) REFERENCES households(id),
@@ -125,6 +127,7 @@ CREATE INDEX IF NOT EXISTS idx_invite_codes_code ON invite_codes(code);
 CREATE INDEX IF NOT EXISTS idx_invite_codes_household ON invite_codes(household_id);
 CREATE INDEX IF NOT EXISTS idx_grocery_items_household ON grocery_items(household_id);
 CREATE INDEX IF NOT EXISTS idx_grocery_items_normalized ON grocery_items(normalized_name);
+CREATE INDEX IF NOT EXISTS idx_grocery_items_upc ON grocery_items(upc);
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_products_upc ON products(upc);

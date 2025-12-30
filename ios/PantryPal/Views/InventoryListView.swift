@@ -5,6 +5,7 @@ struct InventoryListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = InventoryViewModel()
+    @State private var groceryViewModel = GroceryViewModel()
     
     @State private var showingScanner = false
     @State private var showingAddCustom = false
@@ -15,10 +16,9 @@ struct InventoryListView: View {
     @State private var searchText = ""
     @State private var selectedFilter: InventoryFilter = .all
     
-    // Toast state
-    @State private var showToast = false
-    @State private var toastMessage = ""
-    @State private var toastType: ToastView.ToastType = .success
+    // Grocery add confirmation (for Free users when last item removed)
+    @State private var showGroceryPrompt = false
+    @State private var pendingGroceryItem: String?
     
     // Polling timer
     @State private var pollingTimer: Timer?
@@ -124,7 +124,9 @@ struct InventoryListView: View {
                         Task {
                             let success = await viewModel.addSmartItem(name: name, upc: upc, expirationDate: date)
                             if success {
-                                showSuccessToast("Added \(name) to pantry!")
+                                ToastCenter.shared.show("Added \(name) to pantry!", type: .success)
+                                // Auto-remove from grocery if item was restocked
+                                await tryAutoRemoveFromGrocery(name: name, upc: upc)
                             } else {
                                 // Error is handled in viewModel.errorMessage
                             }
@@ -134,7 +136,11 @@ struct InventoryListView: View {
                     .presentationDetents([.large])
                 } else {
                     ScannerSheet(viewModel: $viewModel, isPresented: $showingScanner, onItemAdded: { message in
-                        showSuccessToast(message.contains("Added") || message.contains("Updated") ? message : "Added \(message) to pantry!")
+                        ToastCenter.shared.show(message.contains("Added") || message.contains("Updated") ? message : "Added \(message) to pantry!", type: .success)
+                        // Trigger auto-remove check after scanner success
+                        Task {
+                            await checkRecentlyAddedForGroceryRemoval()
+                        }
                     })
                     .environment(authViewModel)
                     .presentationDetents([.large])
@@ -142,7 +148,11 @@ struct InventoryListView: View {
             }
             .sheet(isPresented: $showingAddCustom) {
                 AddCustomItemView(viewModel: $viewModel, isPresented: $showingAddCustom, onItemAdded: { name in
-                    showSuccessToast("Added \(name) to pantry!")
+                    ToastCenter.shared.show("Added \(name) to pantry!", type: .success)
+                    // Auto-remove from grocery if item was restocked
+                    Task {
+                        await tryAutoRemoveFromGrocery(name: name, upc: nil)
+                    }
                 })
                 .environment(authViewModel)
                 .presentationDetents([.large])
@@ -170,6 +180,7 @@ struct InventoryListView: View {
             .task {
                 print("🚀 [InventoryListView] View loaded, starting initial sync sequence")
                 viewModel.setContext(modelContext)
+                groceryViewModel.setModelContext(modelContext)
                 await viewModel.loadInventory()
                 await viewModel.loadLocations()
                 
@@ -217,16 +228,23 @@ struct InventoryListView: View {
                     Task { await viewModel.loadInventory() }
                 }
             }
-            .toast(isShowing: $showToast, message: toastMessage, type: toastType)
-        }
-    }
-    
-    private func showSuccessToast(_ message: String) {
-        toastMessage = message
-        toastType = .success
-        HapticService.shared.success()
-        withAnimation {
-            showToast = true
+            .alert("Add to Grocery List?", isPresented: $showGroceryPrompt) {
+                Button("Not now", role: .cancel) {
+                    pendingGroceryItem = nil
+                }
+                Button("Add", role: .none) {
+                    if let itemName = pendingGroceryItem {
+                        Task {
+                            await addToGroceryList(itemName)
+                        }
+                    }
+                    pendingGroceryItem = nil
+                }
+            } message: {
+                if let itemName = pendingGroceryItem {
+                    Text("You're out of \(itemName). Add it to your grocery list?")
+                }
+            }
         }
     }
     
@@ -274,6 +292,106 @@ struct InventoryListView: View {
         } catch {
             print("❌ [InventoryListView] Background polling sync failed: \(error)")
         }
+    }
+    
+    private func handleDecrement(item: InventoryItem) async {
+        print("🛒 [GroceryLogic] handleDecrement called for: \(item.displayName), current qty: \(item.quantity)")
+        
+        // Decrement will happen, so check if THIS decrement makes it zero
+        let willBeZero = item.quantity == 1
+        
+        if willBeZero {
+            print("🛒 [GroceryLogic] This decrement will make quantity zero - treating as last item")
+            await handleItemRemoval(item: item)
+        } else {
+            print("🛒 [GroceryLogic] Regular decrement, quantity will be: \(item.quantity - 1)")
+            await viewModel.adjustQuantity(id: item.id, adjustment: -1)
+        }
+    }
+    
+    private func handleItemRemoval(item: InventoryItem) async {
+        let isPremium = authViewModel.currentHousehold?.isPremiumActive ?? false
+        let itemName = item.displayName
+        let wasLastItem = item.quantity == 1
+        
+        print("🛒 [GroceryLogic] handleItemRemoval called")
+        print("🛒 [GroceryLogic] - Item: \(itemName), Quantity: \(item.quantity)")
+        print("🛒 [GroceryLogic] - isPremium: \(isPremium)")
+        print("🛒 [GroceryLogic] - wasLastItem: \(wasLastItem)")
+        
+        // Perform the deletion
+        await viewModel.adjustQuantity(id: item.id, adjustment: -1)
+        
+        // Trigger grocery logic if this was the last item
+        if wasLastItem {
+            print("🛒 [GroceryLogic] Last item detected, triggering handleItemHitZero")
+            await handleItemHitZero(itemName: itemName, isPremium: isPremium)
+        } else {
+            print("🛒 [GroceryLogic] Not last item, no grocery action")
+        }
+    }
+    
+    private func handleItemHitZero(itemName: String, isPremium: Bool) async {
+        print("🛒 [GroceryLogic] handleItemHitZero called")
+        print("🛒 [GroceryLogic] - itemName: \(itemName)")
+        print("🛒 [GroceryLogic] - isPremium: \(isPremium)")
+        
+        // Show confirmation prompt for ALL users (Premium and Free)
+        print("🛒 [GroceryLogic] Showing confirmation prompt for: \(itemName)")
+        pendingGroceryItem = itemName
+        showGroceryPrompt = true
+    }
+    
+    private func addToGroceryList(_ itemName: String) async {
+        print("🛒 [GroceryAdd] Starting addToGroceryList for: \(itemName)")
+        do {
+            _ = try await APIService.shared.addGroceryItem(name: itemName)
+            print("🛒 [GroceryAdd] ✅ Successfully added: \(itemName)")
+            ToastCenter.shared.show("✓ Added to grocery list", type: .success)
+        } catch let error as APIError {
+            print("🛒 [GroceryAdd] ❌ APIError: \(error)")
+            ToastCenter.shared.show("Failed to add to grocery list", type: .error)
+        } catch {
+            print("🛒 [GroceryAdd] ❌ Unknown error: \(error)")
+            ToastCenter.shared.show("Failed to add to grocery list", type: .error)
+        }
+    }
+    
+    /// Attempts to auto-remove from grocery list when inventory is restocked
+    private func attemptGroceryAutoRemove(forItem item: InventoryItem) async {
+        guard item.quantity > 0 else { return }
+        
+        let removed = await groceryViewModel.attemptAutoRemove(
+            upc: item.productUpc,
+            name: item.productName ?? item.displayName,
+            brand: item.productBrand
+        )
+        
+        if removed {
+            let displayName = item.displayName
+            ToastCenter.shared.show("Removed \(displayName) from grocery list", type: .info)
+        }
+    }
+    
+    /// Try auto-remove using name and UPC
+    private func tryAutoRemoveFromGrocery(name: String, upc: String?) async {
+        let removed = await groceryViewModel.attemptAutoRemove(
+            upc: upc,
+            name: name,
+            brand: nil
+        )
+        
+        if removed {
+            ToastCenter.shared.show("Removed from grocery list", type: .info)
+        }
+    }
+    
+    /// Check recently added items (fallback for scanner sheet)
+    private func checkRecentlyAddedForGroceryRemoval() async {
+        // After a successful add, check the most recent items in inventory
+        // This is a fallback since scanner doesn't give us item details
+        guard let recentItem = viewModel.items.first else { return }
+        await attemptGroceryAutoRemove(forItem: recentItem)
     }
     
     private var emptyStateContent: some View {
@@ -350,9 +468,19 @@ struct InventoryListView: View {
             // Inventory items
             Section {
                 ForEach(filteredItems) { item in
-                    InventoryItemRow(item: item, viewModel: $viewModel, onEdit: {
-                        editingItem = item
-                    })
+                    InventoryItemRow(
+                        item: item,
+                        viewModel: $viewModel,
+                        onEdit: {
+                            editingItem = item
+                        },
+                        onRemove: { item in
+                            await handleItemRemoval(item: item)
+                        },
+                        onDecrement: { item in
+                            await handleDecrement(item: item)
+                        }
+                    )
                 }
                 .onDelete { indexSet in
                     Task {
@@ -370,6 +498,8 @@ struct InventoryItemRow: View {
     let item: InventoryItem
     @Binding var viewModel: InventoryViewModel
     var onEdit: () -> Void = {}
+    var onRemove: (InventoryItem) async -> Void // Handler for full removal
+    var onDecrement: (InventoryItem) async -> Void // Handler for decrement (may trigger grocery logic)
     @State private var showDeleteConfirmation = false
     
     var body: some View {
@@ -427,7 +557,7 @@ struct InventoryItemRow: View {
                             HapticService.shared.warning()
                         } else {
                             HapticService.shared.lightImpact()
-                            Task { await viewModel.adjustQuantity(id: item.id, adjustment: -1) }
+                            Task { await onDecrement(item) }
                         }
                     }) {
                         Image(systemName: "minus.circle.fill")
@@ -459,7 +589,9 @@ struct InventoryItemRow: View {
         .alert("Remove Item?", isPresented: $showDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Remove", role: .destructive) {
-                Task { await viewModel.adjustQuantity(id: item.id, adjustment: -1) }
+                Task {
+                    await onRemove(item)
+                }
             }
         } message: {
             Text("This will remove \"\(item.displayName)\" from your pantry.")
@@ -491,7 +623,7 @@ struct ScannerSheet: View {
     @State private var pendingUPC: String?
     @State private var lookupResult: UPCLookupResponse?
     @State private var isLookingUp = false
-    @State private var selectedLocationId: String?
+    @State private var selectedLocationId: String = ""
     
     // Custom product fields for inline entry
     @State private var customName = ""
@@ -560,14 +692,14 @@ struct ScannerSheet: View {
             selectDefaultLocation()
         }
         .onChange(of: selectedLocationId) { _, newLocationId in
-            if let locationId = newLocationId {
-                LastUsedLocationStore.shared.setLastLocation(locationId, for: authViewModel.currentHousehold?.id)
+            if !newLocationId.isEmpty {
+                LastUsedLocationStore.shared.setLastLocation(newLocationId, for: authViewModel.currentHousehold?.id)
             }
         }
     }
     
     private func selectDefaultLocation() {
-        if selectedLocationId == nil {
+        if selectedLocationId.isEmpty {
             let householdId = authViewModel.currentHousehold?.id
             let defaultLocationId = viewModel.locations.first(where: { $0.name == "Pantry" })?.id ?? viewModel.locations.first?.id ?? "pantry"
             
@@ -671,24 +803,14 @@ struct ScannerSheet: View {
                                 .foregroundColor(.secondary)
                             
                             Picker("Location", selection: $selectedLocationId) {
-                                Text("Select").tag(nil as String?)
                                 ForEach(viewModel.locations) { location in
-                                    Text(location.name).tag(location.id as String?)
+                                    Text(location.name).tag(location.id)
                                 }
                             }
                             .labelsHidden()
-                            .tint(selectedLocationId == nil ? .red : .primary)
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .fixedSize()
-                            
-                            // Validation indicator
-                            if selectedLocationId == nil {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                                    .fixedSize()
-                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -771,7 +893,7 @@ struct ScannerSheet: View {
                     .foregroundColor(.white)
                     .cornerRadius(12)
                 }
-                .disabled(isAddingCustom || selectedLocationId == nil || (isProductNotFound && !canAddCustomProduct))
+                .disabled(isAddingCustom || (isProductNotFound && !canAddCustomProduct))
                 
                 HStack(spacing: 12) {
                     // Secondary: Add (and close)
@@ -786,7 +908,7 @@ struct ScannerSheet: View {
                             .foregroundColor(.ppPurple)
                             .cornerRadius(12)
                     }
-                    .disabled(isAddingCustom || selectedLocationId == nil || (isProductNotFound && !canAddCustomProduct))
+                    .disabled(isAddingCustom || (isProductNotFound && !canAddCustomProduct))
                     
                     // Tertiary: Cancel
                     Button(action: {
@@ -817,8 +939,7 @@ struct ScannerSheet: View {
     }
     
     private var locationValidationMessage: String? {
-        guard selectedLocationId == nil else { return nil }
-        return "Please select a location"
+        return nil // Location is now always valid (never nil)
     }
     
     private func resetScannerState() {
@@ -858,19 +979,19 @@ struct ScannerSheet: View {
             )
             
             // Add to inventory
-            guard let locationId = selectedLocationId else {
+            guard !selectedLocationId.isEmpty else {
                 viewModel.errorMessage = "Please select a location"
                 isAddingCustom = false
                 return
             }
             
-            UserPreferences.shared.lastUsedLocationId = locationId
+            UserPreferences.shared.lastUsedLocationId = selectedLocationId
             
             _ = await viewModel.addCustomItem(
                 product: product,
                 quantity: quantity,
                 expirationDate: showingDatePicker ? expirationDate : nil,
-                locationId: locationId
+                locationId: selectedLocationId
             )
             
             let productName = customName.trimmingCharacters(in: .whitespaces)
@@ -890,8 +1011,8 @@ struct ScannerSheet: View {
     }
     
     private func addExistingProduct(upc: String, keepScanning: Bool) async {
-        guard let locationId = selectedLocationId else { return }
-        UserPreferences.shared.lastUsedLocationId = locationId
+        guard !selectedLocationId.isEmpty else { return }
+        UserPreferences.shared.lastUsedLocationId = selectedLocationId
         
         // Check if user edited the product
         if !editedName.isEmpty {
@@ -910,7 +1031,7 @@ struct ScannerSheet: View {
                     product: product,
                     quantity: quantity,
                     expirationDate: showingDatePicker ? expirationDate : nil,
-                    locationId: locationId
+                    locationId: selectedLocationId
                 )
                 
                 onItemAdded?(editedName)
@@ -930,7 +1051,7 @@ struct ScannerSheet: View {
                 upc: upc,
                 quantity: quantity,
                 expirationDate: showingDatePicker ? expirationDate : nil,
-                locationId: locationId
+                locationId: selectedLocationId
             )
             
             if response?.requiresCustomProduct == true {
@@ -1006,24 +1127,20 @@ struct AddCustomItemView: View {
     @State private var expirationDate = Date()
     @State private var isLoading = false
     @State private var showingScanner = false
-    @State private var selectedLocationId: String?
+    @State private var selectedLocationId: String = ""
     
     private var canSubmit: Bool {
-        !name.isEmpty && selectedLocationId != nil && !isLoading
+        !name.isEmpty && !selectedLocationId.isEmpty && !isLoading
     }
     
     private var validationMessage: String? {
         if name.isEmpty {
             return nil // Don't show validation until user tries to submit
         }
-        if selectedLocationId == nil {
+        if selectedLocationId.isEmpty {
             return "Please select a storage location"
         }
         return nil
-    }
-    
-    private var showLocationFooter: Bool {
-        !viewModel.locations.isEmpty && selectedLocationId == nil
     }
     
     @ViewBuilder
@@ -1078,10 +1195,9 @@ struct AddCustomItemView: View {
                     if viewModel.locations.isEmpty {
                         emptyLocationsView
                     } else {
-                        Picker("Storage Location *", selection: $selectedLocationId) {
-                            Text("Select Location").tag(nil as String?)
+                        Picker("Storage Location", selection: $selectedLocationId) {
                             ForEach(viewModel.locations) { location in
-                                Text(location.fullPath).tag(location.id as String?)
+                                Text(location.fullPath).tag(location.id)
                             }
                         }
                         
@@ -1090,10 +1206,8 @@ struct AddCustomItemView: View {
                 } header: {
                     Text("Location")
                 } footer: {
-                    if showLocationFooter {
-                        Text("Location is required to add items to your inventory")
-                            .font(.caption)
-                    }
+                    Text("Location is required to add items to your inventory")
+                        .font(.caption)
                 }
                 
                 Section("Inventory") {
@@ -1132,8 +1246,8 @@ struct AddCustomItemView: View {
                 selectDefaultLocation()
             }
             .onChange(of: selectedLocationId) { _, newLocationId in
-                if let locationId = newLocationId {
-                    LastUsedLocationStore.shared.setLastLocation(locationId, for: authViewModel.currentHousehold?.id)
+                if !newLocationId.isEmpty {
+                    LastUsedLocationStore.shared.setLastLocation(newLocationId, for: authViewModel.currentHousehold?.id)
                 }
             }
             .sheet(isPresented: $showingScanner) {
@@ -1143,7 +1257,7 @@ struct AddCustomItemView: View {
     }
     
     private func selectDefaultLocation() {
-        if selectedLocationId == nil {
+        if selectedLocationId.isEmpty {
             let householdId = authViewModel.currentHousehold?.id
             let defaultLocationId = viewModel.locations.first(where: { $0.name == "Pantry" })?.id ?? viewModel.locations.first?.id ?? "pantry"
             
@@ -1158,7 +1272,7 @@ struct AddCustomItemView: View {
     private func saveItem() async {
         isLoading = true
         
-        guard let locationId = selectedLocationId else {
+        guard !selectedLocationId.isEmpty else {
             viewModel.errorMessage = "Please select a location"
             isLoading = false
             return
@@ -1177,7 +1291,7 @@ struct AddCustomItemView: View {
                 product: product,
                 quantity: quantity,
                 expirationDate: showingDatePicker ? expirationDate : nil,
-                locationId: locationId
+                locationId: selectedLocationId
             )
             
             if success {
@@ -1203,8 +1317,18 @@ struct EditItemView: View {
     @State private var hasExpiration: Bool
     @State private var expirationDate: Date
     @State private var notes: String
-    @State private var selectedLocationId: String?
+    @State private var selectedLocationId: String
     @State private var isLoading = false
+    @State private var validationError: String?
+    
+    private var canSave: Bool {
+        // Location must be valid - cannot be empty
+        guard !selectedLocationId.isEmpty else {
+            return false
+        }
+        // Must be a valid location from the list
+        return viewModel.locations.contains(where: { $0.id == selectedLocationId })
+    }
     
     init(item: InventoryItem, viewModel: Binding<InventoryViewModel>, editingItem: Binding<InventoryItem?>) {
         self.item = item
@@ -1213,7 +1337,10 @@ struct EditItemView: View {
         self._quantity = State(initialValue: item.quantity)
         self._hasExpiration = State(initialValue: item.expirationDate != nil)
         self._notes = State(initialValue: item.notes ?? "")
-        self._selectedLocationId = State(initialValue: item.locationId)
+        
+        // Initialize location - use item's location or fallback to first available
+        let initialLocation = item.locationId ?? viewModel.wrappedValue.locations.first?.id ?? ""
+        self._selectedLocationId = State(initialValue: initialLocation)
         
         // Parse expiration date
         if let expDateStr = item.expirationDate {
@@ -1272,12 +1399,15 @@ struct EditItemView: View {
                         }
                     } else {
                         Picker("Storage Location", selection: $selectedLocationId) {
-                            Text("Select Location").tag(nil as String?)
                             ForEach(viewModel.locations) { location in
-                                Text(location.fullPath).tag(location.id as String?)
+                                Text(location.fullPath).tag(location.id)
                             }
                         }
                     }
+                    
+                    Text("Location is required for all inventory items")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
                 
                 Section("Expiration") {
@@ -1333,7 +1463,7 @@ struct EditItemView: View {
                     Button("Save") {
                         saveChanges()
                     }
-                    .disabled(isLoading)
+                    .disabled(isLoading || !canSave)
                 }
             }
             .overlay {
@@ -1348,7 +1478,21 @@ struct EditItemView: View {
     }
     
     private func saveChanges() {
+        // Validate location before saving
+        guard !selectedLocationId.isEmpty else {
+            validationError = "Location required"
+            HapticService.shared.error()
+            return
+        }
+        
+        guard viewModel.locations.contains(where: { $0.id == selectedLocationId }) else {
+            validationError = "Invalid location"
+            HapticService.shared.error()
+            return
+        }
+        
         isLoading = true
+        validationError = nil
         
         Task {
             await viewModel.updateItem(
