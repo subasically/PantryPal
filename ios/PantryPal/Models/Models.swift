@@ -49,10 +49,32 @@ struct Household: Codable, Identifiable, Sendable {
     let name: String
     let createdAt: String?
     let isPremium: Bool?
+    let premiumExpiresAt: String?
     
     enum CodingKeys: String, CodingKey {
         case id, name, isPremium
         case createdAt = "created_at"
+        case premiumExpiresAt = "premiumExpiresAt"
+    }
+    
+    // Helper to check if Premium is currently active (client-side validation)
+    var isPremiumActive: Bool {
+        guard let isPremium = isPremium, isPremium else {
+            return false
+        }
+        
+        // If no expiration date, Premium is active indefinitely
+        guard let expiresAtString = premiumExpiresAt else {
+            return true
+        }
+        
+        // Check if expiration date is in the future
+        let formatter = ISO8601DateFormatter()
+        guard let expiresAt = formatter.date(from: expiresAtString) else {
+            return isPremium // Fallback to isPremium if can't parse date
+        }
+        
+        return expiresAt > Date()
     }
 }
 

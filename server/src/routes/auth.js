@@ -212,11 +212,14 @@ router.get('/me', authenticateToken, (req, res) => {
     
     let household = null;
     if (user.household_id) {
-        const h = db.prepare('SELECT * FROM households WHERE id = ?').get(user.household_id);
+        const h = db.prepare('SELECT id, name, is_premium, premium_expires_at, created_at FROM households WHERE id = ?').get(user.household_id);
         if (h) {
             household = {
-                ...h,
-                isPremium: Boolean(h.is_premium)
+                id: h.id,
+                name: h.name,
+                isPremium: Boolean(h.is_premium),
+                premiumExpiresAt: h.premium_expires_at,
+                createdAt: h.created_at
             };
         }
     }

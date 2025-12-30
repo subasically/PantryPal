@@ -5,9 +5,44 @@ const { v4: uuidv4 } = require('uuid');
 const authenticateToken = require('../middleware/auth');
 const pushService = require('../services/pushNotifications');
 const { logSync } = require('../services/syncLogger');
+const { isHouseholdPremium } = require('../utils/premiumHelper');
 
 // All routes require authentication
 router.use(authenticateToken);
+
+// Helper: Auto-manage grocery list for Premium households
+function autoManageGrocery(householdId, productName, newQuantity, oldQuantity) {
+    try {
+        // Check if household is Premium (with expiration support)
+        if (!isHouseholdPremium(householdId)) {
+            return false; // Only auto-manage for Premium
+        }
+        
+        const normalizedName = productName.trim().toLowerCase().replace(/\s+/g, ' ');
+        
+        // If quantity went from >0 to 0, add to grocery
+        if (oldQuantity > 0 && newQuantity === 0) {
+            const existing = db.prepare(`
+                SELECT id FROM grocery_items
+                WHERE household_id = ? AND normalized_name = ?
+            `).get(householdId, normalizedName);
+            
+            if (!existing) {
+                db.prepare(`
+                    INSERT INTO grocery_items (household_id, name, normalized_name)
+                    VALUES (?, ?, ?)
+                `).run(householdId, productName.trim(), normalizedName);
+                console.log(`[Grocery] Auto-added "${productName}" to grocery list (Premium, checkout)`);
+                return true; // Item was added
+            }
+        }
+        
+        return false; // No action taken
+    } catch (error) {
+        console.error('Auto-manage grocery error (checkout):', error);
+        return false;
+    }
+}
 
 // Checkout an item by UPC (quick scan mode - reduces quantity by 1)
 router.post('/scan', (req, res) => {
@@ -74,6 +109,9 @@ router.post('/scan', (req, res) => {
 
         const now = new Date().toISOString();
         const checkoutId = uuidv4();
+        
+        const oldQuantity = inventoryItem.quantity;
+        const newQuantity = oldQuantity - 1;
 
         // Record checkout in history
         db.prepare(`
@@ -97,6 +135,15 @@ router.post('/scan', (req, res) => {
                 locationId: inventoryItem.location_id
             });
         }
+        
+        // Auto-manage grocery list for Premium (when quantity reaches 0)
+        const productFullName = product.brand ? `${product.brand} ${product.name}` : product.name;
+        const addedToGrocery = autoManageGrocery(
+            req.user.householdId, 
+            productFullName,
+            newQuantity,
+            oldQuantity
+        );
 
         // Get updated inventory item (or null if deleted)
         const updatedItem = inventoryItem.quantity > 1 
@@ -116,6 +163,14 @@ router.post('/scan', (req, res) => {
                 name: product.name,
                 brand: product.brand,
                 imageUrl: product.image_url
+            },
+            previousQuantity: inventoryItem.quantity,
+            newQuantity: inventoryItem.quantity - 1,
+            itemDeleted: inventoryItem.quantity <= 1,
+            inventoryItem: updatedItem,
+            checkoutId: checkoutId,
+            addedToGrocery: addedToGrocery // Flag for client to show confirmation or toast
+        });
             },
             previousQuantity: inventoryItem.quantity,
             newQuantity: inventoryItem.quantity - 1,

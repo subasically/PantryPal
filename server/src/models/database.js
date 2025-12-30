@@ -24,10 +24,24 @@ function initializeDatabase() {
             console.log('Migrating: Adding apple_id column to users table...');
             db.prepare('ALTER TABLE users ADD COLUMN apple_id TEXT').run();
             db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_apple_id ON users(apple_id)').run();
-            console.log('Migration successful');
+            console.log('Migration successful: apple_id added');
         }
     } catch (error) {
-        console.error('Migration error:', error);
+        console.error('Migration error (apple_id):', error);
+    }
+    
+    // Migration: Add premium_expires_at to households if it doesn't exist
+    try {
+        const tableInfo = db.prepare("PRAGMA table_info(households)").all();
+        const hasPremiumExpires = tableInfo.some(col => col.name === 'premium_expires_at');
+        
+        if (!hasPremiumExpires) {
+            console.log('Migrating: Adding premium_expires_at column to households table...');
+            db.prepare('ALTER TABLE households ADD COLUMN premium_expires_at DATETIME').run();
+            console.log('Migration successful: premium_expires_at added');
+        }
+    } catch (error) {
+        console.error('Migration error (premium_expires_at):', error);
     }
 
     console.log('Database initialized successfully');

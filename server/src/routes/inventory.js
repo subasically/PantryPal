@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../models/database');
 const authenticateToken = require('../middleware/auth');
 const { logSync } = require('../services/syncLogger');
+const { isHouseholdPremium, canAddItems, isOverFreeLimit, FREE_LIMIT } = require('../utils/premiumHelper');
 
 const router = express.Router();
 
@@ -11,9 +12,8 @@ router.use(authenticateToken);
 // Helper: Auto-manage grocery list for Premium households
 function autoManageGrocery(householdId, productName, newQuantity, oldQuantity) {
     try {
-        // Check if household is Premium
-        const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId);
-        if (!household || !household.is_premium) {
+        // Check if household is Premium (with expiration support)
+        if (!isHouseholdPremium(householdId)) {
             return; // Only auto-manage for Premium
         }
         
@@ -31,6 +31,7 @@ function autoManageGrocery(householdId, productName, newQuantity, oldQuantity) {
                     INSERT INTO grocery_items (household_id, name, normalized_name)
                     VALUES (?, ?, ?)
                 `).run(householdId, productName.trim(), normalizedName);
+                console.log(`[Grocery] Auto-added "${productName}" to grocery list (Premium)`);
             }
         }
         
@@ -40,6 +41,7 @@ function autoManageGrocery(householdId, productName, newQuantity, oldQuantity) {
                 DELETE FROM grocery_items
                 WHERE household_id = ? AND normalized_name = ?
             `).run(householdId, normalizedName);
+            console.log(`[Grocery] Auto-removed "${productName}" from grocery list (Premium)`);
         }
     } catch (error) {
         console.error('Auto-manage grocery error:', error);
@@ -121,22 +123,18 @@ router.get('/expired', (req, res) => {
     }
 });
 
-const FREE_LIMIT = 25;
-
 // Helper to check inventory limit
 function checkInventoryLimit(householdId) {
-    const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId);
-    if (household && household.is_premium) return true;
-
     const count = db.prepare('SELECT COUNT(*) as count FROM inventory WHERE household_id = ?').get(householdId).count;
-    return count < FREE_LIMIT;
+    return canAddItems(householdId, count);
 }
 
 // Helper to check write permissions (shared household requires premium)
 function checkWritePermission(householdId) {
-    const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId);
-    if (household && household.is_premium) return true;
+    // Premium households always have write permission
+    if (isHouseholdPremium(householdId)) return true;
 
+    // Free households can write if they have 1 or fewer members
     const memberCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?').get(householdId).count;
     return memberCount <= 1;
 }

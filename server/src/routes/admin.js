@@ -22,7 +22,7 @@ function adminAuth(req, res, next) {
 router.post('/households/:householdId/premium', adminAuth, (req, res) => {
     try {
         const { householdId } = req.params;
-        const { isPremium } = req.body;
+        const { isPremium, expiresAt } = req.body;
         
         if (typeof isPremium !== 'boolean') {
             return res.status(400).json({ error: 'isPremium must be a boolean' });
@@ -35,15 +35,21 @@ router.post('/households/:householdId/premium', adminAuth, (req, res) => {
         }
         
         // Update premium status
-        db.prepare('UPDATE households SET is_premium = ? WHERE id = ?')
-            .run(isPremium ? 1 : 0, householdId);
+        // If isPremium is true and expiresAt is provided, set it
+        // If isPremium is true and expiresAt is not provided, set to NULL (no expiration)
+        // If isPremium is false, clear expiration
+        const premiumExpiresAt = isPremium && expiresAt ? expiresAt : null;
         
-        console.log(`[Admin] Updated household ${household.name} (${householdId}) premium status to: ${isPremium}`);
+        db.prepare('UPDATE households SET is_premium = ?, premium_expires_at = ? WHERE id = ?')
+            .run(isPremium ? 1 : 0, premiumExpiresAt, householdId);
+        
+        console.log(`[Admin] Updated household ${household.name} (${householdId}) premium status to: ${isPremium}, expires: ${premiumExpiresAt || 'never'}`);
         
         res.json({
             householdId,
             name: household.name,
-            isPremium
+            isPremium,
+            premiumExpiresAt
         });
     } catch (error) {
         console.error('Admin premium toggle error:', error);
