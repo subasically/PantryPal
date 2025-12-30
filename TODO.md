@@ -34,6 +34,18 @@
 
 ## Post-MVP Features (After Revenue Validation)
 
+### Real-Time Sync (Multi-User)
+- [ ] **Decision:** Implement polling (30-60s) vs SSE vs WebSocket
+  - Current: Manual sync (pull-to-refresh, app open, after actions)
+  - Pain: Users don't see household changes until manual refresh
+  - Options evaluated:
+    - ✅ Polling: Simple, 1hr work, good enough
+    - ⏸️ SSE: Real-time, 1-2 days, medium complexity
+    - ⏸️ WebSocket: Best latency, 2-3 days, high complexity
+  - **Verdict:** Polling is sufficient for MVP+, validate need first
+  - Implementation: Timer-based sync in InventoryViewModel
+  - Optimization: Only when app active, stop on background
+
 ### Push Notifications
 - [ ] Push notification setup (APNs)
 - [ ] Device token registration
