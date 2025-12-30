@@ -36,6 +36,7 @@
 		2F3780132F01F56F006F4E33 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780122F01F56F006F4E33 /* PaywallView.swift */; };
 		2F3780152F031DC4006F4E33 /* GroceryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780142F031DC4006F4E33 /* GroceryViewModel.swift */; };
 		2F3780172F031DCB006F4E33 /* GroceryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780162F031DCB006F4E33 /* GroceryListView.swift */; };
+		2F3780192F0431EB006F4E33 /* LastUsedLocationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780182F0431EB006F4E33 /* LastUsedLocationStore.swift */; };
 		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
 		933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */; };
 		A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */; };
@@ -75,6 +76,7 @@
 		2F3780122F01F56F006F4E33 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		2F3780142F031DC4006F4E33 /* GroceryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryViewModel.swift; sourceTree = "<group>"; };
 		2F3780162F031DCB006F4E33 /* GroceryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListView.swift; sourceTree = "<group>"; };
+		2F3780182F0431EB006F4E33 /* LastUsedLocationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastUsedLocationStore.swift; sourceTree = "<group>"; };
 		2F74C56F2EDE639E006E985C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationsSettingsView.swift; sourceTree = "<group>"; };
 		52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CheckoutView.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 		306 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2F3780182F0431EB006F4E33 /* LastUsedLocationStore.swift */,
 				2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */,
 				2F3780012EFC6A97006F4E33 /* OCRService.swift */,
 				2F377FFD2EFC6621006F4E33 /* HapticService.swift */,
@@ -269,6 +272,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2F37800A2EFC726B006F4E33 /* CheckoutViewModel.swift in Sources */,
+				2F3780192F0431EB006F4E33 /* LastUsedLocationStore.swift in Sources */,
 				001 /* PantryPalApp.swift in Sources */,
 				002 /* Models.swift in Sources */,
 				2F37800C2EFC7274006F4E33 /* ActionQueueService.swift in Sources */,

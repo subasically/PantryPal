@@ -41,14 +41,14 @@ class LastUsedLocationStore {
     /// Get a safe default location ID, verifying it exists in the available locations
     /// - Parameters:
     ///   - householdId: The household ID
-    ///   - availableLocations: The list of available locations
+    ///   - availableLocations: The list of available locations (can be Location or LocationFlat)
     ///   - defaultLocationId: The fallback location ID (usually "pantry")
     /// - Returns: A valid location ID from the available locations
-    func getSafeDefaultLocation(
+    func getSafeDefaultLocation<T: Identifiable>(
         for householdId: String?,
-        availableLocations: [Location],
+        availableLocations: [T],
         defaultLocationId: String
-    ) -> String {
+    ) -> String where T.ID == String {
         // Try to get last used location
         if let lastLocationId = getLastLocation(for: householdId),
            availableLocations.contains(where: { $0.id == lastLocationId }) {
