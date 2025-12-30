@@ -433,6 +433,7 @@ struct InventoryItemRow: View {
 struct ScannerSheet: View {
     @Binding var viewModel: InventoryViewModel
     @Binding var isPresented: Bool
+    @Environment(AuthViewModel.self) private var authViewModel
     var onItemAdded: ((String) -> Void)?
     
     @State private var scannedCode: String?
@@ -506,23 +507,28 @@ struct ScannerSheet: View {
             }
         }
         .onAppear {
-            if selectedLocationId == nil {
-                selectedLocationId = UserPreferences.shared.lastUsedLocationId
-            }
             selectDefaultLocation()
         }
         .onChange(of: viewModel.locations) { _, _ in
             selectDefaultLocation()
         }
+        .onChange(of: selectedLocationId) { _, newLocationId in
+            if let locationId = newLocationId {
+                LastUsedLocationStore.shared.setLastLocation(locationId, for: authViewModel.currentHousehold?.id)
+            }
+        }
     }
     
     private func selectDefaultLocation() {
         if selectedLocationId == nil {
-            if let pantry = viewModel.locations.first(where: { $0.name == "Pantry" }) {
-                selectedLocationId = pantry.id
-            } else if let first = viewModel.locations.first {
-                selectedLocationId = first.id
-            }
+            let householdId = authViewModel.currentHousehold?.id
+            let defaultLocationId = viewModel.locations.first(where: { $0.name == "Pantry" })?.id ?? viewModel.locations.first?.id ?? "pantry"
+            
+            selectedLocationId = LastUsedLocationStore.shared.getSafeDefaultLocation(
+                for: householdId,
+                availableLocations: viewModel.locations,
+                defaultLocationId: defaultLocationId
+            )
         }
     }
     
@@ -909,6 +915,7 @@ struct ScannerSheet: View {
 struct AddCustomItemView: View {
     @Binding var viewModel: InventoryViewModel
     @Binding var isPresented: Bool
+    @Environment(AuthViewModel.self) private var authViewModel
     var prefilledUPC: String?
     var onItemAdded: ((String) -> Void)?
     
@@ -920,7 +927,7 @@ struct AddCustomItemView: View {
     @State private var expirationDate = Date()
     @State private var isLoading = false
     @State private var showingScanner = false
-    @State private var selectedLocationId: String? = UserPreferences.shared.lastUsedLocationId
+    @State private var selectedLocationId: String?
     
     var body: some View {
         NavigationStack {
@@ -985,6 +992,11 @@ struct AddCustomItemView: View {
             .onChange(of: viewModel.locations) { _, _ in
                 selectDefaultLocation()
             }
+            .onChange(of: selectedLocationId) { _, newLocationId in
+                if let locationId = newLocationId {
+                    LastUsedLocationStore.shared.setLastLocation(locationId, for: authViewModel.currentHousehold?.id)
+                }
+            }
             .sheet(isPresented: $showingScanner) {
                 UPCScannerSheet(scannedUPC: $upc, isPresented: $showingScanner)
             }
@@ -993,11 +1005,14 @@ struct AddCustomItemView: View {
     
     private func selectDefaultLocation() {
         if selectedLocationId == nil {
-            if let pantry = viewModel.locations.first(where: { $0.name == "Pantry" }) {
-                selectedLocationId = pantry.id
-            } else if let first = viewModel.locations.first {
-                selectedLocationId = first.id
-            }
+            let householdId = authViewModel.currentHousehold?.id
+            let defaultLocationId = viewModel.locations.first(where: { $0.name == "Pantry" })?.id ?? viewModel.locations.first?.id ?? "pantry"
+            
+            selectedLocationId = LastUsedLocationStore.shared.getSafeDefaultLocation(
+                for: householdId,
+                availableLocations: viewModel.locations,
+                defaultLocationId: defaultLocationId
+            )
         }
     }
     
