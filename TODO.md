@@ -11,12 +11,29 @@
 - [x] Household Switching with confirmation
 - [x] Premium Simulation (DEBUG only)
 - [x] Premium Badge in Settings
+- [x] **Premium Lifecycle Management** ✨ NEW
+  - [x] Database: premium_expires_at column
+  - [x] Premium remains active until expiration (no immediate cutoff)
+  - [x] Graceful downgrade (read-only above limit)
+  - [x] Offline Premium caching support
+  - [x] Checkout auto-add parity (qty → 0 triggers grocery add)
 - [ ] One-time "household locked" banner
 - [ ] Restore purchases (StoreKit integration)
 
 ## Week 2: Polish & Launch Prep
-- [ ] In-App Purchases (StoreKit 2)
-- [ ] Receipt validation
+- [ ] **In-App Purchases (StoreKit 2)** ← NEXT
+  - [ ] Product configuration
+  - [ ] Purchase flow
+  - [ ] Receipt validation
+  - [ ] Set premium_expires_at on purchase/renewal
+  - [ ] Handle subscription cancellation
+  - [ ] Restore purchases
+- [ ] Last-item confirmation UX (Free households)
+  - [ ] Alert: "Add to grocery list?" when qty → 0
+  - [ ] Premium: Silent auto-add with toast
+- [ ] Premium expiration warnings
+  - [ ] Alert 7 days before expiration
+  - [ ] Banner on expiration day
 - [ ] App Store screenshots
 - [ ] Clear pricing copy
 - [ ] TestFlight to friends/family
