@@ -630,7 +630,14 @@ struct ScannerSheet: View {
                                 }
                             }
                             .labelsHidden()
-                            .tint(.primary)
+                            .tint(selectedLocationId == nil ? .red : .primary)
+                            
+                            // Validation indicator
+                            if selectedLocationId == nil {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
                         }
                     }
                     
@@ -654,6 +661,21 @@ struct ScannerSheet: View {
                     }
                 }
                 .padding()
+                
+                // Validation message
+                if let message = locationValidationMessage {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                        Text(message)
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                }
                 
                 Divider()
                 
@@ -740,6 +762,11 @@ struct ScannerSheet: View {
     
     private var canAddCustomProduct: Bool {
         !customName.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+    
+    private var locationValidationMessage: String? {
+        guard selectedLocationId == nil else { return nil }
+        return "Please select a location"
     }
     
     private func resetScannerState() {
