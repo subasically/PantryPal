@@ -20,6 +20,10 @@ struct InventoryListView: View {
     @State private var toastMessage = ""
     @State private var toastType: ToastView.ToastType = .success
     
+    // Polling timer
+    @State private var pollingTimer: Timer?
+    private let pollingInterval: TimeInterval = 60 // 60 seconds
+    
     enum InventoryFilter: String, CaseIterable {
         case all = "All"
         case expiringSoon = "Expiring Soon"
@@ -180,6 +184,9 @@ struct InventoryListView: View {
                 // Reload without triggering full loading state to avoid flash
                 await viewModel.loadInventory(withLoadingState: false)
                 await viewModel.loadLocations()
+                
+                // Start polling timer
+                startPolling()
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 if newPhase == .active {
@@ -195,6 +202,11 @@ struct InventoryListView: View {
                             print("❌ [InventoryListView] App active sync failed: \(error)")
                         }
                     }
+                    // Resume polling
+                    startPolling()
+                } else if newPhase == .background || newPhase == .inactive {
+                    // Stop polling when app goes to background
+                    stopPolling()
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
@@ -227,6 +239,41 @@ struct InventoryListView: View {
             return false
         }
         return true
+    }
+    
+    // MARK: - Polling
+    
+    private func startPolling() {
+        // Stop any existing timer first
+        stopPolling()
+        
+        print("🔄 [InventoryListView] Starting polling (every \(Int(pollingInterval))s)")
+        
+        pollingTimer = Timer.scheduledTimer(withTimeInterval: pollingInterval, repeats: true) { _ in
+            Task { @MainActor in
+                print("⏱️ [InventoryListView] Polling sync triggered")
+                await performBackgroundSync()
+            }
+        }
+    }
+    
+    private func stopPolling() {
+        pollingTimer?.invalidate()
+        pollingTimer = nil
+        print("⏸️ [InventoryListView] Polling stopped")
+    }
+    
+    private func performBackgroundSync() async {
+        // Silent sync without loading states
+        await ActionQueueService.shared.processQueue(modelContext: modelContext)
+        do {
+            try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+            await viewModel.loadInventory(withLoadingState: false)
+            await viewModel.loadLocations()
+            print("✅ [InventoryListView] Background polling sync completed")
+        } catch {
+            print("❌ [InventoryListView] Background polling sync failed: \(error)")
+        }
     }
     
     private var emptyStateContent: some View {
