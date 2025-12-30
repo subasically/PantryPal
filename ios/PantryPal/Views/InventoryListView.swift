@@ -678,14 +678,19 @@ struct ScannerSheet: View {
                             }
                             .labelsHidden()
                             .tint(selectedLocationId == nil ? .red : .primary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .fixedSize()
                             
                             // Validation indicator
                             if selectedLocationId == nil {
                                 Image(systemName: "exclamationmark.circle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
+                                    .fixedSize()
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     
                     Spacer()
