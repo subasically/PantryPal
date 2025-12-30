@@ -170,18 +170,24 @@ router.post('/', (req, res) => {
             return res.status(400).json({ error: 'Product ID is required' });
         }
 
+        // Validate locationId is provided (REQUIRED)
+        if (!locationId) {
+            return res.status(400).json({ 
+                error: 'Location is required for inventory items',
+                code: 'LOCATION_REQUIRED'
+            });
+        }
+
         // Verify product exists
         const product = db.prepare('SELECT id FROM products WHERE id = ?').get(productId);
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        // Verify location if provided
-        if (locationId) {
-            const location = db.prepare('SELECT id FROM locations WHERE id = ? AND household_id = ?').get(locationId, householdId);
-            if (!location) {
-                return res.status(404).json({ error: 'Location not found' });
-            }
+        // Verify location exists and belongs to household
+        const location = db.prepare('SELECT id FROM locations WHERE id = ? AND household_id = ?').get(locationId, householdId);
+        if (!location) {
+            return res.status(404).json({ error: 'Location not found or does not belong to this household' });
         }
 
         // Check if item already exists (same product, same expiration, same location)
@@ -298,13 +304,16 @@ router.post('/quick-add', async (req, res) => {
         }
 
         if (!locationId) {
-            return res.status(400).json({ error: 'Location is required' });
+            return res.status(400).json({ 
+                error: 'Location is required for inventory items',
+                code: 'LOCATION_REQUIRED'
+            });
         }
 
-        // Verify location exists
+        // Verify location exists and belongs to household
         const location = db.prepare('SELECT id FROM locations WHERE id = ? AND household_id = ?').get(locationId, householdId);
         if (!location) {
-            return res.status(404).json({ error: 'Location not found' });
+            return res.status(404).json({ error: 'Location not found or does not belong to this household' });
         }
 
         // Find or create product

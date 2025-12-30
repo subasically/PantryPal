@@ -929,6 +929,20 @@ struct AddCustomItemView: View {
     @State private var showingScanner = false
     @State private var selectedLocationId: String?
     
+    private var canSubmit: Bool {
+        !name.isEmpty && selectedLocationId != nil && !isLoading
+    }
+    
+    private var validationMessage: String? {
+        if name.isEmpty {
+            return nil // Don't show validation until user tries to submit
+        }
+        if selectedLocationId == nil {
+            return "Please select a storage location"
+        }
+        return nil
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -946,14 +960,46 @@ struct AddCustomItemView: View {
                     }
                 }
                 
-                Section("Location") {
-                    if !viewModel.locations.isEmpty {
+                Section {
+                    if viewModel.locations.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.orange)
+                                Text("No storage locations available")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            Text("Go to Settings → Storage Locations to create locations")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                    } else {
                         Picker("Storage Location *", selection: $selectedLocationId) {
                             Text("Select Location").tag(nil as String?)
                             ForEach(viewModel.locations) { location in
                                 Text(location.fullPath).tag(location.id as String?)
                             }
                         }
+                        
+                        if let message = validationMessage {
+                            HStack {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                                Text(message)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Location")
+                } footer: {
+                    if !viewModel.locations.isEmpty && selectedLocationId == nil {
+                        Text("Location is required to add items to your inventory")
+                            .font(.caption)
                     }
                 }
                 
@@ -980,7 +1026,7 @@ struct AddCustomItemView: View {
                     Button("Save") {
                         Task { await saveItem() }
                     }
-                    .disabled(name.isEmpty || isLoading || selectedLocationId == nil)
+                    .disabled(!canSubmit)
                 }
             }
             .onAppear {
@@ -1024,8 +1070,6 @@ struct AddCustomItemView: View {
             isLoading = false
             return
         }
-        
-        UserPreferences.shared.lastUsedLocationId = locationId
         
         do {
             let product = try await APIService.shared.createProduct(
