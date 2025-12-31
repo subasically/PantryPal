@@ -5,8 +5,8 @@ enum AccessibilityIdentifiers {
     
     // MARK: - Login/Onboarding
     enum Login {
-        static let signInWithAppleButton = "login.signInWithApple"
-        static let continueWithEmailButton = "login.continueWithEmail"
+        static let signInWithAppleButton = "login.signInWithAppleButton"
+        static let continueWithEmailButton = "login.continueWithEmailButton"
         static let emailField = "login.emailField"
         static let passwordField = "login.passwordField"
         static let loginButton = "login.loginButton"
