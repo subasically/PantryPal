@@ -76,8 +76,8 @@ final class PantryPalUITests: XCTestCase {
         emailField.typeText("test@pantrypal.com")
         
         let passwordField = app.secureTextFields["login.passwordField"]
-        passwordField.tap()
-        sleep(1) // Wait for keyboard focus
+        passwordField.doubleTap() // Double tap works better for SecureTextField
+        sleep(2) // Longer wait for keyboard focus
         passwordField.typeText("Test123!")
         
         app.buttons["login.loginButton"].tap()
@@ -107,8 +107,8 @@ final class PantryPalUITests: XCTestCase {
         emailField.typeText("test@pantrypal.com")
         
         let passwordField = app.secureTextFields["login.passwordField"]
-        passwordField.tap()
-        sleep(1) // Wait for keyboard focus
+        passwordField.doubleTap() // Double tap works better for SecureTextField
+        sleep(2) // Longer wait for keyboard focus
         passwordField.typeText("Test123!")
         
         app.buttons["login.loginButton"].tap()
