@@ -26,16 +26,16 @@ final class PantryPalUITests: XCTestCase {
     override func tearDownWithError() throws {
         // Logout to ensure clean state for next test
         if app.otherElements["mainTab.container"].exists {
-            // Find and tap Settings tab (last tab)
-            let tabs = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'settings'"))
-            if tabs.count > 0 {
-                tabs.firstMatch.tap()
+            // Tap Settings button (person icon in top left of Inventory)
+            let settingsBtn = app.buttons[AccessibilityIdentifiers.Settings.button]
+            if settingsBtn.waitForExistence(timeout: 2) {
+                settingsBtn.tap()
                 sleep(1)
                 
-                // Find and tap Sign Out button
-                let signOutBtn = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'sign out'"))
-                if signOutBtn.count > 0 {
-                    signOutBtn.firstMatch.tap()
+                // Tap Sign Out button
+                let signOutBtn = app.buttons[AccessibilityIdentifiers.Settings.signOutButton]
+                if signOutBtn.waitForExistence(timeout: 2) {
+                    signOutBtn.tap()
                     sleep(2)
                 }
             }

@@ -80,6 +80,7 @@ struct InventoryListView: View {
                     Button(action: { showingSettings = true }) {
                         Image(systemName: "person.circle")
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifiers.Settings.button)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {

@@ -232,6 +232,7 @@ struct SettingsView: View {
                             Spacer()
                         }
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifiers.Settings.signOutButton)
                 }
                 
                 // Danger Zone
