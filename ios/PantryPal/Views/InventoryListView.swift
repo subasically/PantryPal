@@ -68,12 +68,10 @@ struct InventoryListView: View {
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.emptyState)
                 } else {
                     inventoryListSections
                 }
             }
-            .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.list)
             .listStyle(.plain)
             .refreshable {
                 print("🔄 [InventoryListView] Pull-to-refresh triggered")
