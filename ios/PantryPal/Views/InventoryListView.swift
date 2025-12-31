@@ -20,10 +20,6 @@ struct InventoryListView: View {
     @State private var showGroceryPrompt = false
     @State private var pendingGroceryItem: String?
     
-    // Polling timer
-    @State private var pollingTimer: Timer?
-    private let pollingInterval: TimeInterval = 60 // 60 seconds
-    
     enum InventoryFilter: String, CaseIterable {
         case all = "All"
         case expiringSoon = "Expiring Soon"
@@ -103,20 +99,14 @@ struct InventoryListView: View {
                 }
             }
             .refreshable {
-                print("🔄 [InventoryListView] User triggered refresh")
-                // 1. Upload pending changes first so they are included in the sync
-                await ActionQueueService.shared.processQueue(modelContext: modelContext)
-                
-                // 2. Fetch latest data (which should now include our uploads)
-                do {
-                    try await SyncService.shared.syncFromRemote(modelContext: modelContext)
-                    print("✅ [InventoryListView] Sync completed successfully")
-                } catch {
-                    print("❌ [InventoryListView] Sync failed: \(error)")
-                }
-                
-                // 3. Reload view model
-                await viewModel.loadInventory()
+                print("🔄 [InventoryListView] Pull-to-refresh triggered")
+                await SyncCoordinator.shared.syncNow(
+                    householdId: authViewModel.currentUser?.householdId,
+                    modelContext: modelContext,
+                    reason: .pullToRefresh
+                )
+                await viewModel.loadInventory(withLoadingState: false)
+                await viewModel.loadLocations()
             }
             .sheet(isPresented: $showingScanner) {
                 if UserPreferences.shared.useSmartScanner {
@@ -195,29 +185,20 @@ struct InventoryListView: View {
                 // Reload without triggering full loading state to avoid flash
                 await viewModel.loadInventory(withLoadingState: false)
                 await viewModel.loadLocations()
-                
-                // Start polling timer
-                startPolling()
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 if newPhase == .active {
                     print("🔄 [InventoryListView] App became active, syncing...")
                     Task {
                         await ActionQueueService.shared.processQueue(modelContext: modelContext)
-                        do {
-                            try await SyncService.shared.syncFromRemote(modelContext: modelContext)
-                            await viewModel.loadInventory(withLoadingState: false)
-                            await viewModel.loadLocations()
-                            print("✅ [InventoryListView] App active sync completed")
-                        } catch {
-                            print("❌ [InventoryListView] App active sync failed: \(error)")
-                        }
+                        SyncCoordinator.shared.requestSync(
+                            householdId: authViewModel.currentUser?.householdId,
+                            modelContext: modelContext,
+                            reason: .appActive
+                        )
+                        await viewModel.loadInventory(withLoadingState: false)
+                        await viewModel.loadLocations()
                     }
-                    // Resume polling
-                    startPolling()
-                } else if newPhase == .background || newPhase == .inactive {
-                    // Stop polling when app goes to background
-                    stopPolling()
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
@@ -261,38 +242,6 @@ struct InventoryListView: View {
     
     // MARK: - Polling
     
-    private func startPolling() {
-        // Stop any existing timer first
-        stopPolling()
-        
-        print("🔄 [InventoryListView] Starting polling (every \(Int(pollingInterval))s)")
-        
-        pollingTimer = Timer.scheduledTimer(withTimeInterval: pollingInterval, repeats: true) { _ in
-            Task { @MainActor in
-                print("⏱️ [InventoryListView] Polling sync triggered")
-                await performBackgroundSync()
-            }
-        }
-    }
-    
-    private func stopPolling() {
-        pollingTimer?.invalidate()
-        pollingTimer = nil
-        print("⏸️ [InventoryListView] Polling stopped")
-    }
-    
-    private func performBackgroundSync() async {
-        // Silent sync without loading states
-        await ActionQueueService.shared.processQueue(modelContext: modelContext)
-        do {
-            try await SyncService.shared.syncFromRemote(modelContext: modelContext)
-            await viewModel.loadInventory(withLoadingState: false)
-            await viewModel.loadLocations()
-            print("✅ [InventoryListView] Background polling sync completed")
-        } catch {
-            print("❌ [InventoryListView] Background polling sync failed: \(error)")
-        }
-    }
     
     private func handleDecrement(item: InventoryItem) async {
         print("🛒 [GroceryLogic] handleDecrement called for: \(item.displayName), current qty: \(item.quantity)")
@@ -306,6 +255,11 @@ struct InventoryListView: View {
         } else {
             print("🛒 [GroceryLogic] Regular decrement, quantity will be: \(item.quantity - 1)")
             await viewModel.adjustQuantity(id: item.id, adjustment: -1)
+            SyncCoordinator.shared.requestSync(
+                householdId: authViewModel.currentUser?.householdId,
+                modelContext: modelContext,
+                reason: .afterAction
+            )
         }
     }
     
@@ -321,6 +275,11 @@ struct InventoryListView: View {
         
         // Perform the deletion
         await viewModel.adjustQuantity(id: item.id, adjustment: -1)
+        SyncCoordinator.shared.requestSync(
+            householdId: authViewModel.currentUser?.householdId,
+            modelContext: modelContext,
+            reason: .afterAction
+        )
         
         // Trigger grocery logic if this was the last item
         if wasLastItem {
@@ -573,7 +532,9 @@ struct InventoryItemRow: View {
                     
                     Button(action: {
                         HapticService.shared.lightImpact()
-                        Task { await viewModel.adjustQuantity(id: item.id, adjustment: 1) }
+                        Task {
+                            await viewModel.adjustQuantity(id: item.id, adjustment: 1)
+                        }
                     }) {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(.ppGreen)
