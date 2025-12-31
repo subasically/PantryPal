@@ -16,8 +16,9 @@ final class PantryPalUITests: XCTestCase {
             "UI_TEST_DISABLE_APP_LOCK": "true"
         ]
         
-        resetTestServer()
-        seedTestServer()
+        // NOTE: Server should already be running and seeded
+        // Run: ./scripts/start-test-server.sh before running tests
+        // The server will have test data already seeded from previous run
         
         app.launch()
     }
