@@ -4,7 +4,6 @@ struct InventoryListView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
-    @EnvironmentObject private var confettiCenter: ConfettiCenter
     @State private var viewModel = InventoryViewModel()
     @State private var groceryViewModel = GroceryViewModel()
     
@@ -20,6 +19,10 @@ struct InventoryListView: View {
     // Grocery add confirmation (for Free users when last item removed)
     @State private var showGroceryPrompt = false
     @State private var pendingGroceryItem: String?
+    
+    // Polling timer
+    @State private var pollingTimer: Timer?
+    private let pollingInterval: TimeInterval = 60 // 60 seconds
     
     enum InventoryFilter: String, CaseIterable {
         case all = "All"
@@ -73,16 +76,6 @@ struct InventoryListView: View {
                 }
             }
             .listStyle(.plain)
-            .refreshable {
-                print("🔄 [InventoryListView] Pull-to-refresh triggered")
-                await SyncCoordinator.shared.syncNow(
-                    householdId: authViewModel.currentUser?.householdId,
-                    modelContext: modelContext,
-                    reason: .pullToRefresh
-                )
-                await viewModel.loadInventory(withLoadingState: false)
-                await viewModel.loadLocations()
-            }
             .searchable(text: $searchText, prompt: "Search items")
             .navigationTitle("Pantry (\(viewModel.items.count))")
             .toolbar {
@@ -99,15 +92,12 @@ struct InventoryListView: View {
                         }) {
                             Image(systemName: "plus")
                         }
-                        .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.addButton)
                         
                         Button(action: { 
                             if checkLimit() { showingScanner = true }
                         }) {
                             Image(systemName: "barcode.viewfinder")
                                 .fontWeight(.semibold)
-                        }
-                        .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.scanButton)
                         }
                     }
                 }
@@ -117,12 +107,13 @@ struct InventoryListView: View {
                 // 1. Upload pending changes first so they are included in the sync
                 await ActionQueueService.shared.processQueue(modelContext: modelContext)
                 
-                // 2. Request sync after action (debounced)
-                SyncCoordinator.shared.requestSync(
-                    householdId: authViewModel.currentUser?.householdId,
-                    modelContext: modelContext,
-                    reason: .afterAction
-                )
+                // 2. Fetch latest data (which should now include our uploads)
+                do {
+                    try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                    print("✅ [InventoryListView] Sync completed successfully")
+                } catch {
+                    print("❌ [InventoryListView] Sync failed: \(error)")
+                }
                 
                 // 3. Reload view model
                 await viewModel.loadInventory()
@@ -172,11 +163,6 @@ struct InventoryListView: View {
             .sheet(isPresented: $showingPaywall) {
                 PaywallView(limit: authViewModel.freeLimit)
                     .presentationDetents([.large])
-                    .overlay {
-                        if confettiCenter.isActive {
-                            ConfettiOverlay()
-                        }
-                    }
             }
             .sheet(item: $editingItem) { item in
                 EditItemView(item: item, viewModel: $viewModel, editingItem: $editingItem)
@@ -200,28 +186,38 @@ struct InventoryListView: View {
                 
                 // Initial sync sequence
                 await ActionQueueService.shared.processQueue(modelContext: modelContext)
-                SyncCoordinator.shared.requestSync(
-                    householdId: authViewModel.currentUser?.householdId,
-                    modelContext: modelContext,
-                    reason: .appActive
-                )
+                do {
+                    try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                    print("✅ [InventoryListView] Initial sync completed")
+                } catch {
+                    print("❌ [InventoryListView] Initial sync failed: \(error)")
+                }
                 // Reload without triggering full loading state to avoid flash
                 await viewModel.loadInventory(withLoadingState: false)
                 await viewModel.loadLocations()
+                
+                // Start polling timer
+                startPolling()
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 if newPhase == .active {
                     print("🔄 [InventoryListView] App became active, syncing...")
                     Task {
                         await ActionQueueService.shared.processQueue(modelContext: modelContext)
-                        SyncCoordinator.shared.requestSync(
-                            householdId: authViewModel.currentUser?.householdId,
-                            modelContext: modelContext,
-                            reason: .appActive
-                        )
-                        await viewModel.loadInventory(withLoadingState: false)
-                        await viewModel.loadLocations()
+                        do {
+                            try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+                            await viewModel.loadInventory(withLoadingState: false)
+                            await viewModel.loadLocations()
+                            print("✅ [InventoryListView] App active sync completed")
+                        } catch {
+                            print("❌ [InventoryListView] App active sync failed: \(error)")
+                        }
                     }
+                    // Resume polling
+                    startPolling()
+                } else if newPhase == .background || newPhase == .inactive {
+                    // Stop polling when app goes to background
+                    stopPolling()
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
@@ -265,6 +261,38 @@ struct InventoryListView: View {
     
     // MARK: - Polling
     
+    private func startPolling() {
+        // Stop any existing timer first
+        stopPolling()
+        
+        print("🔄 [InventoryListView] Starting polling (every \(Int(pollingInterval))s)")
+        
+        pollingTimer = Timer.scheduledTimer(withTimeInterval: pollingInterval, repeats: true) { _ in
+            Task { @MainActor in
+                print("⏱️ [InventoryListView] Polling sync triggered")
+                await performBackgroundSync()
+            }
+        }
+    }
+    
+    private func stopPolling() {
+        pollingTimer?.invalidate()
+        pollingTimer = nil
+        print("⏸️ [InventoryListView] Polling stopped")
+    }
+    
+    private func performBackgroundSync() async {
+        // Silent sync without loading states
+        await ActionQueueService.shared.processQueue(modelContext: modelContext)
+        do {
+            try await SyncService.shared.syncFromRemote(modelContext: modelContext)
+            await viewModel.loadInventory(withLoadingState: false)
+            await viewModel.loadLocations()
+            print("✅ [InventoryListView] Background polling sync completed")
+        } catch {
+            print("❌ [InventoryListView] Background polling sync failed: \(error)")
+        }
+    }
     
     private func handleDecrement(item: InventoryItem) async {
         print("🛒 [GroceryLogic] handleDecrement called for: \(item.displayName), current qty: \(item.quantity)")
@@ -419,6 +447,24 @@ struct InventoryListView: View {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             
+            // Success message
+            if let success = viewModel.successMessage {
+                Section {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.ppGreen)
+                        Text(success)
+                    }
+                    .padding(.vertical, 4)
+                }
+                .listRowBackground(Color.ppGreen.opacity(0.15))
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        viewModel.successMessage = nil
+                    }
+                }
+            }
+            
             // Inventory items
             Section {
                 ForEach(filteredItems) { item in
@@ -446,6 +492,7 @@ struct InventoryListView: View {
             }
         }
     }
+}
 
 struct InventoryItemRow: View {
     let item: InventoryItem
@@ -518,13 +565,11 @@ struct InventoryItemRow: View {
                             .font(.title2)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.decrementButton(id: item.id))
                     
                     Text("\(item.quantity)")
                         .font(.headline)
                         .foregroundColor(.ppPurple)
                         .frame(minWidth: 30)
-                        .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.quantityLabel(id: item.id))
                     
                     Button(action: {
                         HapticService.shared.lightImpact()
@@ -535,14 +580,12 @@ struct InventoryItemRow: View {
                             .font(.title2)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.incrementButton(id: item.id))
                 }
             }
         }
         .buttonStyle(.plain)
         .foregroundColor(.primary)
         .padding(.vertical, 4)
-        .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.row(id: item.id))
         .alert("Remove Item?", isPresented: $showDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Remove", role: .destructive) {
