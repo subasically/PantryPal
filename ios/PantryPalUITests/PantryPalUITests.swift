@@ -72,10 +72,12 @@ final class PantryPalUITests: XCTestCase {
         let emailField = app.textFields["login.emailField"]
         XCTAssertTrue(emailField.waitForExistence(timeout: 3))
         emailField.tap()
+        sleep(1) // Wait for keyboard
         emailField.typeText("test@pantrypal.com")
         
         let passwordField = app.secureTextFields["login.passwordField"]
         passwordField.tap()
+        sleep(1) // Wait for keyboard focus
         passwordField.typeText("Test123!")
         
         app.buttons["login.loginButton"].tap()
