@@ -106,3 +106,27 @@ curl https://api-pantrypal.subasically.me/health
 docker cp migration.js pantrypal-server-pantrypal-api-1:/app/
 docker-compose exec -T pantrypal-api node /app/migration.js
 ```
+
+## 📦 Version Bumping
+
+When the user says **"bump version and build"**:
+
+1. **Read current version/build** from `ios/PantryPal.xcodeproj/project.pbxproj`:
+   ```bash
+   grep -A1 "MARKETING_VERSION = " ios/PantryPal.xcodeproj/project.pbxproj | head -2
+   grep -A1 "CURRENT_PROJECT_VERSION = " ios/PantryPal.xcodeproj/project.pbxproj | head -2
+   ```
+
+2. **Increment build number** (keep version same unless major release):
+   - Example: `1.0.0 (5)` → `1.0.0 (6)`
+   - Use `sed` to update both MARKETING_VERSION and CURRENT_PROJECT_VERSION
+
+3. **Commit and tag**:
+   ```bash
+   git add ios/PantryPal.xcodeproj/project.pbxproj
+   git commit -m "chore: Bump version to X.Y.Z (BUILD)"
+   git tag -a "vX.Y.Z-BUILD" -m "Release vX.Y.Z (BUILD)"
+   git push origin main --tags
+   ```
+
+4. **Format**: Version follows `MAJOR.MINOR.PATCH (BUILD)` where BUILD increments for each TestFlight release.
