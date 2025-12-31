@@ -71,6 +71,7 @@ struct InventoryListView: View {
                     inventoryListSections
                 }
             }
+            .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.list)
             .listStyle(.plain)
             .searchable(text: $searchText, prompt: "Search items")
             .navigationTitle("Pantry (\(viewModel.items.count))")
@@ -88,6 +89,7 @@ struct InventoryListView: View {
                         }) {
                             Image(systemName: "plus")
                         }
+                        .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.addButton)
                         
                         Button(action: { 
                             if checkLimit() { showingScanner = true }
@@ -95,6 +97,7 @@ struct InventoryListView: View {
                             Image(systemName: "barcode.viewfinder")
                                 .fontWeight(.semibold)
                         }
+                        .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.scanButton)
                     }
                 }
             }
