@@ -40,14 +40,27 @@ router.post('/reset', (req, res) => {
     try {
         console.log('[Test] Resetting database...');
         
-        // Delete all test data (keep schema)
-        db.prepare('DELETE FROM checkout_history').run();
-        db.prepare('DELETE FROM grocery_items').run();
-        db.prepare('DELETE FROM inventory').run();
-        db.prepare('DELETE FROM products WHERE household_id IS NOT NULL').run(); // Keep global products
-        db.prepare('DELETE FROM locations').run();
-        db.prepare('DELETE FROM households').run();
-        db.prepare('DELETE FROM users').run();
+        // Use a transaction with foreign keys disabled
+        const resetTransaction = db.transaction(() => {
+            db.pragma('foreign_keys = OFF');
+            
+            // Delete all test data (keep schema)
+            db.prepare('DELETE FROM device_tokens').run();
+            db.prepare('DELETE FROM notification_preferences').run();
+            db.prepare('DELETE FROM invite_codes').run();
+            db.prepare('DELETE FROM checkout_history').run();
+            db.prepare('DELETE FROM grocery_items').run();
+            db.prepare('DELETE FROM sync_log').run();
+            db.prepare('DELETE FROM inventory').run();
+            db.prepare('DELETE FROM locations').run();
+            db.prepare('DELETE FROM products WHERE household_id IS NOT NULL').run(); // Keep global products
+            db.prepare('DELETE FROM users').run();
+            db.prepare('DELETE FROM households').run();
+            
+            db.pragma('foreign_keys = ON');
+        });
+        
+        resetTransaction();
         
         console.log('[Test] Database reset complete');
         
@@ -57,7 +70,7 @@ router.post('/reset', (req, res) => {
         });
     } catch (error) {
         console.error('[Test] Reset error:', error);
-        res.status(500).json({ error: 'Failed to reset database' });
+        res.status(500).json({ error: 'Failed to reset database', details: error.message });
     }
 });
 
