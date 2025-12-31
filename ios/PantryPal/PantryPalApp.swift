@@ -98,11 +98,14 @@ struct ContentView: View {
             if authViewModel.isAuthenticated {
                 if authViewModel.showHouseholdSetup {
                     HouseholdSetupView()
+                        .accessibilityIdentifier("householdSetup.container")
                 } else {
                     MainTabView()
+                        .accessibilityIdentifier("mainTab.container")
                 }
             } else {
                 LoginView()
+                    .accessibilityIdentifier("login.container")
             }
         }
         .alert("Enable \(authViewModel.biometricName)?", isPresented: $authViewModel.showBiometricEnablePrompt) {

@@ -24,6 +24,23 @@ final class PantryPalUITests: XCTestCase {
     }
     
     override func tearDownWithError() throws {
+        // Logout to ensure clean state for next test
+        if app.otherElements["mainTab.container"].exists {
+            // Find and tap Settings tab (last tab)
+            let tabs = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'settings'"))
+            if tabs.count > 0 {
+                tabs.firstMatch.tap()
+                sleep(1)
+                
+                // Find and tap Sign Out button
+                let signOutBtn = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'sign out'"))
+                if signOutBtn.count > 0 {
+                    signOutBtn.firstMatch.tap()
+                    sleep(2)
+                }
+            }
+        }
+        
         app = nil
     }
     
@@ -64,6 +81,11 @@ final class PantryPalUITests: XCTestCase {
     // MARK: - Helper Methods
     
     func loginTestUser() {
+        // Check if already logged in
+        if app.otherElements["mainTab.container"].exists || app.otherElements["householdSetup.container"].exists {
+            return // Already logged in, skip
+        }
+        
         let continueBtn = app.buttons["login.continueWithEmailButton"]
         if continueBtn.waitForExistence(timeout: 3) {
             continueBtn.tap()
@@ -115,13 +137,14 @@ final class PantryPalUITests: XCTestCase {
         
         sleep(3)
         
-        // Should see inventory list or onboarding
+        // Should see one of: household setup, main tab view, or inventory list
+        let householdSetup = app.otherElements["householdSetup.container"]
+        let mainTabView = app.otherElements["mainTab.container"]
         let inventoryList = app.otherElements["inventory.list"]
-        let onboardingSkip = app.buttons["onboarding.skipButton"]
         
         XCTAssertTrue(
-            inventoryList.waitForExistence(timeout: 5) || onboardingSkip.exists,
-            "Should reach inventory or onboarding"
+            householdSetup.waitForExistence(timeout: 5) || mainTabView.exists || inventoryList.exists,
+            "Should reach household setup, main tab, or inventory after login"
         )
     }
     
