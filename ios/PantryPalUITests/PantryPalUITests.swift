@@ -27,13 +27,13 @@ final class PantryPalUITests: XCTestCase {
         // Logout to ensure clean state for next test
         if app.otherElements["mainTab.container"].exists {
             // Tap Settings button (person icon in top left of Inventory)
-            let settingsBtn = app.buttons[AccessibilityIdentifiers.Settings.button]
+            let settingsBtn = app.buttons["settings.button"]
             if settingsBtn.waitForExistence(timeout: 2) {
                 settingsBtn.tap()
                 sleep(1)
                 
                 // Tap Sign Out button
-                let signOutBtn = app.buttons[AccessibilityIdentifiers.Settings.signOutButton]
+                let signOutBtn = app.buttons["settings.signOutButton"]
                 if signOutBtn.waitForExistence(timeout: 2) {
                     signOutBtn.tap()
                     sleep(2)
