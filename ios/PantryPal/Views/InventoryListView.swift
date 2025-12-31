@@ -406,24 +406,6 @@ struct InventoryListView: View {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             
-            // Success message
-            if let success = viewModel.successMessage {
-                Section {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.ppGreen)
-                        Text(success)
-                    }
-                    .padding(.vertical, 4)
-                }
-                .listRowBackground(Color.ppGreen.opacity(0.15))
-                .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        viewModel.successMessage = nil
-                    }
-                }
-            }
-            
             // Inventory items
             Section {
                 ForEach(filteredItems) { item in
