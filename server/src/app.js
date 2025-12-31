@@ -29,7 +29,7 @@ function createApp() {
     app.use('/api/grocery', groceryRoutes);
     
     // Test endpoints (only in non-production)
-    if (process.env.NODE_ENV !== 'production' || process.env.ALLOW_TEST_ENDPOINTS) {
+    if (process.env.NODE_ENV !== 'production' || process.env.ALLOW_TEST_ENDPOINTS === 'true') {
         const testRoutes = require('./routes/test');
         app.use('/api/test', testRoutes);
         console.log('⚠️  [DEV] Test endpoints enabled at /api/test');
