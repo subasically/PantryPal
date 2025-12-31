@@ -117,16 +117,27 @@ When the user says **"bump version and build"**:
    grep -A1 "CURRENT_PROJECT_VERSION = " ios/PantryPal.xcodeproj/project.pbxproj | head -2
    ```
 
-2. **Increment build number** (keep version same unless major release):
-   - Example: `1.0.0 (5)` → `1.0.0 (6)`
-   - Use `sed` to update both MARKETING_VERSION and CURRENT_PROJECT_VERSION
+2. **Generate new build number** in timestamp format `YYYYMMDDHHmmss`:
+   ```bash
+   date +"%Y%m%d%H%M%S"
+   # Example: 20251230221623
+   ```
 
-3. **Commit and tag**:
+3. **Update project.pbxproj** using sed:
+   ```bash
+   # Update CURRENT_PROJECT_VERSION with new timestamp
+   sed -i '' 's/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = NEW_BUILD;/g' ios/PantryPal.xcodeproj/project.pbxproj
+   ```
+
+4. **Commit and tag**:
    ```bash
    git add ios/PantryPal.xcodeproj/project.pbxproj
-   git commit -m "chore: Bump version to X.Y.Z (BUILD)"
-   git tag -a "vX.Y.Z-BUILD" -m "Release vX.Y.Z (BUILD)"
+   git commit -m "chore: Bump build to X.Y.Z (TIMESTAMP)"
+   git tag -a "vX.Y.Z-TIMESTAMP" -m "Release vX.Y.Z (TIMESTAMP)"
    git push origin main --tags
    ```
 
-4. **Format**: Version follows `MAJOR.MINOR.PATCH (BUILD)` where BUILD increments for each TestFlight release.
+5. **Format**: 
+   - Version: `MAJOR.MINOR.PATCH` (e.g., `1.0.0`)
+   - Build: Timestamp `YYYYMMDDHHmmss` (e.g., `20251230221623`)
+   - Tag: `vMAJOR.MINOR.PATCH-BUILD` (e.g., `v1.0.0-20251230221623`)
