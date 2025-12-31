@@ -1,7 +1,32 @@
-# UI Test Environment - Ready to Use
+# UI Test Environment - SERVER MUST STAY RUNNING
 
 **Date:** December 31, 2025  
-**Status:** ✅ LOCAL TEST SERVER RUNNING
+**Status:** ⚠️ **IMPORTANT: Keep test server running during tests!**
+
+---
+
+## ⚠️ CRITICAL: Test Server Management
+
+**THE PROBLEM:** Tests failed because the server exited after seeding.
+
+**THE SOLUTION:** Use the helper scripts to keep the server running.
+
+### Quick Start (Use This!)
+
+```bash
+# Terminal 1: Start and KEEP server running
+./scripts/start-test-server.sh
+# Server will stay running until you stop it
+
+# Terminal 2: Run tests (or use Xcode Cmd+U)
+cd ios
+xcodebuild test -scheme PantryPal \
+  -destination 'platform=iOS Simulator,id=DEA4C9CE-5106-41AD-B36A-378A8714D172' \
+  -only-testing:PantryPalUITests
+
+# When done: Stop server
+./scripts/stop-test-server.sh
+```
 
 ---
 

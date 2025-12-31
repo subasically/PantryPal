@@ -4,7 +4,7 @@ final class PantryPalUITests: XCTestCase {
     
     var app: XCUIApplication!
     let testServerURL = "http://localhost:3002"
-    let testAdminKey = "test-admin-secret-change-me"
+    let testAdminKey = "pantrypal-test-key-2025"
     
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -32,7 +32,7 @@ final class PantryPalUITests: XCTestCase {
         let url = URL(string: "\(testServerURL)/api/test/reset")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue(testAdminKey, forHTTPHeaderField: "X-Test-Admin-Key")
+        request.setValue(testAdminKey, forHTTPHeaderField: "x-test-admin-key")
         
         let exp = XCTestExpectation(description: "Reset")
         URLSession.shared.dataTask(with: request) { _, response, _ in
@@ -48,7 +48,7 @@ final class PantryPalUITests: XCTestCase {
         let url = URL(string: "\(testServerURL)/api/test/seed")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue(testAdminKey, forHTTPHeaderField: "X-Test-Admin-Key")
+        request.setValue(testAdminKey, forHTTPHeaderField: "x-test-admin-key")
         
         let exp = XCTestExpectation(description: "Seed")
         URLSession.shared.dataTask(with: request) { _, response, _ in

@@ -1,0 +1,708 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		001 /* PantryPalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101 /* PantryPalApp.swift */; };
+		002 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102 /* Models.swift */; };
+		003 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103 /* APIService.swift */; };
+		004 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104 /* AuthViewModel.swift */; };
+		005 /* InventoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105 /* InventoryViewModel.swift */; };
+		006 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106 /* LoginView.swift */; };
+		007 /* InventoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107 /* InventoryListView.swift */; };
+		008 /* BarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108 /* BarcodeScannerView.swift */; };
+		009 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110 /* Colors.swift */; };
+		010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 111 /* Assets.xcassets */; };
+		011 /* BiometricAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112 /* BiometricAuthService.swift */; };
+		012 /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113 /* UserPreferences.swift */; };
+		013 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114 /* NotificationService.swift */; };
+		115 /* HouseholdSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116 /* HouseholdSharingView.swift */; };
+		2F377FFA2EFB7975006F4E33 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FF92EFB7975006F4E33 /* SplashView.swift */; };
+		2F377FFC2EFC65D4006F4E33 /* SwiftDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FFB2EFC65D4006F4E33 /* SwiftDataModels.swift */; };
+		2F377FFF2EFC6621006F4E33 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FFE2EFC6621006F4E33 /* SyncService.swift */; };
+		2F3780002EFC6621006F4E33 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FFD2EFC6621006F4E33 /* HapticService.swift */; };
+		2F3780022EFC6A97006F4E33 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780012EFC6A97006F4E33 /* OCRService.swift */; };
+		2F3780042EFC6AAD006F4E33 /* PhotoCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */; };
+		2F3780062EFC6AEB006F4E33 /* SmartScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */; };
+		2F3780082EFC725E006F4E33 /* SDPendingAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780072EFC725E006F4E33 /* SDPendingAction.swift */; };
+		2F37800A2EFC726B006F4E33 /* CheckoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780092EFC726B006F4E33 /* CheckoutViewModel.swift */; };
+		2F37800C2EFC7274006F4E33 /* ActionQueueService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */; };
+		2F37800E2EFC743A006F4E33 /* barcode-beep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2F37800D2EFC743A006F4E33 /* barcode-beep.mp3 */; };
+		2F3780112EFC7A7E006F4E33 /* HouseholdSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */; };
+		2F3780132F01F56F006F4E33 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780122F01F56F006F4E33 /* PaywallView.swift */; };
+		2F3780152F031DC4006F4E33 /* GroceryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780142F031DC4006F4E33 /* GroceryViewModel.swift */; };
+		2F3780172F031DCB006F4E33 /* GroceryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780162F031DCB006F4E33 /* GroceryListView.swift */; };
+		2F3780192F0431EB006F4E33 /* LastUsedLocationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780182F0431EB006F4E33 /* LastUsedLocationStore.swift */; };
+		2F37801B2F04A6C8006F4E33 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37801A2F04A6C8006F4E33 /* QRScannerView.swift */; };
+		2F37801D2F04E9B3006F4E33 /* ConfettiCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37801C2F04E9B3006F4E33 /* ConfettiCenter.swift */; };
+		2F37801F2F04E9BD006F4E33 /* ConfettiOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37801E2F04E9BD006F4E33 /* ConfettiOverlay.swift */; };
+		2F3780232F04F1C5006F4E33 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780202F04F1C5006F4E33 /* AppError.swift */; };
+		2F3780242F04F1C5006F4E33 /* AppErrorMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780212F04F1C5006F4E33 /* AppErrorMapper.swift */; };
+		2F3780252F04F1C5006F4E33 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780222F04F1C5006F4E33 /* AppLogger.swift */; };
+		2F3780272F04F686006F4E33 /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780262F04F686006F4E33 /* SyncCoordinator.swift */; };
+		2F37802A2F04F854006F4E33 /* UITestingMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780292F04F854006F4E33 /* UITestingMode.swift */; };
+		2F37802B2F04F854006F4E33 /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780282F04F854006F4E33 /* AccessibilityIdentifiers.swift */; };
+		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
+		7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */; };
+		933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */; };
+		A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */; };
+		B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4A7C84F0B02C27FF31131A /* ToastView.swift */; };
+		BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */; };
+		EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60392A419ED813B3C8B0683E /* ToastCenter.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2F3780362F04F886006F4E33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 600 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 400;
+			remoteInfo = PantryPal;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		100 /* PantryPal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PantryPal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		101 /* PantryPalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryPalApp.swift; sourceTree = "<group>"; };
+		102 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		103 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+		104 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		105 /* InventoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryViewModel.swift; sourceTree = "<group>"; };
+		106 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		107 /* InventoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryListView.swift; sourceTree = "<group>"; };
+		108 /* BarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
+		109 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		110 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		111 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		112 /* BiometricAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuthService.swift; sourceTree = "<group>"; };
+		113 /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
+		114 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		116 /* HouseholdSharingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdSharingView.swift; sourceTree = "<group>"; };
+		2F2078C32EF59CE3002B7B2C /* PantryPal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PantryPal.entitlements; sourceTree = "<group>"; };
+		2F377FF92EFB7975006F4E33 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		2F377FFB2EFC65D4006F4E33 /* SwiftDataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataModels.swift; sourceTree = "<group>"; };
+		2F377FFD2EFC6621006F4E33 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
+		2F377FFE2EFC6621006F4E33 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
+		2F3780012EFC6A97006F4E33 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
+		2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureView.swift; sourceTree = "<group>"; };
+		2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartScannerView.swift; sourceTree = "<group>"; };
+		2F3780072EFC725E006F4E33 /* SDPendingAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPendingAction.swift; sourceTree = "<group>"; };
+		2F3780092EFC726B006F4E33 /* CheckoutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutViewModel.swift; sourceTree = "<group>"; };
+		2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionQueueService.swift; sourceTree = "<group>"; };
+		2F37800D2EFC743A006F4E33 /* barcode-beep.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "barcode-beep.mp3"; sourceTree = "<group>"; };
+		2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdSetupView.swift; sourceTree = "<group>"; };
+		2F3780122F01F56F006F4E33 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		2F3780142F031DC4006F4E33 /* GroceryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryViewModel.swift; sourceTree = "<group>"; };
+		2F3780162F031DCB006F4E33 /* GroceryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListView.swift; sourceTree = "<group>"; };
+		2F3780182F0431EB006F4E33 /* LastUsedLocationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastUsedLocationStore.swift; sourceTree = "<group>"; };
+		2F37801A2F04A6C8006F4E33 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		2F37801C2F04E9B3006F4E33 /* ConfettiCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiCenter.swift; sourceTree = "<group>"; };
+		2F37801E2F04E9BD006F4E33 /* ConfettiOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiOverlay.swift; sourceTree = "<group>"; };
+		2F3780202F04F1C5006F4E33 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
+		2F3780212F04F1C5006F4E33 /* AppErrorMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppErrorMapper.swift; sourceTree = "<group>"; };
+		2F3780222F04F1C5006F4E33 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		2F3780262F04F686006F4E33 /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
+		2F3780282F04F854006F4E33 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
+		2F3780292F04F854006F4E33 /* UITestingMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestingMode.swift; sourceTree = "<group>"; };
+		2F3780302F04F886006F4E33 /* PantryPalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PantryPalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F74C56F2EDE639E006E985C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastHostView.swift; sourceTree = "<group>"; };
+		3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationsSettingsView.swift; sourceTree = "<group>"; };
+		52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CheckoutView.swift; sourceTree = "<group>"; };
+		6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppTextField.swift; sourceTree = "<group>"; };
+		60392A419ED813B3C8B0683E /* ToastCenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastCenter.swift; sourceTree = "<group>"; };
+		ED4A7C84F0B02C27FF31131A /* ToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		2F3780312F04F886006F4E33 /* PantryPalUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PantryPalUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		200 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2F37802D2F04F886006F4E33 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		300 = {
+			isa = PBXGroup;
+			children = (
+				301 /* PantryPal */,
+				2F3780312F04F886006F4E33 /* PantryPalUITests */,
+				302 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		301 /* PantryPal */ = {
+			isa = PBXGroup;
+			children = (
+				2F37800D2EFC743A006F4E33 /* barcode-beep.mp3 */,
+				2F2078C32EF59CE3002B7B2C /* PantryPal.entitlements */,
+				101 /* PantryPalApp.swift */,
+				109 /* Info.plist */,
+				111 /* Assets.xcassets */,
+				303 /* Models */,
+				304 /* Views */,
+				305 /* ViewModels */,
+				306 /* Services */,
+				307 /* Utils */,
+			);
+			path = PantryPal;
+			sourceTree = "<group>";
+		};
+		302 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				100 /* PantryPal.app */,
+				2F3780302F04F886006F4E33 /* PantryPalUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		303 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				102 /* Models.swift */,
+				2F3780072EFC725E006F4E33 /* SDPendingAction.swift */,
+				2F377FFB2EFC65D4006F4E33 /* SwiftDataModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		304 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */,
+				108 /* BarcodeScannerView.swift */,
+				52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */,
+				7155113A53D7C3F6CB2C86DE /* Components */,
+				2F3780162F031DCB006F4E33 /* GroceryListView.swift */,
+				2F3780102EFC7A7E006F4E33 /* HouseholdSetupView.swift */,
+				116 /* HouseholdSharingView.swift */,
+				107 /* InventoryListView.swift */,
+				3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */,
+				106 /* LoginView.swift */,
+				2F3780122F01F56F006F4E33 /* PaywallView.swift */,
+				2F37801A2F04A6C8006F4E33 /* QRScannerView.swift */,
+				2F74C56F2EDE639E006E985C /* SettingsView.swift */,
+				2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */,
+				2F377FF92EFB7975006F4E33 /* SplashView.swift */,
+				3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		305 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				104 /* AuthViewModel.swift */,
+				2F3780092EFC726B006F4E33 /* CheckoutViewModel.swift */,
+				2F3780142F031DC4006F4E33 /* GroceryViewModel.swift */,
+				105 /* InventoryViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		306 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */,
+				103 /* APIService.swift */,
+				112 /* BiometricAuthService.swift */,
+				2F37801C2F04E9B3006F4E33 /* ConfettiCenter.swift */,
+				2F377FFD2EFC6621006F4E33 /* HapticService.swift */,
+				2F3780182F0431EB006F4E33 /* LastUsedLocationStore.swift */,
+				114 /* NotificationService.swift */,
+				2F3780012EFC6A97006F4E33 /* OCRService.swift */,
+				2F3780262F04F686006F4E33 /* SyncCoordinator.swift */,
+				2F377FFE2EFC6621006F4E33 /* SyncService.swift */,
+				60392A419ED813B3C8B0683E /* ToastCenter.swift */,
+				113 /* UserPreferences.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		307 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				2F3780282F04F854006F4E33 /* AccessibilityIdentifiers.swift */,
+				2F3780292F04F854006F4E33 /* UITestingMode.swift */,
+				2F3780202F04F1C5006F4E33 /* AppError.swift */,
+				2F3780212F04F1C5006F4E33 /* AppErrorMapper.swift */,
+				2F3780222F04F1C5006F4E33 /* AppLogger.swift */,
+				110 /* Colors.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		7155113A53D7C3F6CB2C86DE /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				2F37801E2F04E9BD006F4E33 /* ConfettiOverlay.swift */,
+				2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */,
+				ED4A7C84F0B02C27FF31131A /* ToastView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2F37802F2F04F886006F4E33 /* PantryPalUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2F3780382F04F886006F4E33 /* Build configuration list for PBXNativeTarget "PantryPalUITests" */;
+			buildPhases = (
+				2F37802C2F04F886006F4E33 /* Sources */,
+				2F37802D2F04F886006F4E33 /* Frameworks */,
+				2F37802E2F04F886006F4E33 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2F3780372F04F886006F4E33 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				2F3780312F04F886006F4E33 /* PantryPalUITests */,
+			);
+			name = PantryPalUITests;
+			packageProductDependencies = (
+			);
+			productName = PantryPalUITests;
+			productReference = 2F3780302F04F886006F4E33 /* PantryPalUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		400 /* PantryPal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 500 /* Build configuration list for PBXNativeTarget "PantryPal" */;
+			buildPhases = (
+				401 /* Sources */,
+				200 /* Frameworks */,
+				402 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PantryPal;
+			productName = PantryPal;
+			productReference = 100 /* PantryPal.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		600 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2610;
+				TargetAttributes = {
+					2F37802F2F04F886006F4E33 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 400;
+					};
+					400 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 601 /* Build configuration list for PBXProject "PantryPal" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 300;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 302 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				400 /* PantryPal */,
+				2F37802F2F04F886006F4E33 /* PantryPalUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2F37802E2F04F886006F4E33 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		402 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				010 /* Assets.xcassets in Resources */,
+				2F37800E2EFC743A006F4E33 /* barcode-beep.mp3 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2F37802C2F04F886006F4E33 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		401 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2F37800A2EFC726B006F4E33 /* CheckoutViewModel.swift in Sources */,
+				2F3780192F0431EB006F4E33 /* LastUsedLocationStore.swift in Sources */,
+				001 /* PantryPalApp.swift in Sources */,
+				002 /* Models.swift in Sources */,
+				2F37800C2EFC7274006F4E33 /* ActionQueueService.swift in Sources */,
+				2F377FFF2EFC6621006F4E33 /* SyncService.swift in Sources */,
+				2F3780002EFC6621006F4E33 /* HapticService.swift in Sources */,
+				2F3780042EFC6AAD006F4E33 /* PhotoCaptureView.swift in Sources */,
+				003 /* APIService.swift in Sources */,
+				2F3780272F04F686006F4E33 /* SyncCoordinator.swift in Sources */,
+				2F3780082EFC725E006F4E33 /* SDPendingAction.swift in Sources */,
+				004 /* AuthViewModel.swift in Sources */,
+				005 /* InventoryViewModel.swift in Sources */,
+				006 /* LoginView.swift in Sources */,
+				007 /* InventoryListView.swift in Sources */,
+				008 /* BarcodeScannerView.swift in Sources */,
+				009 /* Colors.swift in Sources */,
+				2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */,
+				011 /* BiometricAuthService.swift in Sources */,
+				012 /* UserPreferences.swift in Sources */,
+				2F3780062EFC6AEB006F4E33 /* SmartScannerView.swift in Sources */,
+				013 /* NotificationService.swift in Sources */,
+				2F37802A2F04F854006F4E33 /* UITestingMode.swift in Sources */,
+				2F37802B2F04F854006F4E33 /* AccessibilityIdentifiers.swift in Sources */,
+				2F377FFC2EFC65D4006F4E33 /* SwiftDataModels.swift in Sources */,
+				2F37801B2F04A6C8006F4E33 /* QRScannerView.swift in Sources */,
+				2F3780022EFC6A97006F4E33 /* OCRService.swift in Sources */,
+				2F3780112EFC7A7E006F4E33 /* HouseholdSetupView.swift in Sources */,
+				2F3780132F01F56F006F4E33 /* PaywallView.swift in Sources */,
+				2F37801F2F04E9BD006F4E33 /* ConfettiOverlay.swift in Sources */,
+				B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */,
+				A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */,
+				2F3780172F031DCB006F4E33 /* GroceryListView.swift in Sources */,
+				2F3780152F031DC4006F4E33 /* GroceryViewModel.swift in Sources */,
+				933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */,
+				2F37801D2F04E9B3006F4E33 /* ConfettiCenter.swift in Sources */,
+				2F3780232F04F1C5006F4E33 /* AppError.swift in Sources */,
+				2F3780242F04F1C5006F4E33 /* AppErrorMapper.swift in Sources */,
+				2F3780252F04F1C5006F4E33 /* AppLogger.swift in Sources */,
+				2F377FFA2EFB7975006F4E33 /* SplashView.swift in Sources */,
+				115 /* HouseholdSharingView.swift in Sources */,
+				7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */,
+				EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */,
+				BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2F3780372F04F886006F4E33 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 400 /* PantryPal */;
+			targetProxy = 2F3780362F04F886006F4E33 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2F3780392F04F886006F4E33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 85PHMLU392;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.PantryPalUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = PantryPal;
+			};
+			name = Debug;
+		};
+		2F37803A2F04F886006F4E33 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 85PHMLU392;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.PantryPalUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = PantryPal;
+			};
+			name = Release;
+		};
+		700 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 85PHMLU392;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		701 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 85PHMLU392;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		702 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20251230221623;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PantryPal/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
+				INFOPLIST_KEY_NSCameraUsageDescription = "PantryPal needs camera access to scan barcodes";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "PantryPal uses Face ID for quick and secure login";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.7.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		703 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20251230221623;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PantryPal/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
+				INFOPLIST_KEY_NSCameraUsageDescription = "PantryPal needs camera access to scan barcodes";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "PantryPal uses Face ID for quick and secure login";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.7.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2F3780382F04F886006F4E33 /* Build configuration list for PBXNativeTarget "PantryPalUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2F3780392F04F886006F4E33 /* Debug */,
+				2F37803A2F04F886006F4E33 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		500 /* Build configuration list for PBXNativeTarget "PantryPal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				702 /* Debug */,
+				703 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		601 /* Build configuration list for PBXProject "PantryPal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				700 /* Debug */,
+				701 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 600 /* Project object */;
+}
