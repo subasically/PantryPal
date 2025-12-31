@@ -88,9 +88,9 @@ final class AuthViewModel {
             // Load full household info (for premium status)
             await loadCurrentUser()
         } catch let error as APIError {
-            errorMessage = error.localizedDescription
+            errorMessage = error.userFriendlyMessage
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.userFriendlyMessage
         }
         
         // Ensure minimum loading time of 1.5 seconds
@@ -126,9 +126,9 @@ final class AuthViewModel {
             // Load full household info
             await loadCurrentUser()
         } catch let error as APIError {
-            errorMessage = error.localizedDescription
+            errorMessage = error.userFriendlyMessage
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.userFriendlyMessage
         }
         
         // Ensure minimum loading time of 1.5 seconds
@@ -179,17 +179,17 @@ final class AuthViewModel {
                 await loadCurrentUser()
             } catch let error as APIError {
                 print("Apple Sign In API Error: \(error.localizedDescription)")
-                errorMessage = error.localizedDescription
+                errorMessage = error.userFriendlyMessage
             } catch {
                 print("Apple Sign In Unknown Error: \(error.localizedDescription)")
-                errorMessage = error.localizedDescription
+                errorMessage = error.userFriendlyMessage
             }
             
         case .failure(let error):
             print("Apple Sign In Failure: \(error.localizedDescription)")
             // Ignore cancellation error
             if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
-                errorMessage = error.localizedDescription
+                errorMessage = error.userFriendlyMessage
             }
         }
         
@@ -217,13 +217,13 @@ final class AuthViewModel {
         biometricService.disableBiometricLogin()
     }
     
-    func register(email: String, password: String, name: String) async {
+    func register(email: String, password: String, firstName: String, lastName: String) async {
         isLoading = true
         errorMessage = nil
         let startTime = Date()
         
         do {
-            let response = try await APIService.shared.register(email: email, password: password, name: name)
+            let response = try await APIService.shared.register(email: email, password: password, firstName: firstName, lastName: lastName)
             currentUser = response.user
             isAuthenticated = true
             showHouseholdSetup = true
@@ -240,9 +240,9 @@ final class AuthViewModel {
             // Load full household info
             await loadCurrentUser()
         } catch let error as APIError {
-            errorMessage = error.localizedDescription
+            errorMessage = error.userFriendlyMessage
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.userFriendlyMessage
         }
         
         // Ensure minimum loading time of 1.5 seconds
@@ -255,19 +255,29 @@ final class AuthViewModel {
     }
     
     func completeHouseholdSetup() async {
-        // If user doesn't have a household yet, create one now
+        print("🔄 [AuthViewModel] completeHouseholdSetup called, currentHousehold: \(currentHousehold?.id ?? "nil")")
+        
+        // Refresh current user first to get latest household info
+        await loadCurrentUser()
+        print("🔄 [AuthViewModel] After refresh, currentHousehold: \(currentHousehold?.id ?? "nil")")
+        
+        // Only create a household if user still doesn't have one after refresh
         if currentHousehold == nil {
             do {
                 _ = try await APIService.shared.createHousehold()
+                print("✅ [AuthViewModel] Created new household")
+                await loadCurrentUser()
             } catch {
-                errorMessage = "Failed to create household: \(error.localizedDescription)"
-                return
+                print("❌ [AuthViewModel] Failed to create household: \(error)")
+                errorMessage = error.userFriendlyMessage
+                // Don't return here - still complete setup even if creation failed
             }
         }
         
+        print("✅ [AuthViewModel] Household setup completed, user household: \(currentHousehold?.id ?? "nil")")
+        
+        // Set this AFTER loadCurrentUser to prevent it from being overridden
         showHouseholdSetup = false
-        // Refresh current user to ensure we have the latest household info
-        await loadCurrentUser()
     }
     
     func logout() {

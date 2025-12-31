@@ -9,6 +9,14 @@ final class SyncService: Sendable {
     
     func syncFromRemote(modelContext: ModelContext) async throws {
         print("🔄 [SyncService] Starting syncFromRemote...")
+        
+        // Check if user has a household - skip sync if they don't
+        guard let (user, _, _) = try? await APIService.shared.getCurrentUser(),
+              user.householdId != nil else {
+            print("⏭️ [SyncService] User has no household, skipping sync")
+            return
+        }
+        
         // 1. Fetch all data from API
         async let fullSyncResponse = APIService.shared.fullSync()
         async let locationsResponse = APIService.shared.getLocationsHierarchy()
@@ -184,5 +192,118 @@ final class SyncService: Sendable {
         // The API returns a flat list in `locations` property of LocationsResponse
         // So we don't actually need to flatten the hierarchy manually if we use that.
         return locations
+    }
+    
+    /// Incremental sync using /sync/changes endpoint
+    func syncChanges(since: String, modelContext: ModelContext) async throws -> String {
+        print("🔄 [SyncService] Starting incremental sync since: \(since)")
+        
+        // Check if user has a household
+        guard let (user, _, _) = try? await APIService.shared.getCurrentUser(),
+              user.householdId != nil else {
+            print("⏭️ [SyncService] User has no household, skipping sync")
+            throw AppError.validation(message: "No household found")
+        }
+        
+        // Fetch changes since last sync
+        let changesResponse = try await APIService.shared.getChanges(since: since)
+        print("📦 [SyncService] Received \(changesResponse.changes.count) changes")
+        
+        // If too many changes or error, fall back to full sync
+        if changesResponse.changes.count > 100 {
+            print("⚠️ [SyncService] Too many changes (\(changesResponse.changes.count)), falling back to full sync")
+            try await syncFromRemote(modelContext: modelContext)
+            return changesResponse.serverTime
+        }
+        
+        // Apply changes
+        for change in changesResponse.changes {
+            try applyChange(change, modelContext: modelContext)
+        }
+        
+        try? modelContext.save()
+        print("✅ [SyncService] Applied \(changesResponse.changes.count) changes")
+        
+        return changesResponse.serverTime
+    }
+    
+    private func applyChange(_ change: SyncChange, modelContext: ModelContext) throws {
+        switch change.entityType {
+        case "inventory":
+            try applyInventoryChange(change, modelContext: modelContext)
+        case "product":
+            try applyProductChange(change, modelContext: modelContext)
+        case "grocery":
+            try applyGroceryChange(change, modelContext: modelContext)
+        default:
+            print("⚠️ [SyncService] Unknown entity type: \(change.entityType)")
+        }
+    }
+    
+    private func applyInventoryChange(_ change: SyncChange, modelContext: ModelContext) throws {
+        let itemId = change.entityId
+        
+        if change.action == "delete" {
+            // Delete item
+            let descriptor = FetchDescriptor<SDInventoryItem>(predicate: #Predicate { $0.id == itemId })
+            if let existing = try? modelContext.fetch(descriptor).first {
+                print("🗑️ [SyncService] Deleting inventory item: \(itemId)")
+                modelContext.delete(existing)
+            }
+        } else {
+            // Create or update
+            guard let payload = change.payload else { return }
+            
+            let descriptor = FetchDescriptor<SDInventoryItem>(predicate: #Predicate { $0.id == itemId })
+            let existing = try? modelContext.fetch(descriptor).first
+            
+            // Parse expiration date
+            var expDate: Date? = nil
+            if let expStr = payload["expirationDate"] as? String {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                expDate = dateFormatter.date(from: expStr)
+            }
+            
+            if let existing = existing {
+                // Update
+                existing.quantity = payload["quantity"] as? Int ?? existing.quantity
+                existing.expirationDate = expDate
+                existing.notes = payload["notes"] as? String
+                existing.locationId = payload["locationId"] as? String
+                print("✏️ [SyncService] Updated inventory item: \(itemId)")
+            } else {
+                // Create
+                guard let productId = payload["productId"] as? String,
+                      let householdId = payload["householdId"] as? String else { return }
+                
+                let newItem = SDInventoryItem(
+                    id: itemId,
+                    householdId: householdId,
+                    quantity: payload["quantity"] as? Int ?? 1,
+                    expirationDate: expDate,
+                    notes: payload["notes"] as? String,
+                    productId: productId,
+                    locationId: payload["locationId"] as? String
+                )
+                
+                // Link product
+                let prodDesc = FetchDescriptor<SDProduct>(predicate: #Predicate { $0.id == productId })
+                newItem.product = try? modelContext.fetch(prodDesc).first
+                
+                modelContext.insert(newItem)
+                print("➕ [SyncService] Created inventory item: \(itemId)")
+            }
+        }
+    }
+    
+    private func applyProductChange(_ change: SyncChange, modelContext: ModelContext) throws {
+        // Similar pattern for products
+        print("📦 [SyncService] Product change: \(change.action) \(change.entityId)")
+    }
+    
+    private func applyGroceryChange(_ change: SyncChange, modelContext: ModelContext) throws {
+        // Similar pattern for grocery items
+        print("🛒 [SyncService] Grocery change: \(change.action) \(change.entityId)")
     }
 }

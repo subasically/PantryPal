@@ -106,7 +106,7 @@ final class GroceryViewModel {
                     errorMessage = message
                 }
             } else {
-                errorMessage = "Failed to add item: \(error.localizedDescription)"
+                errorMessage = "Failed to add item: \(error.userFriendlyMessage)"
             }
             print("Add grocery error: \(error)")
             return false

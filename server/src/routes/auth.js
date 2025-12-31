@@ -93,11 +93,15 @@ router.post('/apple', async (req, res) => {
             // Create user with placeholder password hash (since they use Apple Sign In)
             // We use a dummy hash that won't match any password
             const placeholderHash = '$2a$10$placeholder_hash_for_apple_signin_users_only';
+            
+            // Parse first and last name
+            const firstName = name?.firstName || name?.givenName || '';
+            const lastName = name?.lastName || name?.familyName || '';
 
             db.prepare(`
-                INSERT INTO users (id, email, password_hash, name, household_id, apple_id)
-                VALUES (?, ?, ?, ?, NULL, ?)
-            `).run(userId, finalEmail, placeholderHash, finalName, appleId);
+                INSERT INTO users (id, email, password_hash, first_name, last_name, household_id, apple_id)
+                VALUES (?, ?, ?, ?, ?, NULL, ?)
+            `).run(userId, finalEmail, placeholderHash, firstName, lastName, appleId);
 
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
         }
@@ -108,7 +112,8 @@ router.post('/apple', async (req, res) => {
             user: {
                 id: user.id,
                 email: user.email,
-                name: user.name,
+                firstName: user.first_name || '',
+                lastName: user.last_name || '',
                 householdId: user.household_id
             },
             token
@@ -122,10 +127,21 @@ router.post('/apple', async (req, res) => {
 // Register
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, name, householdName } = req.body;
+        const { email, password, firstName, lastName, name } = req.body;
 
-        if (!email || !password || !name) {
-            return res.status(400).json({ error: 'Email, password, and name are required' });
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+        
+        // Support both new (firstName/lastName) and legacy (name) formats
+        let finalFirstName = firstName || '';
+        let finalLastName = lastName || '';
+        
+        // If legacy "name" field is provided and firstName/lastName are not, parse it
+        if (name && !firstName && !lastName) {
+            const nameParts = name.trim().split(/\s+/);
+            finalFirstName = nameParts[0] || '';
+            finalLastName = nameParts.slice(1).join(' ') || '';
         }
 
         // Check if user exists
@@ -136,15 +152,12 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const userId = uuidv4();
-        
-        // Household will be created later
-        // let finalHouseholdId = null;
 
         // Create user
         db.prepare(`
-            INSERT INTO users (id, email, password_hash, name, household_id)
-            VALUES (?, ?, ?, ?, NULL)
-        `).run(userId, email, hashedPassword, name);
+            INSERT INTO users (id, email, password_hash, first_name, last_name, household_id)
+            VALUES (?, ?, ?, ?, ?, NULL)
+        `).run(userId, email, hashedPassword, finalFirstName, finalLastName);
 
         const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
         const token = generateToken(user);
@@ -153,7 +166,8 @@ router.post('/register', async (req, res) => {
             user: {
                 id: user.id,
                 email: user.email,
-                name: user.name,
+                firstName: user.first_name || '',
+                lastName: user.last_name || '',
                 householdId: null
             },
             token,
@@ -190,7 +204,8 @@ router.post('/login', async (req, res) => {
             user: {
                 id: user.id,
                 email: user.email,
-                name: user.name,
+                firstName: user.first_name || '',
+                lastName: user.last_name || '',
                 householdId: user.household_id
             },
             token
@@ -205,7 +220,7 @@ const FREE_LIMIT = 25;
 
 // Get current user
 router.get('/me', authenticateToken, (req, res) => {
-    const user = db.prepare('SELECT id, email, name, household_id FROM users WHERE id = ?').get(req.user.id);
+    const user = db.prepare('SELECT id, email, first_name, last_name, household_id FROM users WHERE id = ?').get(req.user.id);
     if (!user) {
         return res.status(404).json({ error: 'User not found' });
     }
@@ -228,7 +243,8 @@ router.get('/me', authenticateToken, (req, res) => {
         user: {
             id: user.id,
             email: user.email,
-            name: user.name,
+            firstName: user.first_name || '',
+            lastName: user.last_name || '',
             householdId: user.household_id
         },
         household,
@@ -393,13 +409,23 @@ router.post('/household/join', authenticateToken, (req, res) => {
 router.get('/household/members', authenticateToken, (req, res) => {
     try {
         const members = db.prepare(`
-            SELECT id, email, name, created_at
+            SELECT id, email, first_name, last_name, created_at
             FROM users
             WHERE household_id = ?
             ORDER BY created_at ASC
         `).all(req.user.householdId);
         
-        res.json({ members });
+        // Map to include computed name field
+        const membersWithNames = members.map(m => ({
+            id: m.id,
+            email: m.email,
+            firstName: m.first_name || '',
+            lastName: m.last_name || '',
+            name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'Member',
+            createdAt: m.created_at
+        }));
+        
+        res.json({ members: membersWithNames });
     } catch (error) {
         console.error('Get members error:', error);
         res.status(500).json({ error: 'Failed to get household members' });

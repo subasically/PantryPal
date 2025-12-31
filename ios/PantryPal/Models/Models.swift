@@ -5,11 +5,17 @@ import Foundation
 struct User: Codable, Identifiable, Sendable {
     let id: String
     let email: String
-    let name: String
+    let firstName: String
+    let lastName: String
     let householdId: String?
     
+    var name: String {
+        let fullName = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        return fullName.isEmpty ? "User" : fullName
+    }
+    
     var displayName: String {
-        if !name.isEmpty && name != "Apple User" && name != "undefined undefined" {
+        if !name.isEmpty && name != "Apple User" && name != "undefined undefined" && name != "User" {
             return name
         }
         if !email.isEmpty {
@@ -37,9 +43,8 @@ struct LoginRequest: Codable, Sendable {
 struct RegisterRequest: Codable, Sendable {
     let email: String
     let password: String
-    let name: String
-    let householdName: String?
-    let householdId: String?
+    let firstName: String
+    let lastName: String
 }
 
 // MARK: - Household
@@ -260,8 +265,30 @@ struct SyncChange: Codable, Sendable {
     let entityType: String
     let entityId: String
     let action: String
-    let payload: [String: String]
+    let payloadString: String?
     let clientTimestamp: String
+    
+    enum CodingKeys: String, CodingKey {
+        case entityType = "entity_type"
+        case entityId = "entity_id"
+        case action
+        case payloadString = "payload"
+        case clientTimestamp = "client_timestamp"
+    }
+    
+    var payload: [String: Any]? {
+        guard let payloadString = payloadString,
+              let data = payloadString.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return json
+    }
+}
+
+struct ChangesResponse: Codable, Sendable {
+    let changes: [SyncChange]
+    let serverTime: String
 }
 
 struct FullSyncResponse: Codable, Sendable {
@@ -426,16 +453,17 @@ struct JoinHouseholdResponse: Codable, Sendable {
 struct HouseholdMember: Codable, Identifiable, Sendable {
     let id: String
     let email: String
-    let name: String
+    let firstName: String
+    let lastName: String
     let createdAt: String
     
-    enum CodingKeys: String, CodingKey {
-        case id, email, name
-        case createdAt = "created_at"
+    var name: String {
+        let fullName = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        return fullName.isEmpty ? "User" : fullName
     }
     
     var displayName: String {
-        if !name.isEmpty && name != "Apple User" && name != "undefined undefined" {
+        if !name.isEmpty && name != "Apple User" && name != "undefined undefined" && name != "User" {
             return name
         }
         if !email.isEmpty {

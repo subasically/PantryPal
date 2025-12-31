@@ -28,6 +28,13 @@ function createApp() {
     app.use('/api/sync', syncRoutes);
     app.use('/api/grocery', groceryRoutes);
     
+    // Test endpoints (only in non-production)
+    if (process.env.NODE_ENV !== 'production' || process.env.ALLOW_TEST_ENDPOINTS) {
+        const testRoutes = require('./routes/test');
+        app.use('/api/test', testRoutes);
+        console.log('⚠️  [DEV] Test endpoints enabled at /api/test');
+    }
+    
     // Admin routes (DEV/TEST ONLY - protected by env var)
     if (process.env.ENABLE_ADMIN_ROUTES === 'true') {
         const adminRoutes = require('./routes/admin');

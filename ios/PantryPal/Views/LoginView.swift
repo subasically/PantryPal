@@ -7,7 +7,8 @@ struct LoginView: View {
     
     @State private var email = ""
     @State private var password = ""
-    @State private var name = ""
+    @State private var firstName = ""
+    @State private var lastName = ""
     @State private var isRegistering = false
     @State private var showEmailForm = false
     @State private var showOtherOptions = false
@@ -73,6 +74,7 @@ struct LoginView: View {
                                     .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
                                     .frame(height: 50)
                                     .cornerRadius(10)
+                                    .accessibilityIdentifier(AccessibilityIdentifiers.Login.signInWithAppleButton)
                                     
                                     if let error = authViewModel.errorMessage {
                                         Text(error)
@@ -96,6 +98,7 @@ struct LoginView: View {
                                             .fontWeight(.medium)
                                     }
                                     .padding(.top, 8)
+                                    .accessibilityIdentifier(AccessibilityIdentifiers.Login.continueWithEmailButton)
                                     
                                     // Back to Face ID if available
                                     if authViewModel.canUseBiometricLogin {
@@ -116,11 +119,21 @@ struct LoginView: View {
                             VStack(spacing: 20) {
                                 VStack(spacing: 16) {
                                     if isRegistering {
-                                        AppTextField(
-                                            placeholder: "Name",
-                                            text: $name,
-                                            textContentType: .name
-                                        )
+                                        HStack(spacing: 12) {
+                                            AppTextField(
+                                                placeholder: "First Name",
+                                                text: $firstName,
+                                                textContentType: .givenName
+                                            )
+                                            .accessibilityIdentifier(AccessibilityIdentifiers.Login.firstNameField)
+                                            
+                                            AppTextField(
+                                                placeholder: "Last Name",
+                                                text: $lastName,
+                                                textContentType: .familyName
+                                            )
+                                            .accessibilityIdentifier(AccessibilityIdentifiers.Login.lastNameField)
+                                        }
                                     }
                                     
                                     AppTextField(
@@ -131,12 +144,14 @@ struct LoginView: View {
                                         autocapitalization: .never,
                                         autocorrectionDisabled: true
                                     )
+                                    .accessibilityIdentifier(AccessibilityIdentifiers.Login.emailField)
                                     
                                     AppSecureField(
                                         placeholder: "Password",
                                         text: $password,
                                         textContentType: isRegistering ? .newPassword : .password
                                     )
+                                    .accessibilityIdentifier(AccessibilityIdentifiers.Login.passwordField)
                                 }
                                 
                                 if let error = authViewModel.errorMessage {
@@ -155,7 +170,8 @@ struct LoginView: View {
                                             await authViewModel.register(
                                                 email: email,
                                                 password: password,
-                                                name: name
+                                                firstName: firstName,
+                                                lastName: lastName
                                             )
                                         } else {
                                             await authViewModel.login(email: email, password: password)
@@ -171,6 +187,7 @@ struct LoginView: View {
                                 }
                                 .buttonStyle(.ppPrimary)
                                 .disabled(authViewModel.isLoading || !isFormValid)
+                                .accessibilityIdentifier(isRegistering ? AccessibilityIdentifiers.Login.registerButton : AccessibilityIdentifiers.Login.loginButton)
                                 
                                 HStack {
                                     Button(isRegistering ? "Sign In" : "Register") {
@@ -225,7 +242,7 @@ struct LoginView: View {
     
     private var isFormValid: Bool {
         if isRegistering {
-            return !email.isEmpty && !password.isEmpty && !name.isEmpty
+            return !email.isEmpty && !password.isEmpty && !firstName.isEmpty && !lastName.isEmpty
         }
         return !email.isEmpty && !password.isEmpty
     }

@@ -10,6 +10,13 @@ const db = new Database(dbPath);
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
 
+// Enable WAL mode for better concurrency
+db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000'); // 5 second timeout for lock acquisition
+db.pragma('synchronous = NORMAL'); // Balance between safety and performance
+
+console.log('✅ SQLite configured: WAL mode enabled, busy_timeout = 5000ms');
+
 // Initialize database with schema
 function initializeDatabase() {
     const schema = fs.readFileSync(schemaPath, 'utf8');
@@ -64,6 +71,27 @@ function initializeDatabase() {
         }
     } catch (error) {
         console.error('Migration error (grocery_items brand/upc):', error);
+    }
+    
+    // Migration: Add first_name and last_name to users if they don't exist
+    try {
+        const tableInfo = db.prepare("PRAGMA table_info(users)").all();
+        const hasFirstName = tableInfo.some(col => col.name === 'first_name');
+        const hasLastName = tableInfo.some(col => col.name === 'last_name');
+        
+        if (!hasFirstName) {
+            console.log('Migrating: Adding first_name column to users table...');
+            db.prepare('ALTER TABLE users ADD COLUMN first_name TEXT').run();
+            console.log('Migration successful: first_name added');
+        }
+        
+        if (!hasLastName) {
+            console.log('Migrating: Adding last_name column to users table...');
+            db.prepare('ALTER TABLE users ADD COLUMN last_name TEXT').run();
+            console.log('Migration successful: last_name added');
+        }
+    } catch (error) {
+        console.error('Migration error (users first_name/last_name):', error);
     }
 
     console.log('Database initialized successfully');

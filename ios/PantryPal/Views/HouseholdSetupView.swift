@@ -22,7 +22,7 @@ struct HouseholdSetupView: View {
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
                     
-                    Text("Set up your household to start tracking your pantry.")
+                    Text("Set up your pantry to start tracking items.")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -51,11 +51,11 @@ struct HouseholdSetupView: View {
                                         .font(.title2)
                                         .foregroundColor(.white)
                                 }
-                                Text(isCreating ? "Creating..." : "Create my household")
+                                Text(isCreating ? "Creating..." : "Start using PantryPal")
                                     .font(.headline)
                                     .foregroundColor(.white)
                             }
-                            Text("Start a new pantry.")
+                            Text("Start a new pantry for yourself or your household.")
                                 .font(.caption)
                                 .foregroundColor(.white.opacity(0.8))
                                 .multilineTextAlignment(.leading)
@@ -112,7 +112,7 @@ struct HouseholdSetupView: View {
                             ProgressView()
                                 .scaleEffect(0.8)
                         } else {
-                            Text("Skip for now")
+                            Text("Continue")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -208,16 +208,33 @@ struct JoinHouseholdOnboardingView: View {
                         
                         Button {
                             Task {
+                                print("🔘 [Onboarding] Join button tapped")
                                 await viewModel.joinHousehold()
+                                print("🔘 [Onboarding] joinHousehold completed, showSuccess: \(viewModel.showSuccess)")
+                                
                                 if viewModel.showSuccess {
+                                    print("✅ [Onboarding] Join successful, syncing and refreshing user...")
                                     onJoinSuccess?()
+                                    
+                                    print("🔘 [Onboarding] Calling completeHouseholdSetup...")
                                     await authViewModel.completeHouseholdSetup()
+                                    print("✅ [Onboarding] Household setup completed")
+                                    
+                                    print("🔘 [Onboarding] showHouseholdSetup is now: \(authViewModel.showHouseholdSetup)")
+                                    print("🔘 [Onboarding] Dismissing sheet...")
                                     dismiss()
+                                } else {
+                                    print("❌ [Onboarding] Join failed or showSuccess is false")
                                 }
                             }
                         } label: {
-                            Text("Join Household")
-                                .frame(maxWidth: .infinity)
+                            if viewModel.isJoining {
+                                ProgressView()
+                                    .tint(.white)
+                            } else {
+                                Text("Join Household")
+                                    .frame(maxWidth: .infinity)
+                            }
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(Color.ppPrimary)

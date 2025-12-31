@@ -5,6 +5,7 @@ import CoreImage.CIFilterBuiltins
 struct HouseholdSharingView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var confettiCenter: ConfettiCenter
     @StateObject private var viewModel = HouseholdSharingViewModel()
     @State private var showJoinSheet = false
     
@@ -17,7 +18,17 @@ struct HouseholdSharingView: View {
         List {
             // Invite Section
             Section {
-                if let invite = viewModel.currentInvite {
+                if viewModel.isLoading {
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text("Generating invite code...")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 40)
+                } else if let invite = viewModel.currentInvite {
                     VStack(spacing: 16) {
                         VStack(spacing: 12) {
                             // QR Code (encodes just the code for scanner compatibility)
@@ -91,8 +102,13 @@ struct HouseholdSharingView: View {
                             }
                         } label: {
                             HStack {
-                                Image(systemName: "qrcode")
-                                Text("Generate Invite Code")
+                                if viewModel.isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                } else {
+                                    Image(systemName: "qrcode")
+                                }
+                                Text(viewModel.isLoading ? "Generating..." : "Generate Invite Code")
                             }
                             .frame(maxWidth: .infinity)
                         }
@@ -198,6 +214,11 @@ struct HouseholdSharingView: View {
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView(limit: authViewModel.freeLimit, reason: .householdSharing)
+        }
+        .overlay {
+            if confettiCenter.isActive {
+                ConfettiOverlay()
+            }
         }
     }
     
@@ -398,122 +419,6 @@ struct CodeCharacterView: View {
     }
 }
 
-struct QRScannerView: UIViewControllerRepresentable {
-    var onCodeScanned: (String) -> Void
-    
-    func makeUIViewController(context: Context) -> QRScannerViewController {
-        let controller = QRScannerViewController()
-        controller.onCodeScanned = onCodeScanned
-        return controller
-    }
-    
-    func updateUIViewController(_ uiViewController: QRScannerViewController, context: Context) {}
-}
-
-class QRScannerViewController: UIViewController {
-    private var captureSession: AVCaptureSession?
-    private var previewLayer: AVCaptureVideoPreviewLayer?
-    var onCodeScanned: ((String) -> Void)?
-    private var hasScanned = false
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        view.backgroundColor = .black
-        setupCamera()
-    }
-    
-    private func setupCamera() {
-        let session = AVCaptureSession()
-        
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video),
-              let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
-              session.canAddInput(videoInput) else {
-            return
-        }
-        
-        session.addInput(videoInput)
-        
-        let metadataOutput = AVCaptureMetadataOutput()
-        
-        if session.canAddOutput(metadataOutput) {
-            session.addOutput(metadataOutput)
-            metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-            metadataOutput.metadataObjectTypes = [.qr]
-        }
-        
-        let preview = AVCaptureVideoPreviewLayer(session: session)
-        preview.frame = view.layer.bounds
-        preview.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(preview)
-        
-        // Capture session is not Sendable, so we capture it weakly or use a local reference
-        // but since we are in a class, we can just use [weak self] and access it, 
-        // but self is MainActor isolated? No, UIViewController is MainActor.
-        // The issue is capturing 'session' local variable in the closure.
-        
-        // Fix: Don't capture the local 'session' variable in the async closure.
-        // Instead, use the property 'self.captureSession' but access it safely?
-        // Actually, the best way is to just capture the session instance if we know what we are doing,
-        // but Swift 6 is strict.
-        
-        // Let's try to just use the local variable but mark the closure as @Sendable (implicit in async)
-        // and since AVCaptureSession is not Sendable, we get a warning.
-        
-        // Workaround: Create a separate start function or just ignore if we can't fix easily without major refactor.
-        // But we can try to use a detached task or just keep it simple.
-        
-        // The error says: Capture of 'session' with non-Sendable type 'AVCaptureSession?' in a '@Sendable' closure
-        
-        // We can try to make the session start on a background queue without capturing the variable directly if possible?
-        // No, we need the reference.
-        
-        // Let's use a helper method that takes the session.
-        
-        startSession(session)
-        
-        self.captureSession = session
-        self.previewLayer = preview
-    }
-    
-    private func startSession(_ session: AVCaptureSession) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            session.startRunning()
-        }
-    }
-    
-    private func stopSession() {
-        guard let session = captureSession else { return }
-        DispatchQueue.global(qos: .userInitiated).async {
-            session.stopRunning()
-        }
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        stopSession()
-    }
-    
-    func handleScannedCode(_ stringValue: String) {
-        guard !hasScanned else { return }
-        hasScanned = true
-        stopSession()
-        onCodeScanned?(stringValue)
-    }
-}
-
-extension QRScannerViewController: @preconcurrency AVCaptureMetadataOutputObjectsDelegate {
-    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        guard let metadataObject = metadataObjects.first,
-              let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
-              let stringValue = readableObject.stringValue else {
-            return
-        }
-        
-        handleScannedCode(stringValue)
-    }
-}
-
 // MARK: - View Models
 
 @MainActor
@@ -545,10 +450,10 @@ class HouseholdSharingViewModel: ObservableObject {
             currentInvite = try await APIService.shared.generateInviteCode()
         } catch {
             // If server returns 403, it will be caught here too, but we try to catch it early
-            if error.localizedDescription.contains("Premium") {
+            if error.userFriendlyMessage.contains("Premium") {
                 NotificationCenter.default.post(name: .showPaywall, object: nil)
             } else {
-                errorMessage = error.localizedDescription
+                errorMessage = error.userFriendlyMessage
                 showError = true
             }
         }
@@ -561,7 +466,7 @@ class HouseholdSharingViewModel: ObservableObject {
             let response = try await APIService.shared.getHouseholdMembers()
             members = response.members
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.userFriendlyMessage
             showError = true
         }
         isLoadingMembers = false
@@ -596,12 +501,15 @@ class JoinHouseholdViewModel: ObservableObject {
     
     func joinHousehold() async {
         isJoining = true
+        print("🔄 [JoinHouseholdViewModel] Attempting to join household with code: \(code)")
         
         do {
-            _ = try await APIService.shared.joinHousehold(code: code)
+            let response = try await APIService.shared.joinHousehold(code: code)
+            print("✅ [JoinHouseholdViewModel] Successfully joined household: \(response.household.id)")
             showSuccess = true
         } catch {
-            errorMessage = error.localizedDescription
+            print("❌ [JoinHouseholdViewModel] Failed to join: \(error)")
+            errorMessage = error.userFriendlyMessage
             showError = true
         }
         

@@ -5,6 +5,7 @@ import SwiftData
 struct PantryPalApp: App {
     @State private var authViewModel = AuthViewModel()
     @StateObject private var notificationService = NotificationService.shared
+    @StateObject private var confettiCenter = ConfettiCenter()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     
@@ -31,6 +32,7 @@ struct PantryPalApp: App {
                 SplashView()
                     .environment(authViewModel)
                     .environmentObject(notificationService)
+                    .environmentObject(confettiCenter)
                     .modelContainer(sharedModelContainer)
                     .task {
                         // Request notification permission on first launch
@@ -45,6 +47,11 @@ struct PantryPalApp: App {
                 
                 // Global toast overlay
                 ToastHostView()
+                
+                // Global confetti overlay
+                if confettiCenter.isActive {
+                    ConfettiOverlay()
+                }
             }
         }
     }

@@ -8,6 +8,7 @@ enum PaywallReason {
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthViewModel.self) private var authViewModel
+    @EnvironmentObject private var confettiCenter: ConfettiCenter
     @State private var isLoading = false
     @State private var showDebugAlert = false
     @State private var debugErrorMessage: String?
@@ -153,6 +154,15 @@ struct PaywallView: View {
                     }
                     .disabled(isLoading)
                 }
+                
+                ToolbarItem(placement: .secondaryAction) {
+                    Button {
+                        confettiCenter.celebrate()
+                    } label: {
+                        Label("Test Confetti", systemImage: "party.popper.fill")
+                            .foregroundColor(.purple)
+                    }
+                }
                 #endif
             }
             .alert("Debug Error", isPresented: .constant(debugErrorMessage != nil)) {
@@ -162,6 +172,11 @@ struct PaywallView: View {
             } message: {
                 if let error = debugErrorMessage {
                     Text(error)
+                }
+            }
+            .overlay {
+                if confettiCenter.isActive {
+                    ConfettiOverlay()
                 }
             }
         }
@@ -190,13 +205,17 @@ struct PaywallView: View {
                 // Refresh user data to get updated household premium status
                 await authViewModel.refreshCurrentUser()
                 
-                // Dismiss paywall
+                // Trigger confetti celebration
+                confettiCenter.celebrate()
+                
+                // Dismiss paywall after a slight delay to let confetti start
+                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
                 dismiss()
             } else {
                 debugErrorMessage = "Premium upgrade returned false"
             }
         } catch {
-            debugErrorMessage = "Failed: \(error.localizedDescription)"
+            debugErrorMessage = "Failed: \(error.userFriendlyMessage)"
         }
         
         isLoading = false

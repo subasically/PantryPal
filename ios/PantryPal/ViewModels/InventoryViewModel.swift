@@ -34,7 +34,7 @@ final class InventoryViewModel {
             // Schedule notifications
             await NotificationService.shared.scheduleExpirationNotifications(for: items)
         } catch {
-            errorMessage = "Failed to load local inventory: \(error.localizedDescription)"
+            errorMessage = "Failed to load local inventory: \(error.userFriendlyMessage)"
         }
         
         if withLoadingState { isLoading = false }
@@ -342,7 +342,7 @@ final class InventoryViewModel {
             
             return response
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.userFriendlyMessage
             return nil
         }
     }

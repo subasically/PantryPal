@@ -1,5 +1,6 @@
 import Foundation
 
+// Keep old APIError temporarily for backward compatibility during migration
 enum APIError: Error, LocalizedError, Sendable {
     case invalidURL
     case noData
@@ -9,13 +10,19 @@ enum APIError: Error, LocalizedError, Sendable {
     case networkError(String)
     
     var errorDescription: String? {
+        // Map to AppError for user messages
+        return toAppError().userMessage
+    }
+    
+    func toAppError() -> AppError {
         switch self {
-        case .invalidURL: return "Invalid URL"
-        case .noData: return "No data received"
-        case .decodingError(let message): return "Decoding error: \(message)"
-        case .serverError(let message): return message
-        case .unauthorized: return "Please log in again"
-        case .networkError(let message): return "Network error: \(message)"
+        case .invalidURL: return .unknown
+        case .noData: return .unknown
+        case .decodingError: return .decodeFailure
+        case .serverError(let msg) where msg.contains("Premium"): return .forbidden(reason: msg)
+        case .serverError(let msg): return .validation(message: msg)
+        case .unauthorized: return .unauthorized
+        case .networkError: return .networkUnavailable
         }
     }
 }
@@ -81,31 +88,54 @@ final class APIService: Sendable {
             request.httpBody = try JSONEncoder().encode(body)
         }
         
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.noData
-        }
-        
-        if httpResponse.statusCode == 401 {
-            throw APIError.unauthorized
-        }
-        
-        if httpResponse.statusCode >= 400 {
-            if let errorResponse = try? JSONDecoder().decode([String: String].self, from: data),
-               let errorMessage = errorResponse["error"] {
-                print("API Error (\(httpResponse.statusCode)): \(errorMessage)")
-                throw APIError.serverError(errorMessage)
-            }
-            let responseString = String(data: data, encoding: .utf8) ?? "No data"
-            print("API Error (\(httpResponse.statusCode)): \(responseString)")
-            throw APIError.serverError("Request failed with status \(httpResponse.statusCode)")
-        }
-        
         do {
-            return try JSONDecoder().decode(T.self, from: data)
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw AppErrorMapper.map(
+                    statusCode: 0,
+                    endpoint: endpoint,
+                    serverMessage: "No response from server"
+                )
+            }
+            
+            // Handle error status codes
+            if httpResponse.statusCode >= 400 {
+                let responseString = String(data: data, encoding: .utf8)
+                var serverMessage: String?
+                
+                // Try to extract error message from response
+                if let errorResponse = try? JSONDecoder().decode([String: String].self, from: data) {
+                    serverMessage = errorResponse["error"]
+                }
+                
+                throw AppErrorMapper.map(
+                    statusCode: httpResponse.statusCode,
+                    endpoint: endpoint,
+                    serverMessage: serverMessage,
+                    responseBody: responseString
+                )
+            }
+            
+            // Decode response
+            do {
+                let decoded = try JSONDecoder().decode(T.self, from: data)
+                return decoded
+            } catch {
+                throw AppErrorMapper.mapDecodingError(
+                    endpoint: endpoint,
+                    expectedType: String(describing: T.self),
+                    responseData: data,
+                    error: error
+                )
+            }
+            
+        } catch let urlError as URLError {
+            throw AppErrorMapper.map(urlError, endpoint: endpoint)
+        } catch let appError as AppError {
+            throw appError
         } catch {
-            throw APIError.decodingError(error.localizedDescription)
+            throw AppErrorMapper.map(error, endpoint: endpoint)
         }
     }
     
@@ -145,8 +175,8 @@ final class APIService: Sendable {
         return response
     }
     
-    func register(email: String, password: String, name: String, householdName: String? = nil, householdId: String? = nil) async throws -> AuthResponse {
-        let body = RegisterRequest(email: email, password: password, name: name, householdName: householdName, householdId: householdId)
+    func register(email: String, password: String, firstName: String, lastName: String) async throws -> AuthResponse {
+        let body = RegisterRequest(email: email, password: password, firstName: firstName, lastName: lastName)
         let response: AuthResponse = try await request(endpoint: "/auth/register", method: "POST", body: body)
         setToken(response.token)
         // Seed default locations for new households
@@ -259,6 +289,10 @@ final class APIService: Sendable {
     
     func fullSync() async throws -> FullSyncResponse {
         try await request(endpoint: "/sync/full")
+    }
+    
+    func getChanges(since: String) async throws -> ChangesResponse {
+        try await request(endpoint: "/sync/changes?since=\(since)")
     }
     
     // MARK: - Locations

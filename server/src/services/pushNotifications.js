@@ -274,8 +274,8 @@ class PushNotificationService {
             WHERE u.household_id = ? AND u.id != ? AND np.checkout_enabled = 1
         `).all(householdId, userId);
 
-        const checkoutUser = db.prepare('SELECT name FROM users WHERE id = ?').get(userId);
-        const userName = checkoutUser?.name || 'Someone';
+        const checkoutUser = db.prepare('SELECT first_name, last_name FROM users WHERE id = ?').get(userId);
+        const userName = checkoutUser ? `${checkoutUser.first_name || ''} ${checkoutUser.last_name || ''}`.trim() || 'Someone' : 'Someone';
 
         for (const user of users) {
             let body;
