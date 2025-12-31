@@ -253,7 +253,8 @@ final class PantryPalUITests: XCTestCase {
             sleep(1)
             
             // Clear search
-            if let clearBtn = searchField.buttons["Clear text"].firstMatch, clearBtn.exists {
+            let clearBtn = searchField.buttons["Clear text"]
+            if clearBtn.exists {
                 clearBtn.tap()
             }
         }
