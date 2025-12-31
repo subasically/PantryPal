@@ -51,7 +51,7 @@ struct CheckoutView: View {
                         .tint(.white)
                 }
             }
-            .accessibilityIdentifier(AccessibilityIdentifiers.Checkout.tabButton)
+            .accessibilityIdentifier("checkout.tabButton")
             .navigationTitle("Checkout")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

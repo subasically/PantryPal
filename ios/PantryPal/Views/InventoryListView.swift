@@ -71,7 +71,7 @@ struct InventoryListView: View {
                     inventoryListSections
                 }
             }
-            .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.list)
+            .accessibilityIdentifier("inventory.list")
             .listStyle(.plain)
             .searchable(text: $searchText, prompt: "Search items")
             .navigationTitle("Pantry (\(viewModel.items.count))")
@@ -80,7 +80,7 @@ struct InventoryListView: View {
                     Button(action: { showingSettings = true }) {
                         Image(systemName: "person.circle")
                     }
-                    .accessibilityIdentifier(AccessibilityIdentifiers.Settings.button)
+                    .accessibilityIdentifier("settings.button")
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -90,7 +90,7 @@ struct InventoryListView: View {
                         }) {
                             Image(systemName: "plus")
                         }
-                        .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.addButton)
+                        .accessibilityIdentifier("inventory.addButton")
                         
                         Button(action: { 
                             if checkLimit() { showingScanner = true }
@@ -98,7 +98,7 @@ struct InventoryListView: View {
                             Image(systemName: "barcode.viewfinder")
                                 .fontWeight(.semibold)
                         }
-                        .accessibilityIdentifier(AccessibilityIdentifiers.Inventory.scanButton)
+                        .accessibilityIdentifier("inventory.scanButton")
                     }
                 }
             }

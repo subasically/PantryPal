@@ -24,7 +24,7 @@ struct GroceryListView: View {
                     itemsList
                 }
             }
-            .accessibilityIdentifier(AccessibilityIdentifiers.Grocery.list)
+            .accessibilityIdentifier("grocery.list")
             .navigationTitle("Grocery List")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -34,7 +34,7 @@ struct GroceryListView: View {
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
                     }
-                    .accessibilityIdentifier(AccessibilityIdentifiers.Grocery.addButton)
+                    .accessibilityIdentifier("grocery.addButton")
                 }
             }
             .sheet(isPresented: $showingAddSheet) {
