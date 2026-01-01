@@ -32,25 +32,28 @@ struct InventoryListView: View {
     }
     
     var filteredItems: [InventoryItem] {
-        var items: [InventoryItem]
-        
+        // First apply filter
+        let baseItems: [InventoryItem]
         switch selectedFilter {
         case .all:
-            items = viewModel.items
+            baseItems = viewModel.items
         case .expiringSoon:
-            items = viewModel.items.filter { $0.isExpiringSoon }
+            baseItems = viewModel.items.filter { $0.isExpiringSoon }
         case .expired:
-            items = viewModel.items.filter { $0.isExpired }
+            baseItems = viewModel.items.filter { $0.isExpired }
         }
         
-        if searchText.isEmpty {
-            return items
+        // Then apply search
+        guard !searchText.isEmpty else {
+            return baseItems
         }
         
-        return items.filter { item in
-            item.displayName.localizedCaseInsensitiveContains(searchText) ||
-            (item.productBrand?.localizedCaseInsensitiveContains(searchText) ?? false) ||
-            (item.productUpc?.contains(searchText) ?? false)
+        let searchLower = searchText.lowercased()
+        return baseItems.filter { item in
+            let nameMatch = item.displayName.lowercased().contains(searchLower)
+            let brandMatch = item.productBrand?.lowercased().contains(searchLower) ?? false
+            let upcMatch = item.productUpc?.contains(searchText) ?? false
+            return nameMatch || brandMatch || upcMatch
         }
     }
     
@@ -83,11 +86,32 @@ struct InventoryListView: View {
             .toolbar {
                 // Sync status indicator in top center
                 ToolbarItem(placement: .principal) {
-                    SyncStatusIndicator(
-                        isSyncing: SyncCoordinator.shared.isSyncing,
-                        pendingCount: pendingActionsCount,
-                        lastSyncTime: SyncCoordinator.shared.lastSyncTime
-                    )
+                    HStack(spacing: 6) {
+                        if SyncCoordinator.shared.isSyncing {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                            Text("Syncing")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else if pendingActionsCount > 0 {
+                            Image(systemName: "arrow.clockwise.circle.fill")
+                                .foregroundStyle(.orange)
+                                .font(.caption)
+                            Text("\(pendingActionsCount) pending")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else if let lastSync = SyncCoordinator.shared.lastSyncTime {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                                .font(.caption)
+                            Text("Synced")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.ultraThinMaterial, in: Capsule())
                     .onTapGesture {
                         showSyncDetail = true
                     }
@@ -239,31 +263,23 @@ struct InventoryListView: View {
                     Task { await viewModel.loadInventory() }
                 }
             }
-            .overlay {
-                if showSyncDetail {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            showSyncDetail = false
-                        }
-                    
-                    SyncStatusDetail(
-                        isSyncing: SyncCoordinator.shared.isSyncing,
-                        pendingCount: pendingActionsCount,
-                        lastSyncTime: SyncCoordinator.shared.lastSyncTime,
-                        isPresented: $showSyncDetail
-                    ) {
-                        // Manual sync
-                        Task {
-                            await SyncCoordinator.shared.syncNow(
-                                householdId: authViewModel.currentUser?.householdId,
-                                modelContext: modelContext,
-                                reason: .manual
-                            )
-                            await viewModel.loadInventory(withLoadingState: false)
-                        }
+            .alert("Sync Status", isPresented: $showSyncDetail) {
+                Button("Sync Now") {
+                    Task {
+                        await SyncCoordinator.shared.syncNow(
+                            householdId: authViewModel.currentUser?.householdId,
+                            modelContext: modelContext,
+                            reason: .manual
+                        )
+                        await viewModel.loadInventory(withLoadingState: false)
                     }
                 }
+                Button("Close", role: .cancel) {}
+            } message: {
+                let status = SyncCoordinator.shared.isSyncing ? "Syncing..." : 
+                            pendingActionsCount > 0 ? "\(pendingActionsCount) changes pending" : "Up to date"
+                let lastSync = SyncCoordinator.shared.lastSyncTime.map { "Last synced: \($0.formatted(.relative(presentation: .named)))" } ?? "Never synced"
+                Text("\(status)\n\(lastSync)")
             }
             .alert("Add to Grocery List?", isPresented: $showGroceryPrompt) {
                 Button("Not now", role: .cancel) {
