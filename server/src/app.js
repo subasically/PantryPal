@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const logger = require('./utils/logger');
 const requestLogger = require('./middleware/logging');
+const { generalLimiter, upcLookupLimiter, authLimiter } = require('./middleware/rateLimiter');
 
 function createApp() {
     const authRoutes = require('./routes/auth');
@@ -16,14 +17,25 @@ function createApp() {
 
     const app = express();
 
+    // Trust proxy for rate limiting (required for correct IP detection behind proxies/load balancers)
+    app.set('trust proxy', 1);
+
     // Middleware
     app.use(cors());
     app.use(express.json());
     app.use(requestLogger); // Log all HTTP requests
+    
+    // Apply general rate limiter to all API routes (except health check)
+    app.use('/api', generalLimiter);
 
-    // Routes
-    app.use('/api/auth', authRoutes);
+    // Routes with specific rate limiters
+    app.use('/api/auth', authLimiter, authRoutes);
+    
+    // Apply UPC lookup rate limiter before product routes
+    app.use('/api/products/lookup', upcLookupLimiter);
     app.use('/api/products', productRoutes);
+    
+    // Other routes (general limiter already applied above)
     app.use('/api/inventory', inventoryRoutes);
     app.use('/api/locations', locationsRoutes);
     app.use('/api/checkout', checkoutRoutes);

@@ -87,6 +87,7 @@ if (isProduction) {
 const logger = winston.createLogger({
     levels: winston.config.npm.levels, // error, warn, info, http, verbose, debug, silly
     transports,
+    silent: isTest, // Completely disable logging in test environment
     exitOnError: false
 });
 

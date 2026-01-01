@@ -1,0 +1,241 @@
+const { v4: uuidv4 } = require('uuid');
+const db = require('../models/database');
+const { isHouseholdPremium } = require('../utils/premiumHelper');
+
+/**
+ * Create default storage locations for a household
+ * @param {string} householdId - Household ID
+ */
+function createDefaultLocations(householdId) {
+    const defaultLocations = [
+        { name: 'Pantry', sortOrder: 0 },
+        { name: 'Fridge', sortOrder: 1 },
+        { name: 'Freezer', sortOrder: 2 },
+        { name: 'Other', sortOrder: 3 }
+    ];
+    
+    const insertLocation = db.prepare(`
+        INSERT INTO locations (id, household_id, name, parent_id, level, sort_order, created_at, updated_at)
+        VALUES (?, ?, ?, NULL, 0, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `);
+    
+    defaultLocations.forEach(loc => {
+        insertLocation.run(uuidv4(), householdId, loc.name, loc.sortOrder);
+    });
+}
+
+/**
+ * Create a new household
+ * @param {string} userId - User ID
+ * @param {string} name - Household name
+ * @returns {Object} { id, name, isPremium }
+ */
+function createHousehold(userId, name = 'My Household') {
+    // Check if user already has a household
+    const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
+    if (user.household_id) {
+        throw new Error('User already belongs to a household');
+    }
+
+    const householdId = uuidv4();
+    
+    const transaction = db.transaction(() => {
+        // Create household
+        db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(householdId, name);
+        
+        // Update user
+        db.prepare('UPDATE users SET household_id = ? WHERE id = ?').run(householdId, userId);
+        
+        // Create default locations
+        createDefaultLocations(householdId);
+    });
+    
+    transaction();
+    
+    return {
+        id: householdId,
+        name,
+        isPremium: false
+    };
+}
+
+/**
+ * Generate household invite code
+ * @param {string} householdId - Household ID
+ * @param {string} userId - User ID creating the invite
+ * @returns {Object} { code, expiresAt, householdName }
+ */
+function generateInviteCode(householdId, userId) {
+    // Check if household is premium
+    const household = db.prepare('SELECT is_premium, name FROM households WHERE id = ?').get(householdId);
+    if (!household.is_premium) {
+        const error = new Error('Household sharing is a Premium feature');
+        error.code = 'PREMIUM_REQUIRED';
+        throw error;
+    }
+
+    // Generate a 6-character alphanumeric code
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude confusing chars (0,O,1,I)
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    const id = uuidv4();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+    
+    db.prepare(`
+        INSERT INTO invite_codes (id, household_id, code, created_by, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+    `).run(id, householdId, code, userId, expiresAt);
+    
+    return {
+        code,
+        expiresAt,
+        householdName: household.name || 'Unknown Household'
+    };
+}
+
+/**
+ * Validate invite code
+ * @param {string} code - Invite code
+ * @returns {Object} { valid, householdId, householdName, memberCount, expiresAt }
+ */
+function validateInviteCode(code) {
+    const invite = db.prepare(`
+        SELECT ic.*, h.name as household_name
+        FROM invite_codes ic
+        JOIN households h ON ic.household_id = h.id
+        WHERE ic.code = ? AND ic.used_by IS NULL AND ic.expires_at > datetime('now')
+    `).get(code.toUpperCase());
+    
+    if (!invite) {
+        throw new Error('Invalid or expired invite code');
+    }
+    
+    // Count household members
+    const memberCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?').get(invite.household_id);
+    
+    return {
+        valid: true,
+        householdId: invite.household_id,
+        householdName: invite.household_name,
+        memberCount: memberCount.count,
+        expiresAt: invite.expires_at
+    };
+}
+
+/**
+ * Join household with invite code
+ * @param {string} userId - User ID
+ * @param {string} code - Invite code
+ * @returns {Object} { success, household }
+ */
+function joinHousehold(userId, code) {
+    const invite = db.prepare(`
+        SELECT * FROM invite_codes
+        WHERE code = ? AND used_by IS NULL AND expires_at > datetime('now')
+    `).get(code.toUpperCase());
+    
+    if (!invite) {
+        throw new Error('Invalid or expired invite code');
+    }
+    
+    // Update user's household
+    db.prepare('UPDATE users SET household_id = ?, updated_at = ? WHERE id = ?')
+        .run(invite.household_id, new Date().toISOString(), userId);
+    
+    // Mark invite as used
+    db.prepare('UPDATE invite_codes SET used_by = ?, used_at = ? WHERE id = ?')
+        .run(userId, new Date().toISOString(), invite.id);
+    
+    const household = db.prepare('SELECT * FROM households WHERE id = ?').get(invite.household_id);
+    
+    return {
+        success: true,
+        household: {
+            id: household.id,
+            name: household.name
+        }
+    };
+}
+
+/**
+ * Get household members
+ * @param {string} householdId - Household ID
+ * @returns {Array} Array of member objects
+ */
+function getHouseholdMembers(householdId) {
+    const members = db.prepare(`
+        SELECT id, email, first_name, last_name, created_at
+        FROM users
+        WHERE household_id = ?
+        ORDER BY created_at ASC
+    `).all(householdId);
+    
+    return members.map(m => ({
+        id: m.id,
+        email: m.email,
+        firstName: m.first_name || '',
+        lastName: m.last_name || '',
+        name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'Member',
+        createdAt: m.created_at
+    }));
+}
+
+/**
+ * Get active invite codes for household
+ * @param {string} householdId - Household ID
+ * @returns {Array} Array of invite codes
+ */
+function getActiveInviteCodes(householdId) {
+    const invites = db.prepare(`
+        SELECT code, expires_at, created_at
+        FROM invite_codes
+        WHERE household_id = ? AND used_by IS NULL AND expires_at > datetime('now')
+        ORDER BY created_at DESC
+    `).all(householdId);
+    
+    return invites;
+}
+
+/**
+ * Reset household data (wipe inventory, history, custom products, locations)
+ * @param {string} householdId - Household ID
+ * @param {string} userId - User ID performing the reset
+ */
+function resetHouseholdData(householdId, userId) {
+    console.log(`[Reset] Wiping data for household ${householdId} by user ${userId}`);
+
+    const deleteInventory = db.prepare('DELETE FROM inventory WHERE household_id = ?');
+    const deleteHistory = db.prepare('DELETE FROM checkout_history WHERE household_id = ?');
+    const deleteCustomProducts = db.prepare('DELETE FROM products WHERE household_id = ? AND is_custom = 1');
+    const deleteLocations = db.prepare('DELETE FROM locations WHERE household_id = ?');
+    const deleteGrocery = db.prepare('DELETE FROM grocery_items WHERE household_id = ?');
+
+    const transaction = db.transaction(() => {
+        deleteInventory.run(householdId);
+        deleteHistory.run(householdId);
+        deleteCustomProducts.run(householdId);
+        deleteLocations.run(householdId);
+        deleteGrocery.run(householdId);
+        
+        // Re-seed default locations so the app isn't empty
+        createDefaultLocations(householdId);
+    });
+
+    transaction();
+
+    return { success: true, message: 'Household data reset successfully' };
+}
+
+module.exports = {
+    createDefaultLocations,
+    createHousehold,
+    generateInviteCode,
+    validateInviteCode,
+    joinHousehold,
+    getHouseholdMembers,
+    getActiveInviteCodes,
+    resetHouseholdData
+};

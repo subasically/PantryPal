@@ -1,0 +1,54 @@
+========================================
+RATE LIMITING DEPLOYMENT NOTES
+========================================
+
+📦 New Package Added:
+   - express-rate-limit v8.2.1
+
+🚀 Deployment Steps:
+
+1. Copy updated files to production:
+   scp package.json package-lock.json root@62.146.177.62:/root/pantrypal-server/
+   scp -r src/middleware/rateLimiter.js root@62.146.177.62:/root/pantrypal-server/src/middleware/
+   scp src/app.js root@62.146.177.62:/root/pantrypal-server/src/
+
+2. SSH to production:
+   ssh root@62.146.177.62
+
+3. Navigate to project:
+   cd /root/pantrypal-server
+
+4. Install new dependencies:
+   npm install
+
+5. Rebuild and restart:
+   docker-compose up -d --build --force-recreate
+
+6. Verify logs:
+   docker-compose logs -f pantrypal-api
+
+7. Test endpoints:
+   curl https://api-pantrypal.subasically.me/health
+   curl https://api-pantrypal.subasically.me/api
+
+⚠️  IMPORTANT NOTES:
+
+- Rate limiting is automatically DISABLED in test environment (NODE_ENV=test)
+- Health check endpoint (/health) is NOT rate limited
+- Trust proxy is enabled for correct IP detection behind load balancers
+- All rate limit violations are logged with Winston
+
+📊 Rate Limits in Production:
+- General API: 100 requests per 15 minutes per IP
+- Auth endpoints: 5 requests per 5 minutes per IP (brute force protection)
+- UPC lookup: 10 requests per minute per IP (expensive external API)
+
+📖 Documentation:
+- See RATE_LIMITING.md for complete documentation
+- Response format includes retryAfter field for clients
+- Standard RateLimit-* headers are included in responses
+
+✅ Testing:
+- All 84 tests pass (including 10 new rate limiting tests)
+- Server starts without errors
+- No deprecation warnings
