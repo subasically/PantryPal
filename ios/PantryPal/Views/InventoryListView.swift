@@ -86,32 +86,11 @@ struct InventoryListView: View {
             .toolbar {
                 // Sync status indicator in top center
                 ToolbarItem(placement: .principal) {
-                    HStack(spacing: 6) {
-                        if SyncCoordinator.shared.isSyncing {
-                            ProgressView()
-                                .scaleEffect(0.7)
-                            Text("Syncing")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else if pendingActionsCount > 0 {
-                            Image(systemName: "arrow.clockwise.circle.fill")
-                                .foregroundStyle(.orange)
-                                .font(.caption)
-                            Text("\(pendingActionsCount) pending")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else if let lastSync = SyncCoordinator.shared.lastSyncTime {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                                .font(.caption)
-                            Text("Synced")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.ultraThinMaterial, in: Capsule())
+                    SyncStatusIndicator(
+                        isSyncing: SyncCoordinator.shared.isSyncing,
+                        pendingCount: pendingActionsCount,
+                        lastSyncTime: SyncCoordinator.shared.lastSyncTime
+                    )
                     .onTapGesture {
                         showSyncDetail = true
                     }
@@ -263,23 +242,31 @@ struct InventoryListView: View {
                     Task { await viewModel.loadInventory() }
                 }
             }
-            .alert("Sync Status", isPresented: $showSyncDetail) {
-                Button("Sync Now") {
-                    Task {
-                        await SyncCoordinator.shared.syncNow(
-                            householdId: authViewModel.currentUser?.householdId,
-                            modelContext: modelContext,
-                            reason: .manual
-                        )
-                        await viewModel.loadInventory(withLoadingState: false)
+            .overlay {
+                if showSyncDetail {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            showSyncDetail = false
+                        }
+                    
+                    SyncStatusDetail(
+                        isSyncing: SyncCoordinator.shared.isSyncing,
+                        pendingCount: pendingActionsCount,
+                        lastSyncTime: SyncCoordinator.shared.lastSyncTime,
+                        isPresented: $showSyncDetail
+                    ) {
+                        // Manual sync
+                        Task {
+                            await SyncCoordinator.shared.syncNow(
+                                householdId: authViewModel.currentUser?.householdId,
+                                modelContext: modelContext,
+                                reason: .manual
+                            )
+                            await viewModel.loadInventory(withLoadingState: false)
+                        }
                     }
                 }
-                Button("Close", role: .cancel) {}
-            } message: {
-                let status = SyncCoordinator.shared.isSyncing ? "Syncing..." : 
-                            pendingActionsCount > 0 ? "\(pendingActionsCount) changes pending" : "Up to date"
-                let lastSync = SyncCoordinator.shared.lastSyncTime.map { "Last synced: \($0.formatted(.relative(presentation: .named)))" } ?? "Never synced"
-                Text("\(status)\n\(lastSync)")
             }
             .alert("Add to Grocery List?", isPresented: $showGroceryPrompt) {
                 Button("Not now", role: .cancel) {
