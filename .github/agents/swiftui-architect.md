@@ -38,6 +38,10 @@ ios/PantryPal/
 │   ├── SettingsView.swift       # User settings + household info
 │   ├── BarcodeScannerView.swift # UPC scanning
 │   └── Components/              # Reusable UI components
+│       ├── SyncStatusIndicator.swift # Real-time sync status (NEW)
+│       ├── ToastView.swift           # Toast notifications
+│       ├── ConfettiOverlay.swift     # Celebration effects
+│       └── PhotoCaptureView.swift    # Camera capture
 ├── ViewModels/
 │   ├── AuthViewModel.swift      # @Observable, manages auth state
 │   ├── InventoryViewModel.swift # @Observable, manages inventory
@@ -365,6 +369,44 @@ defer {
     }
 }
 ```
+
+### Sync Status Visibility (NEW - January 2026)
+
+**SyncStatusIndicator** shows real-time sync state to users:
+
+```swift
+import SwiftUI
+import SwiftData
+
+// In InventoryListView toolbar
+.toolbar {
+    ToolbarItem(placement: .principal) {
+        SyncStatusIndicator(
+            isSyncing: SyncCoordinator.shared.isSyncing,
+            pendingCount: pendingActionsCount,
+            lastSyncTime: SyncCoordinator.shared.lastSyncTime
+        )
+    }
+}
+
+// Update pending count periodically
+.onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in
+    Task { @MainActor in
+        let fetchDescriptor = FetchDescriptor<SDPendingAction>()
+        if let actions = try? modelContext.fetch(fetchDescriptor) {
+            pendingActionsCount = actions.count
+        }
+    }
+}
+```
+
+**Four sync states:**
+- **Syncing:** Progress spinner + "Syncing..."
+- **Pending:** Orange icon + count (e.g., "3 pending")
+- **Synced:** Green checkmark + relative time (e.g., "Synced 2m ago")
+- **Not synced:** Gray icon + "Not synced"
+
+Tap indicator to show `SyncStatusDetail` overlay with manual sync button.
 
 ## Common Gotchas
 
