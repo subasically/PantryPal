@@ -61,6 +61,28 @@ struct PantryPalApp: App {
 @MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        // Handle UI Testing reset
+        if CommandLine.arguments.contains("--uitesting") {
+            // Clear all UserDefaults
+            if let bundleID = Bundle.main.bundleIdentifier {
+                UserDefaults.standard.removePersistentDomain(forName: bundleID)
+            }
+            UserDefaults.standard.synchronize()
+            
+            // Clear SwiftData cache
+            let fileManager = FileManager.default
+            if let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                let storeURL = appSupport.appendingPathComponent("default.store")
+                try? fileManager.removeItem(at: storeURL)
+                let shmURL = appSupport.appendingPathComponent("default.store-shm")
+                try? fileManager.removeItem(at: shmURL)
+                let walURL = appSupport.appendingPathComponent("default.store-wal")
+                try? fileManager.removeItem(at: walURL)
+            }
+            
+            print("✅ UI Testing: Cleared UserDefaults and SwiftData")
+        }
+        
         UNUserNotificationCenter.current().delegate = self
         return true
     }

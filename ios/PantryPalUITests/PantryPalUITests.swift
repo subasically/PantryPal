@@ -10,7 +10,7 @@ final class PantryPalUITests: XCTestCase {
         continueAfterFailure = false
         
         app = XCUIApplication()
-        app.launchArguments = ["UI_TESTING"]
+        app.launchArguments = ["--uitesting"] // Enable UI testing mode to clear app state
         app.launchEnvironment = [
             "API_BASE_URL": testServerURL,
             "UI_TEST_DISABLE_APP_LOCK": "true"
@@ -41,6 +41,8 @@ final class PantryPalUITests: XCTestCase {
             }
         }
         
+        // Terminate app to force clean state
+        app.terminate()
         app = nil
     }
     
@@ -81,14 +83,16 @@ final class PantryPalUITests: XCTestCase {
     // MARK: - Helper Methods
     
     func loginTestUser() {
-        // Check if already logged in
-        if app.otherElements["mainTab.container"].exists || app.otherElements["householdSetup.container"].exists {
-            return // Already logged in, skip
+        // Check if already at main screen (shouldn't happen with tearDown but be safe)
+        if app.otherElements["mainTab.container"].exists || app.otherElements["inventory.list"].exists {
+            return // Already logged in
         }
         
         let continueBtn = app.buttons["login.continueWithEmailButton"]
-        if continueBtn.waitForExistence(timeout: 3) {
+        if continueBtn.waitForExistence(timeout: 5) {
             continueBtn.tap()
+        } else {
+            return // Not at login screen, probably already past it
         }
         
         let emailField = app.textFields["login.emailField"]
@@ -103,7 +107,17 @@ final class PantryPalUITests: XCTestCase {
         passwordField.typeText("Test123!")
         
         app.buttons["login.loginButton"].tap()
-        sleep(3) // Wait for login and sync
+        
+        // Wait for navigation to complete (household setup OR main tab)
+        let householdSetup = app.otherElements["householdSetup.container"]
+        let mainTab = app.otherElements["mainTab.container"]
+        
+        // Wait up to 8 seconds for either view to appear (includes API call time)
+        var waited = 0
+        while waited < 8 && !householdSetup.exists && !mainTab.exists {
+            sleep(1)
+            waited += 1
+        }
     }
     
     func skipOnboardingIfNeeded() {
@@ -154,32 +168,40 @@ final class PantryPalUITests: XCTestCase {
         
         // Verify inventory list exists
         let inventoryList = app.otherElements["inventory.list"]
-        XCTAssertTrue(inventoryList.waitForExistence(timeout: 5))
+        XCTAssertTrue(inventoryList.waitForExistence(timeout: 5), "Inventory list should be visible")
         
         // Tap add button
         let addBtn = app.buttons["inventory.addButton"]
-        XCTAssertTrue(addBtn.waitForExistence(timeout: 3))
+        XCTAssertTrue(addBtn.waitForExistence(timeout: 3), "Add button should exist")
         addBtn.tap()
         
         sleep(1)
         
-        // Find and fill name field
-        let nameFields = app.textFields.matching(NSPredicate(format: "placeholderValue CONTAINS[c] 'name'"))
-        if nameFields.count > 0 {
-            let nameField = nameFields.firstMatch
-            nameField.tap()
-            nameField.typeText("UI Test Banana")
-            
-            // Find save button
-            let saveBtn = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'save' OR label CONTAINS[c] 'add'")).firstMatch
-            if saveBtn.exists {
-                saveBtn.tap()
-                sleep(2)
-            }
+        // Fill name field using accessibility identifier
+        let nameField = app.textFields["addItem.nameField"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 3), "Name field should exist")
+        nameField.tap()
+        nameField.typeText("UI Test Banana")
+        
+        // Wait for location to auto-select and save button to become enabled
+        // The form needs both a name and a location before enabling the save button
+        let saveBtn = app.buttons["addItem.saveButton"]
+        XCTAssertTrue(saveBtn.waitForExistence(timeout: 3), "Save button should exist")
+        
+        // Wait for save button to become enabled (location should auto-select)
+        let saveBtnEnabled = saveBtn.waitForExistence(timeout: 5) && saveBtn.isEnabled
+        if !saveBtnEnabled {
+            // If still disabled after 5s, wait a bit longer for location to load
+            sleep(2)
         }
         
+        XCTAssertTrue(saveBtn.isEnabled, "Save button should be enabled after location auto-select")
+        saveBtn.tap()
+        
+        sleep(2)
+        
         // Verify still on inventory
-        XCTAssertTrue(inventoryList.exists)
+        XCTAssertTrue(inventoryList.exists, "Should return to inventory list")
     }
     
     func test03_InventoryQuantity_IncrementAndDecrement() throws {

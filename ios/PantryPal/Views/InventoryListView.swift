@@ -1126,7 +1126,9 @@ struct AddCustomItemView: View {
             Form {
                 Section("Product Info") {
                     TextField("Product Name *", text: $name)
+                        .accessibilityIdentifier("addItem.nameField")
                     TextField("Brand", text: $brand)
+                        .accessibilityIdentifier("addItem.brandField")
                     
                     HStack {
                         TextField("UPC (optional)", text: $upc)
@@ -1181,6 +1183,7 @@ struct AddCustomItemView: View {
                         Task { await saveItem() }
                     }
                     .disabled(!canSubmit)
+                    .accessibilityIdentifier("addItem.saveButton")
                 }
             }
             .onAppear {
