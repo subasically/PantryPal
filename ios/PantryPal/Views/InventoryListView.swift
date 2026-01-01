@@ -38,9 +38,13 @@ struct InventoryListView: View {
         case .all:
             baseItems = viewModel.items
         case .expiringSoon:
-            baseItems = viewModel.items.filter { $0.isExpiringSoon }
+            baseItems = viewModel.items.filter { item in
+                item.isExpiringSoon
+            }
         case .expired:
-            baseItems = viewModel.items.filter { $0.isExpired }
+            baseItems = viewModel.items.filter { item in
+                item.isExpired
+            }
         }
         
         // Then apply search
@@ -48,13 +52,31 @@ struct InventoryListView: View {
             return baseItems
         }
         
-        let searchLower = searchText.lowercased()
         return baseItems.filter { item in
-            let nameMatch = item.displayName.lowercased().contains(searchLower)
-            let brandMatch = item.productBrand?.lowercased().contains(searchLower) ?? false
-            let upcMatch = item.productUpc?.contains(searchText) ?? false
-            return nameMatch || brandMatch || upcMatch
+            matchesSearch(item: item, searchText: searchText)
         }
+    }
+    
+    private func matchesSearch(item: InventoryItem, searchText: String) -> Bool {
+        let searchLower = searchText.lowercased()
+        
+        // Check name
+        let nameMatch = item.displayName.lowercased().contains(searchLower)
+        if nameMatch { return true }
+        
+        // Check brand
+        if let brand = item.productBrand {
+            let brandMatch = brand.lowercased().contains(searchLower)
+            if brandMatch { return true }
+        }
+        
+        // Check UPC
+        if let upc = item.productUpc {
+            let upcMatch = upc.contains(searchText)
+            if upcMatch { return true }
+        }
+        
+        return false
     }
     
     var body: some View {
