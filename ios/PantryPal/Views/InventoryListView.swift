@@ -161,14 +161,19 @@ struct InventoryListView: View {
     
     var body: some View {
         NavigationStack {
-            inventoryList
-                .navigationTitle("Pantry (\(viewModel.items.count))")
-                .toolbar {
-                    syncStatusToolbarItem
-                    settingsToolbarItem
-                    actionButtonsToolbarItem
-                }
-                .refreshable {
+            configuredInventoryList
+        }
+    }
+    
+    private var configuredInventoryList: some View {
+        inventoryList
+            .navigationTitle("Pantry (\(viewModel.items.count))")
+            .toolbar {
+                syncStatusToolbarItem
+                settingsToolbarItem
+                actionButtonsToolbarItem
+            }
+            .refreshable {
                 print("🔄 [InventoryListView] Pull-to-refresh triggered")
                 await SyncCoordinator.shared.syncNow(
                     householdId: authViewModel.currentUser?.householdId,
