@@ -79,32 +79,44 @@ struct InventoryListView: View {
         return false
     }
     
+    private var inventoryList: some View {
+        List {
+            if viewModel.isLoading && viewModel.items.isEmpty {
+                loadingSection
+            } else if viewModel.items.isEmpty {
+                emptySection
+            } else {
+                inventoryListSections
+            }
+        }
+        .accessibilityIdentifier("inventory.list")
+        .listStyle(.plain)
+        .searchable(text: $searchText, prompt: "Search items")
+    }
+    
+    private var loadingSection: some View {
+        Section {
+            HStack {
+                Spacer()
+                ProgressView("Loading inventory...")
+                Spacer()
+            }
+        }
+        .listRowBackground(Color.clear)
+    }
+    
+    private var emptySection: some View {
+        Section {
+            emptyStateContent
+        }
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+    }
+    
     var body: some View {
         NavigationStack {
-            List {
-                if viewModel.isLoading && viewModel.items.isEmpty {
-                    Section {
-                        HStack {
-                            Spacer()
-                            ProgressView("Loading inventory...")
-                            Spacer()
-                        }
-                    }
-                    .listRowBackground(Color.clear)
-                } else if viewModel.items.isEmpty {
-                    Section {
-                        emptyStateContent
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                } else {
-                    inventoryListSections
-                }
-            }
-            .accessibilityIdentifier("inventory.list")
-            .listStyle(.plain)
-            .searchable(text: $searchText, prompt: "Search items")
-            .navigationTitle("Pantry (\(viewModel.items.count))")
+            inventoryList
+                .navigationTitle("Pantry (\(viewModel.items.count))")
             .toolbar {
                 // Sync status indicator in top center
                 ToolbarItem(placement: .principal) {
