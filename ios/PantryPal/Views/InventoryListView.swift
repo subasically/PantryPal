@@ -113,50 +113,62 @@ struct InventoryListView: View {
         .listRowSeparator(.hidden)
     }
     
+    @ToolbarContentBuilder
+    private var syncStatusToolbarItem: some ToolbarContent {
+        ToolbarItem(placement: .principal) {
+            SyncStatusIndicator(
+                isSyncing: SyncCoordinator.shared.isSyncing,
+                pendingCount: pendingActionsCount,
+                lastSyncTime: SyncCoordinator.shared.lastSyncTime
+            )
+            .onTapGesture {
+                showSyncDetail = true
+            }
+        }
+    }
+    
+    @ToolbarContentBuilder
+    private var settingsToolbarItem: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            Button(action: { showingSettings = true }) {
+                Image(systemName: "person.circle")
+            }
+            .accessibilityIdentifier("settings.button")
+        }
+    }
+    
+    @ToolbarContentBuilder
+    private var actionButtonsToolbarItem: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarTrailing) {
+            HStack(spacing: 16) {
+                Button(action: { 
+                    if checkLimit() { showingAddCustom = true }
+                }) {
+                    Image(systemName: "plus")
+                }
+                .accessibilityIdentifier("inventory.addButton")
+                
+                Button(action: { 
+                    if checkLimit() { showingScanner = true }
+                }) {
+                    Image(systemName: "barcode.viewfinder")
+                        .fontWeight(.semibold)
+                }
+                .accessibilityIdentifier("inventory.scanButton")
+            }
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             inventoryList
                 .navigationTitle("Pantry (\(viewModel.items.count))")
-            .toolbar {
-                // Sync status indicator in top center
-                ToolbarItem(placement: .principal) {
-                    SyncStatusIndicator(
-                        isSyncing: SyncCoordinator.shared.isSyncing,
-                        pendingCount: pendingActionsCount,
-                        lastSyncTime: SyncCoordinator.shared.lastSyncTime
-                    )
-                    .onTapGesture {
-                        showSyncDetail = true
-                    }
+                .toolbar {
+                    syncStatusToolbarItem
+                    settingsToolbarItem
+                    actionButtonsToolbarItem
                 }
-                
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { showingSettings = true }) {
-                        Image(systemName: "person.circle")
-                    }
-                    .accessibilityIdentifier("settings.button")
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 16) {
-                        Button(action: { 
-                            if checkLimit() { showingAddCustom = true }
-                        }) {
-                            Image(systemName: "plus")
-                        }
-                        .accessibilityIdentifier("inventory.addButton")
-                        
-                        Button(action: { 
-                            if checkLimit() { showingScanner = true }
-                        }) {
-                            Image(systemName: "barcode.viewfinder")
-                                .fontWeight(.semibold)
-                        }
-                        .accessibilityIdentifier("inventory.scanButton")
-                    }
-                }
-            }
-            .refreshable {
+                .refreshable {
                 print("🔄 [InventoryListView] Pull-to-refresh triggered")
                 await SyncCoordinator.shared.syncNow(
                     householdId: authViewModel.currentUser?.householdId,
