@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct InventoryListView: View {
     @Environment(AuthViewModel.self) private var authViewModel
@@ -6,6 +7,10 @@ struct InventoryListView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = InventoryViewModel()
     @State private var groceryViewModel = GroceryViewModel()
+    
+    // Sync status tracking
+    @State private var showSyncDetail = false
+    @State private var pendingActionsCount = 0
     
     @State private var showingScanner = false
     @State private var showingAddCustom = false
@@ -76,6 +81,18 @@ struct InventoryListView: View {
             .searchable(text: $searchText, prompt: "Search items")
             .navigationTitle("Pantry (\(viewModel.items.count))")
             .toolbar {
+                // Sync status indicator in top center
+                ToolbarItem(placement: .principal) {
+                    SyncStatusIndicator(
+                        isSyncing: SyncCoordinator.shared.isSyncing,
+                        pendingCount: pendingActionsCount,
+                        lastSyncTime: SyncCoordinator.shared.lastSyncTime
+                    )
+                    .onTapGesture {
+                        showSyncDetail = true
+                    }
+                }
+                
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showingSettings = true }) {
                         Image(systemName: "person.circle")
@@ -205,12 +222,47 @@ struct InventoryListView: View {
                     }
                 }
             }
+            .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in
+                // Update pending actions count every 2 seconds
+                Task { @MainActor in
+                    let fetchDescriptor = FetchDescriptor<SDPendingAction>()
+                    if let actions = try? modelContext.fetch(fetchDescriptor) {
+                        pendingActionsCount = actions.count
+                    }
+                }
+            }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
                 // Only show paywall if we're not already showing settings (which handles its own paywall)
                 if !showingSettings {
                     showingPaywall = true
                     // Refresh inventory to revert local optimistic changes
                     Task { await viewModel.loadInventory() }
+                }
+            }
+            .overlay {
+                if showSyncDetail {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            showSyncDetail = false
+                        }
+                    
+                    SyncStatusDetail(
+                        isSyncing: SyncCoordinator.shared.isSyncing,
+                        pendingCount: pendingActionsCount,
+                        lastSyncTime: SyncCoordinator.shared.lastSyncTime,
+                        isPresented: $showSyncDetail
+                    ) {
+                        // Manual sync
+                        Task {
+                            await SyncCoordinator.shared.syncNow(
+                                householdId: authViewModel.currentUser?.householdId,
+                                modelContext: modelContext,
+                                reason: .manual
+                            )
+                            await viewModel.loadInventory(withLoadingState: false)
+                        }
+                    }
                 }
             }
             .alert("Add to Grocery List?", isPresented: $showGroceryPrompt) {
