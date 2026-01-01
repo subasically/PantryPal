@@ -279,3 +279,256 @@ After deployment, monitor:
 4. ⏭️ Add last-item confirmation for free households
 5. ⏭️ Premium expiration warnings (7 days before)
 6. ⏭️ App Store submission
+
+---
+
+## 💾 Database Backup System
+
+### Overview
+Automated daily backups of the production SQLite database with 30-day retention and compression.
+
+### Backup Configuration
+- **Schedule:** Daily at 2 AM UTC via cron
+- **Location:** `/root/backups/pantrypal-db/`
+- **Format:** `pantrypal-YYYYMMDD-HHMMSS.db`
+- **Retention:** 30 days (rolling)
+- **Compression:** Gzip for backups 7+ days old
+- **Logging:** `/root/pantrypal-server/logs/backup.log`
+
+### Setup Instructions
+
+#### 1. Deploy Backup Scripts
+```bash
+# Copy scripts to production server
+scp server/scripts/backup-database.sh root@62.146.177.62:/root/pantrypal-server/scripts/
+scp server/scripts/restore-database.sh root@62.146.177.62:/root/pantrypal-server/scripts/
+
+# SSH to server
+ssh root@62.146.177.62
+
+# Make scripts executable
+chmod +x /root/pantrypal-server/scripts/backup-database.sh
+chmod +x /root/pantrypal-server/scripts/restore-database.sh
+
+# Create backup and log directories
+mkdir -p /root/backups/pantrypal-db
+mkdir -p /root/pantrypal-server/logs
+
+# Test backup script manually
+/root/pantrypal-server/scripts/backup-database.sh
+```
+
+#### 2. Configure Cron Job
+```bash
+# SSH to production server
+ssh root@62.146.177.62
+
+# Open crontab editor
+crontab -e
+
+# Add this line (daily backup at 2 AM UTC)
+0 2 * * * /root/pantrypal-server/scripts/backup-database.sh >> /root/pantrypal-server/logs/backup-cron.log 2>&1
+
+# Save and exit (Ctrl+X, Y, Enter in nano)
+
+# Verify cron job is installed
+crontab -l | grep backup-database
+
+# Check cron service is running
+systemctl status cron
+```
+
+#### 3. Verify Backup System
+```bash
+# Run backup manually
+/root/pantrypal-server/scripts/backup-database.sh
+
+# Check backup was created
+ls -lh /root/backups/pantrypal-db/
+
+# Check log file
+tail -20 /root/pantrypal-server/logs/backup.log
+
+# Verify backup integrity
+sqlite3 /root/backups/pantrypal-db/pantrypal-YYYYMMDD-HHMMSS.db "PRAGMA integrity_check;"
+# Should output: ok
+```
+
+### Restore Operations
+
+#### List Available Backups
+```bash
+# SSH to server
+ssh root@62.146.177.62
+
+# List all backups
+/root/pantrypal-server/scripts/restore-database.sh --list
+
+# Or manually
+ls -lht /root/backups/pantrypal-db/
+```
+
+#### Restore Database from Backup
+```bash
+# SSH to server
+ssh root@62.146.177.62
+
+# Navigate to server directory
+cd /root/pantrypal-server
+
+# Restore specific backup (CAUTION: Overwrites production DB!)
+./scripts/restore-database.sh pantrypal-20260101-020000.db --confirm
+
+# Or with full path
+./scripts/restore-database.sh /root/backups/pantrypal-db/pantrypal-20260101-020000.db --confirm
+
+# Restore from compressed backup
+./scripts/restore-database.sh pantrypal-20251225-020000.db.gz --confirm
+
+# Check logs
+tail -50 /root/pantrypal-server/logs/backup.log
+```
+
+#### Restore Process Details
+1. Creates pre-restore backup of current database
+2. Stops container to prevent database locks
+3. Verifies backup integrity before restore
+4. Copies backup to container
+5. Restarts container
+6. Verifies restored database integrity
+7. Logs all operations
+
+### Backup Monitoring
+
+#### Check Backup Status
+```bash
+# View recent backup logs
+tail -100 /root/pantrypal-server/logs/backup.log
+
+# Check last backup
+ls -lht /root/backups/pantrypal-db/ | head -5
+
+# Check backup count
+find /root/backups/pantrypal-db/ -name "pantrypal-*.db*" | wc -l
+
+# Check total backup size
+du -sh /root/backups/pantrypal-db/
+
+# Check cron logs
+tail -50 /root/pantrypal-server/logs/backup-cron.log
+```
+
+#### Verify Backup Integrity
+```bash
+# Check latest backup
+LATEST_BACKUP=$(ls -t /root/backups/pantrypal-db/pantrypal-*.db 2>/dev/null | head -1)
+if [ -f "$LATEST_BACKUP" ]; then
+    sqlite3 "$LATEST_BACKUP" "PRAGMA integrity_check;"
+else
+    echo "No uncompressed backups found, checking compressed..."
+    LATEST_COMPRESSED=$(ls -t /root/backups/pantrypal-db/pantrypal-*.db.gz | head -1)
+    gunzip -c "$LATEST_COMPRESSED" | sqlite3 - "PRAGMA integrity_check;"
+fi
+```
+
+### Maintenance
+
+#### Manual Backup
+```bash
+# Create immediate backup
+/root/pantrypal-server/scripts/backup-database.sh
+```
+
+#### Cleanup Old Backups
+```bash
+# Delete backups older than 60 days (manual cleanup)
+find /root/backups/pantrypal-db/ -name "pantrypal-*.db.gz" -mtime +60 -delete
+
+# Or adjust retention in backup script:
+# Edit RETENTION_DAYS variable in backup-database.sh
+```
+
+#### Adjust Backup Schedule
+```bash
+# Edit crontab
+crontab -e
+
+# Common schedules:
+# Every 6 hours: 0 */6 * * * /root/pantrypal-server/scripts/backup-database.sh
+# Twice daily: 0 2,14 * * * /root/pantrypal-server/scripts/backup-database.sh
+# Weekly: 0 2 * * 0 /root/pantrypal-server/scripts/backup-database.sh
+```
+
+### Troubleshooting
+
+#### Backup Not Running
+```bash
+# Check cron service
+systemctl status cron
+
+# Check cron job exists
+crontab -l | grep backup
+
+# Check script permissions
+ls -l /root/pantrypal-server/scripts/backup-database.sh
+
+# Check container name
+docker ps --format '{{.Names}}' | grep pantrypal
+
+# Run manually to see errors
+/root/pantrypal-server/scripts/backup-database.sh
+```
+
+#### Restore Failed
+```bash
+# Check pre-restore backup was created
+ls -lh /root/backups/pantrypal-db/pre-restore-*.db
+
+# Check container is running
+docker ps | grep pantrypal
+
+# Verify backup integrity before restore
+sqlite3 /root/backups/pantrypal-db/BACKUP_FILE.db "PRAGMA integrity_check;"
+
+# Check logs for detailed error
+tail -100 /root/pantrypal-server/logs/backup.log
+```
+
+#### Disk Space Issues
+```bash
+# Check disk usage
+df -h /root/backups
+
+# Check backup directory size
+du -sh /root/backups/pantrypal-db/
+
+# Delete old compressed backups
+find /root/backups/pantrypal-db/ -name "pantrypal-*.db.gz" -mtime +30 -delete
+
+# Compress recent backups immediately
+find /root/backups/pantrypal-db/ -name "pantrypal-*.db" -mtime +1 -exec gzip {} \;
+```
+
+### Backup Best Practices
+
+1. **Test Restores Regularly:** Verify backups work by doing test restores monthly
+2. **Monitor Disk Space:** Ensure backup directory has adequate space
+3. **Keep Pre-Restore Backups:** Don't delete pre-restore backups immediately
+4. **Off-Site Backups:** Consider copying backups to external storage/cloud
+5. **Document Procedures:** Keep this guide updated with any changes
+6. **Alert on Failures:** Set up monitoring/alerts for backup failures
+
+### Off-Site Backup (Optional)
+
+```bash
+# Sync backups to another location (e.g., AWS S3, rsync to another server)
+# Add to cron after main backup:
+
+# Example: Rsync to backup server
+# 30 2 * * * rsync -avz /root/backups/pantrypal-db/ backup-server:/backups/pantrypal/
+
+# Example: AWS S3 sync (requires aws-cli)
+# 30 2 * * * aws s3 sync /root/backups/pantrypal-db/ s3://my-bucket/pantrypal-backups/
+```
+
+---

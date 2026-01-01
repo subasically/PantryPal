@@ -1,6 +1,8 @@
 // Express app factory for testing
 const express = require('express');
 const cors = require('cors');
+const logger = require('./utils/logger');
+const requestLogger = require('./middleware/logging');
 
 function createApp() {
     const authRoutes = require('./routes/auth');
@@ -17,6 +19,7 @@ function createApp() {
     // Middleware
     app.use(cors());
     app.use(express.json());
+    app.use(requestLogger); // Log all HTTP requests
 
     // Routes
     app.use('/api/auth', authRoutes);
@@ -32,14 +35,14 @@ function createApp() {
     if (process.env.NODE_ENV !== 'production' || process.env.ALLOW_TEST_ENDPOINTS === 'true') {
         const testRoutes = require('./routes/test');
         app.use('/api/test', testRoutes);
-        console.log('⚠️  [DEV] Test endpoints enabled at /api/test');
+        logger.warn('⚠️  [DEV] Test endpoints enabled at /api/test');
     }
     
     // Admin routes (DEV/TEST ONLY - protected by env var)
     if (process.env.ENABLE_ADMIN_ROUTES === 'true') {
         const adminRoutes = require('./routes/admin');
         app.use('/api/admin', adminRoutes);
-        console.log('⚠️  [DEV] Admin routes enabled - do NOT use in production!');
+        logger.warn('⚠️  [DEV] Admin routes enabled - do NOT use in production!');
     }
 
     // Health check
@@ -67,7 +70,12 @@ function createApp() {
 
     // Error handling
     app.use((err, req, res, next) => {
-        console.error('Unhandled error:', err);
+        logger.logError('Unhandled error', err, {
+            path: req.path,
+            method: req.method,
+            userId: req.user?.id,
+            householdId: req.user?.householdId
+        });
         res.status(500).json({ error: 'Internal server error' });
     });
 

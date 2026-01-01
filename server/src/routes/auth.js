@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../models/database');
 const appleSignin = require('apple-signin-auth');
 const authenticateToken = require('../middleware/auth');
+const logger = require('../utils/logger');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -56,7 +57,11 @@ router.post('/apple', async (req, res) => {
             // Optional: ignoreExpiration: true, // Ignore token expiration
         });
 
-        console.log(`[Auth] Apple Sign In attempt: AppleID=${appleId}, Email=${appleEmail}, InputEmail=${email}`);
+        logger.logAuth('apple_signin_attempt', {
+            appleId,
+            appleEmail,
+            inputEmail: email
+        });
 
         // Check if user exists by Apple ID
         let user = db.prepare('SELECT * FROM users WHERE apple_id = ?').get(appleId);
@@ -66,7 +71,10 @@ router.post('/apple', async (req, res) => {
              // Check if user exists by email (linking accounts)
              const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(searchEmail);
              if (existingUser) {
-                 console.log('[Auth] Linking Apple ID ' + appleId + ' to existing user ' + existingUser.id);
+                 logger.logAuth('apple_account_link', {
+                     appleId,
+                     userId: existingUser.id
+                 });
                  db.prepare('UPDATE users SET apple_id = ? WHERE id = ?').run(appleId, existingUser.id);
                  user = db.prepare('SELECT * FROM users WHERE id = ?').get(existingUser.id);
              }
@@ -104,9 +112,20 @@ router.post('/apple', async (req, res) => {
             `).run(userId, finalEmail, placeholderHash, firstName, lastName, appleId);
 
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+            
+            logger.logAuth('apple_user_created', {
+                userId,
+                email: finalEmail,
+                appleId
+            });
         }
 
         const token = generateToken(user);
+        
+        logger.logAuth('apple_signin_success', {
+            userId: user.id,
+            householdId: user.household_id
+        });
 
         res.json({
             user: {
@@ -119,7 +138,7 @@ router.post('/apple', async (req, res) => {
             token
         });
     } catch (error) {
-        console.error('Apple Sign In error:', error);
+        logger.logError('Apple Sign In error', error);
         res.status(500).json({ error: 'Apple Sign In failed' });
     }
 });
@@ -147,6 +166,10 @@ router.post('/register', async (req, res) => {
         // Check if user exists
         const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
         if (existingUser) {
+            logger.logAuth('register_failed', {
+                email,
+                reason: 'user_already_exists'
+            });
             return res.status(400).json({ error: 'User already exists' });
         }
 
@@ -161,6 +184,11 @@ router.post('/register', async (req, res) => {
 
         const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
         const token = generateToken(user);
+        
+        logger.logAuth('register_success', {
+            userId,
+            email
+        });
 
         res.status(201).json({
             user: {
@@ -174,7 +202,7 @@ router.post('/register', async (req, res) => {
             householdId: null
         });
     } catch (error) {
-        console.error('Registration error:', error);
+        logger.logError('Registration error', error);
         res.status(500).json({ error: 'Registration failed' });
     }
 });
@@ -190,15 +218,30 @@ router.post('/login', async (req, res) => {
 
         const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
         if (!user) {
+            logger.logAuth('login_failed', {
+                email,
+                reason: 'user_not_found'
+            });
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
+            logger.logAuth('login_failed', {
+                email,
+                userId: user.id,
+                reason: 'invalid_password'
+            });
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         const token = generateToken(user);
+        
+        logger.logAuth('login_success', {
+            userId: user.id,
+            email,
+            householdId: user.household_id
+        });
 
         res.json({
             user: {
@@ -211,7 +254,7 @@ router.post('/login', async (req, res) => {
             token
         });
     } catch (error) {
-        console.error('Login error:', error);
+        logger.logError('Login error', error);
         res.status(500).json({ error: 'Login failed' });
     }
 });

@@ -28,7 +28,7 @@ describe('Inventory API', () => {
     let productId;
     let inventoryId;
 
-    // Setup: Create user, get token, and create a location
+    // Setup: Create user, household, get token, and create a location
     beforeAll(async () => {
         // Register user
         const registerRes = await request(app)
@@ -36,12 +36,19 @@ describe('Inventory API', () => {
             .send({
                 email: 'inventory-test@example.com',
                 password: 'password123',
-                name: 'Inventory Test User',
-                householdName: 'Inventory Test Household'
+                firstName: 'Inventory',
+                lastName: 'User'
             });
 
         authToken = registerRes.body.token;
-        householdId = registerRes.body.householdId;
+        
+        // Create household
+        const householdRes = await request(app)
+            .post('/api/auth/household')
+            .set('Authorization', `Bearer ${authToken}`)
+            .send({ name: 'Inventory Test Household' });
+        
+        householdId = householdRes.body.id;
 
         // Get locations (should have defaults)
         const locationsRes = await request(app)
@@ -116,7 +123,7 @@ describe('Inventory API', () => {
                 });
 
             expect(res.status).toBe(400);
-            expect(res.body.error).toBe('Location is required');
+            expect(res.body.error).toBe('Location is required for inventory items');
         });
 
         it('should fail without productId', async () => {

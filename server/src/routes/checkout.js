@@ -137,12 +137,12 @@ router.post('/scan', (req, res) => {
         if (inventoryItem.quantity <= 1) {
             db.prepare('DELETE FROM inventory WHERE id = ?').run(inventoryItem.id);
             
-            logSync(req.user.householdId, 'inventory', inventoryItem.id, 'delete', {});
+            logSync(req.user.householdId, 'inventory', 'delete', inventoryItem.id, {});
         } else {
             db.prepare('UPDATE inventory SET quantity = quantity - 1, updated_at = ? WHERE id = ?')
                 .run(now, inventoryItem.id);
                 
-            logSync(req.user.householdId, 'inventory', inventoryItem.id, 'update', { 
+            logSync(req.user.householdId, 'inventory', 'update', inventoryItem.id, { 
                 quantity: inventoryItem.quantity - 1,
                 expirationDate: inventoryItem.expiration_date,
                 notes: inventoryItem.notes,
@@ -212,7 +212,7 @@ router.get('/history', (req, res) => {
                 p.name as product_name,
                 p.brand as product_brand,
                 p.image_url as product_image,
-                u.name as user_name
+                (u.first_name || ' ' || u.last_name) as user_name
             FROM checkout_history ch
             JOIN products p ON ch.product_id = p.id
             JOIN users u ON ch.user_id = u.id

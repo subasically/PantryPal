@@ -27,19 +27,26 @@ describe('Locations API', () => {
     let locationId;
     let childLocationId;
 
-    // Setup: Create user
+    // Setup: Create user and household
     beforeAll(async () => {
         const registerRes = await request(app)
             .post('/api/auth/register')
             .send({
                 email: 'locations-test@example.com',
                 password: 'password123',
-                name: 'Locations Test User',
-                householdName: 'Locations Test Household'
+                firstName: 'Locations',
+                lastName: 'User'
             });
 
         authToken = registerRes.body.token;
-        householdId = registerRes.body.householdId;
+        
+        // Create household
+        const householdRes = await request(app)
+            .post('/api/auth/household')
+            .set('Authorization', `Bearer ${authToken}`)
+            .send({ name: 'Locations Test Household' });
+        
+        householdId = householdRes.body.id;
     });
 
     afterAll(() => {
@@ -61,9 +68,9 @@ describe('Locations API', () => {
             
             // Should have default locations
             const names = res.body.locations.map(l => l.name);
-            expect(names).toContain('Basement Pantry');
-            expect(names).toContain('Basement Chest Freezer');
-            expect(names).toContain('Kitchen Fridge');
+            expect(names).toContain('Pantry');
+            expect(names).toContain('Fridge');
+            expect(names).toContain('Freezer');
 
             // Save first location ID for later tests
             locationId = res.body.locations[0].id;

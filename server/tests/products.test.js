@@ -26,19 +26,26 @@ describe('Products API', () => {
     let householdId;
     let customProductId;
 
-    // Setup: Create user
+    // Setup: Create user and household
     beforeAll(async () => {
         const registerRes = await request(app)
             .post('/api/auth/register')
             .send({
                 email: 'products-test@example.com',
                 password: 'password123',
-                name: 'Products Test User',
-                householdName: 'Products Test Household'
+                firstName: 'Products',
+                lastName: 'User'
             });
 
         authToken = registerRes.body.token;
-        householdId = registerRes.body.householdId;
+        
+        // Create household
+        const householdRes = await request(app)
+            .post('/api/auth/household')
+            .set('Authorization', `Bearer ${authToken}`)
+            .send({ name: 'Products Test Household' });
+        
+        householdId = householdRes.body.id;
     });
 
     afterAll(() => {
@@ -128,7 +135,7 @@ describe('Products API', () => {
             expect(res.status).toBe(200);
             expect(res.body.found).toBe(true);
             expect(res.body.product.name).toBe('Updated Product Name'); // After upsert test
-            expect(res.body.source).toBe('cache');
+            expect(res.body.source).toBe('local');
         });
 
         it('should return not found for unknown UPC', async () => {

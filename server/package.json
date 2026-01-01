@@ -29,7 +29,9 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^4.2.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "jest": "^30.2.0",
@@ -39,6 +41,9 @@
   "jest": {
     "testEnvironment": "node",
     "testTimeout": 10000,
-    "verbose": true
+    "verbose": true,
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
   }
 }

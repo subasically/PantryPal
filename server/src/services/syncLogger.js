@@ -1,4 +1,5 @@
 const db = require('../models/database');
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * Log sync operations to sync_log table
@@ -11,14 +12,16 @@ const db = require('../models/database');
 function logSync(householdId, entityType, operation, entityId, metadata = {}) {
     try {
         db.prepare(`
-            INSERT INTO sync_log (household_id, entity_type, operation, entity_id, metadata)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO sync_log (id, household_id, entity_type, entity_id, action, payload, client_timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `).run(
+            uuidv4(),
             householdId,
             entityType,
-            operation,
             entityId,
-            JSON.stringify(metadata)
+            operation,
+            JSON.stringify(metadata),
+            new Date().toISOString()
         );
     } catch (error) {
         console.error('[Sync Logger] Error logging sync:', error);

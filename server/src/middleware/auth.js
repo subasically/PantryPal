@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const db = require('../models/database');
+const logger = require('../utils/logger');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 function authenticateToken(req, res, next) {
@@ -7,11 +8,20 @@ function authenticateToken(req, res, next) {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
+        logger.logAuth('token_missing', {
+            path: req.path,
+            ip: req.ip
+        });
         return res.sendStatus(401);
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
+            logger.logAuth('token_invalid', {
+                error: err.message,
+                path: req.path,
+                ip: req.ip
+            });
             return res.sendStatus(403);
         }
         
@@ -20,6 +30,10 @@ function authenticateToken(req, res, next) {
             const freshUser = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
             
             if (!freshUser) {
+                logger.logAuth('user_not_found', {
+                    userId: user.id,
+                    path: req.path
+                });
                 return res.sendStatus(403);
             }
             
@@ -30,9 +44,18 @@ function authenticateToken(req, res, next) {
                 householdId: freshUser.household_id
             };
             
+            logger.logAuth('token_validated', {
+                userId: freshUser.id,
+                householdId: freshUser.household_id,
+                path: req.path
+            });
+            
             next();
         } catch (error) {
-            console.error('Auth middleware error:', error);
+            logger.logError('Auth middleware error', error, {
+                userId: user?.id,
+                path: req.path
+            });
             res.sendStatus(500);
         }
     });

@@ -40,15 +40,16 @@ describe('Auth API', () => {
                 .send({
                     email: 'test@example.com',
                     password: 'password123',
-                    name: 'Test User',
-                    householdName: 'Test Household'
+                    firstName: 'Test',
+                    lastName: 'User'
                 });
 
             expect(res.status).toBe(201);
             expect(res.body).toHaveProperty('token');
             expect(res.body).toHaveProperty('user');
             expect(res.body.user.email).toBe('test@example.com');
-            expect(res.body.user.name).toBe('Test User');
+            expect(res.body.user.firstName).toBe('Test');
+            expect(res.body.user.lastName).toBe('User');
             expect(res.body).toHaveProperty('householdId');
 
             authToken = res.body.token;
@@ -64,7 +65,7 @@ describe('Auth API', () => {
                 });
 
             expect(res.status).toBe(400);
-            expect(res.body.error).toBe('Email, password, and name are required');
+            expect(res.body.error).toBe('Email and password are required');
         });
 
         it('should fail when email already exists', async () => {
@@ -73,11 +74,12 @@ describe('Auth API', () => {
                 .send({
                     email: 'test@example.com',
                     password: 'password123',
-                    name: 'Another User'
+                    firstName: 'Another',
+                    lastName: 'User'
                 });
 
-            expect(res.status).toBe(409);
-            expect(res.body.error).toBe('Email already registered');
+            expect(res.status).toBe(400);
+            expect(res.body.error).toBe('User already exists');
         });
     });
 
@@ -160,6 +162,20 @@ describe('Auth API', () => {
 
     describe('Household Invites', () => {
         let inviteCode;
+
+        beforeAll(async () => {
+            // Create a household for the user
+            const householdRes = await request(app)
+                .post('/api/auth/household')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ name: 'Test Household' });
+            
+            householdId = householdRes.body.id;
+            
+            // Make the household premium for testing invite features
+            const db = require('../src/models/database');
+            db.prepare('UPDATE households SET is_premium = 1 WHERE id = ?').run(householdId);
+        });
 
         it('should generate an invite code', async () => {
             const res = await request(app)
