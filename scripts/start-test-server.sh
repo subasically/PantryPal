@@ -1,5 +1,9 @@
 #!/bin/bash
 echo "🚀 Starting PantryPal Test Server..."
+
+# Add common node paths to PATH
+export PATH="/usr/local/bin:/opt/homebrew/bin:$HOME/.nvm/versions/node/v22.13.0/bin:$PATH"
+
 cd "$(dirname "$0")/../server" || exit 1
 EXISTING_PID=$(lsof -ti:3002 2>/dev/null)
 if [ -n "$EXISTING_PID" ]; then
@@ -16,5 +20,6 @@ if curl -s http://localhost:3002/health > /dev/null 2>&1; then
     echo "   Stop with: kill $SERVER_PID"
 else
     echo "❌ Failed to start"
+    cat /tmp/pantrypal-test-server.log
     exit 1
 fi
