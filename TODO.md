@@ -18,7 +18,17 @@
   - [x] Offline Premium caching support
   - [x] Checkout auto-add parity (qty → 0 triggers grocery add)
 - [ ] One-time "household locked" banner
-- [ ] Restore purchases (StoreKit integration)
+- [x] **In-App Purchases (StoreKit 2)** ✨ COMPLETED
+  - [x] Product configuration (.storekit file)
+  - [x] Purchase flow (PaywallView → StoreKitService → Server)
+  - [x] Receipt validation (/api/subscriptions/validate)
+  - [x] Set premium_expires_at on purchase/renewal
+  - [x] Handle subscription cancellation/expiration
+  - [x] Restore purchases functionality
+  - [ ] Xcode: Add Configuration.storekit to build settings
+  - [ ] Test: Purchase flow → confetti → Premium unlocked
+  - [ ] Test: Restore purchases flow
+  - [ ] Test: Sandbox account testing
 
 ## Week 2: Polish & Launch Prep
 - [x] **Location & TextField Standardization** ✨ COMPLETED
