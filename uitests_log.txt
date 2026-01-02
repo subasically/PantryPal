@@ -1,0 +1,883 @@
+Running tests...
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'PantryPalUITests' started at 2026-01-02 15:58:39.846.
+Test Case '-[PantryPalUITests.PantryPalUITests test01_LoginWithEmail_Success]' started.
+    t =     0.00s Start Test at 2026-01-02 15:58:39.847
+    t =     0.02s Set Up
+    t =     0.03s     Open me.subasically.pantrypal
+    t =     0.03s         Launch me.subasically.pantrypal
+    t =     2.21s             Setting up automation session
+    t =     4.91s             Wait for me.subasically.pantrypal to idle
+    t =     6.12s Waiting 5.0s for "login.continueWithEmailButton" Button to exist
+    t =     7.17s     Checking `Expect predicate `existsNoRetry == 1` for object "login.continueWithEmailButton" Button`
+    t =     7.17s         Checking existence of `"login.continueWithEmailButton" Button`
+    t =     8.34s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     8.34s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     8.36s     Find the "login.continueWithEmailButton" Button
+    t =     8.39s Tap "login.continueWithEmailButton" Button
+    t =     8.39s     Wait for me.subasically.pantrypal to idle
+    t =     8.39s     Find the "login.continueWithEmailButton" Button
+    t =     8.41s     Check for interrupting elements affecting "login.continueWithEmailButton" Button
+    t =     8.43s     Synthesize event
+    t =     8.72s     Wait for me.subasically.pantrypal to idle
+    t =     8.73s Tap "login.emailField" TextField
+    t =     8.73s     Wait for me.subasically.pantrypal to idle
+    t =     8.73s     Find the "login.emailField" TextField
+    t =     8.75s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     8.77s     Synthesize event
+    t =     9.06s     Wait for me.subasically.pantrypal to idle
+    t =     9.51s Type 'test@pantrypal.com' into "login.emailField" TextField
+    t =     9.51s     Wait for me.subasically.pantrypal to idle
+    t =     9.84s     Find the "login.emailField" TextField
+    t =     9.91s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     9.96s     Synthesize event
+    t =    10.46s     Wait for me.subasically.pantrypal to idle
+    t =    10.47s Tap "login.passwordField" SecureTextField
+    t =    10.47s     Wait for me.subasically.pantrypal to idle
+    t =    10.47s     Find the "login.passwordField" SecureTextField
+    t =    10.51s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =    10.56s     Synthesize event
+    t =    10.85s     Wait for me.subasically.pantrypal to idle
+    t =    10.86s Type '<redacted>' into "login.passwordField" SecureTextField
+    t =    10.86s     Wait for me.subasically.pantrypal to idle
+    t =    10.86s     Find the "login.passwordField" SecureTextField
+    t =    10.90s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =    10.95s     Synthesize event
+    t =    11.28s     Wait for me.subasically.pantrypal to idle
+    t =    12.32s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.loginButton" Button`
+    t =    12.32s     Checking existence of `"login.loginButton" Button`
+    t =    12.38s     Find the "login.loginButton" Button
+    t =    12.44s Tap "login.loginButton" Button
+    t =    12.44s     Wait for me.subasically.pantrypal to idle
+    t =    12.44s     Find the "login.loginButton" Button
+    t =    12.48s     Check for interrupting elements affecting "login.loginButton" Button
+    t =    12.52s     Synthesize event
+    t =    12.82s     Wait for me.subasically.pantrypal to idle
+    t =    13.15s Checking existence of `"householdSetup.container" Other`
+    t =    13.27s Checking existence of `"mainTab.container" Other`
+    t =    13.46s Waiting 2.0s for "onboarding.skipButton" Button to exist
+    t =    14.55s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    14.55s         Checking existence of `"onboarding.skipButton" Button`
+    t =    14.66s         Capturing element debug description
+    t =    15.46s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    15.46s         Checking existence of `"onboarding.skipButton" Button`
+    t =    15.56s         Capturing element debug description
+    t =    15.56s     Checking existence of `"onboarding.skipButton" Button`
+    t =    15.65s Collecting debug information to assist test failure triage
+    t =    15.65s     Requesting snapshot of accessibility hierarchy for app with pid 49202
+    t =    15.78s Checking existence of `"inventory.addButton" Button`
+    t =    15.87s Tear Down
+    t =    15.87s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =    15.98s     Checking existence of `"settings.button" Button`
+    t =    16.06s     Waiting 2.0s for "settings.button" Button to exist
+    t =    17.10s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.button" Button`
+    t =    17.10s             Checking existence of `"settings.button" Button`
+    t =    17.20s     Tap "settings.button" Button
+    t =    17.20s         Wait for me.subasically.pantrypal to idle
+    t =    17.21s         Find the "settings.button" Button
+    t =    17.30s         Check for interrupting elements affecting "settings.button" Button
+    t =    17.39s         Synthesize event
+    t =    17.72s         Wait for me.subasically.pantrypal to idle
+    t =    17.73s     Waiting 2.0s for "settings.signOutButton" Button to exist
+    t =    18.77s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.signOutButton" Button`
+    t =    18.77s             Checking existence of `"settings.signOutButton" Button`
+    t =    18.96s     Tap "settings.signOutButton" Button
+    t =    18.96s         Wait for me.subasically.pantrypal to idle
+    t =    18.96s         Find the "settings.signOutButton" Button
+    t =    19.12s         Check for interrupting elements affecting "settings.signOutButton" Button
+    t =    19.27s         Synthesize event
+    t =    19.57s         Wait for me.subasically.pantrypal to idle
+    t =    19.58s     Waiting 5.0s for "login.continueWithEmailButton" Button to exist
+    t =    20.61s         Checking `Expect predicate `existsNoRetry == 1` for object "login.continueWithEmailButton" Button`
+    t =    20.61s             Checking existence of `"login.continueWithEmailButton" Button`
+    t =    20.65s     Terminate me.subasically.pantrypal:49202
+Test Case '-[PantryPalUITests.PantryPalUITests test01_LoginWithEmail_Success]' passed (21.707 seconds).
+Test Case '-[PantryPalUITests.PantryPalUITests test02_AddCustomItem_Success]' started.
+    t =     0.00s Start Test at 2026-01-02 15:59:01.555
+    t =     0.02s Set Up
+    t =     0.02s     Open me.subasically.pantrypal
+    t =     0.02s         Launch me.subasically.pantrypal
+    t =     1.26s             Setting up automation session
+    t =     3.78s             Wait for me.subasically.pantrypal to idle
+    t =     5.97s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     5.97s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     6.06s     Find the "login.continueWithEmailButton" Button
+    t =     6.10s Tap "login.continueWithEmailButton" Button
+    t =     6.10s     Wait for me.subasically.pantrypal to idle
+    t =     6.11s     Find the "login.continueWithEmailButton" Button
+    t =     6.12s     Check for interrupting elements affecting "login.continueWithEmailButton" Button
+    t =     6.14s     Synthesize event
+    t =     6.44s     Wait for me.subasically.pantrypal to idle
+    t =     6.44s Tap "login.emailField" TextField
+    t =     6.44s     Wait for me.subasically.pantrypal to idle
+    t =     6.45s     Find the "login.emailField" TextField
+    t =     6.47s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     6.49s     Synthesize event
+    t =     6.79s     Wait for me.subasically.pantrypal to idle
+    t =     7.22s Type 'test@pantrypal.com' into "login.emailField" TextField
+    t =     7.22s     Wait for me.subasically.pantrypal to idle
+    t =     7.57s     Find the "login.emailField" TextField
+    t =     7.63s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     7.67s     Synthesize event
+    t =     8.17s     Wait for me.subasically.pantrypal to idle
+    t =     8.18s Tap "login.passwordField" SecureTextField
+    t =     8.18s     Wait for me.subasically.pantrypal to idle
+    t =     8.18s     Find the "login.passwordField" SecureTextField
+    t =     8.24s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     8.28s     Synthesize event
+    t =     8.59s     Wait for me.subasically.pantrypal to idle
+    t =     8.59s Type '<redacted>' into "login.passwordField" SecureTextField
+    t =     8.59s     Wait for me.subasically.pantrypal to idle
+    t =     8.59s     Find the "login.passwordField" SecureTextField
+    t =     8.65s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     8.70s     Synthesize event
+    t =     9.05s     Wait for me.subasically.pantrypal to idle
+    t =    10.09s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.loginButton" Button`
+    t =    10.09s     Checking existence of `"login.loginButton" Button`
+    t =    10.16s     Find the "login.loginButton" Button
+    t =    10.26s Tap "login.loginButton" Button
+    t =    10.26s     Wait for me.subasically.pantrypal to idle
+    t =    10.26s     Find the "login.loginButton" Button
+    t =    10.30s     Check for interrupting elements affecting "login.loginButton" Button
+    t =    10.34s     Synthesize event
+    t =    10.63s     Wait for me.subasically.pantrypal to idle
+    t =    11.01s Checking existence of `"householdSetup.container" Other`
+    t =    11.13s Checking existence of `"mainTab.container" Other`
+    t =    11.22s Waiting 2.0s for "onboarding.skipButton" Button to exist
+    t =    12.25s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    12.25s         Checking existence of `"onboarding.skipButton" Button`
+    t =    12.36s         Capturing element debug description
+    t =    13.22s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    13.22s         Checking existence of `"onboarding.skipButton" Button`
+    t =    13.34s         Capturing element debug description
+    t =    13.34s     Checking existence of `"onboarding.skipButton" Button`
+    t =    13.44s Collecting debug information to assist test failure triage
+    t =    13.44s     Requesting snapshot of accessibility hierarchy for app with pid 49434
+    t =    14.63s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "inventory.addButton" Button`
+    t =    14.63s     Checking existence of `"inventory.addButton" Button`
+    t =    14.74s     Find the "inventory.addButton" Button
+    t =    14.86s Tap "inventory.addButton" Button
+    t =    14.86s     Wait for me.subasically.pantrypal to idle
+    t =    14.86s     Find the "inventory.addButton" Button
+    t =    14.95s     Check for interrupting elements affecting "inventory.addButton" Button
+    t =    15.03s     Synthesize event
+    t =    15.36s     Wait for me.subasically.pantrypal to idle
+    t =    15.85s Waiting 3.0s for "addItem.nameField" TextField to exist
+    t =    16.89s     Checking `Expect predicate `existsNoRetry == 1` for object "addItem.nameField" TextField`
+    t =    16.89s         Checking existence of `"addItem.nameField" TextField`
+    t =    17.07s Tap "addItem.nameField" TextField
+    t =    17.07s     Wait for me.subasically.pantrypal to idle
+    t =    17.07s     Find the "addItem.nameField" TextField
+    t =    17.21s     Check for interrupting elements affecting "addItem.nameField" TextField
+    t =    17.34s     Synthesize event
+    t =    17.64s     Wait for me.subasically.pantrypal to idle
+    t =    18.10s Type 'UI Test Banana' into "addItem.nameField" TextField
+    t =    18.10s     Wait for me.subasically.pantrypal to idle
+    t =    18.11s     Find the "addItem.nameField" TextField
+    t =    18.28s     Check for interrupting elements affecting "addItem.nameField" TextField
+    t =    18.43s     Synthesize event
+    t =    18.87s     Wait for me.subasically.pantrypal to idle
+    t =    18.88s Waiting 5.0s for "addItem.saveButton" Button to exist
+    t =    19.90s     Checking `Expect predicate `existsNoRetry == 1` for object "addItem.saveButton" Button`
+    t =    19.90s         Checking existence of `"addItem.saveButton" Button`
+    t =    20.07s Find the "addItem.saveButton" Button
+    t =    21.26s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "addItem.saveButton" Button`
+    t =    21.27s     Checking existence of `"addItem.saveButton" Button`
+    t =    21.45s     Find the "addItem.saveButton" Button
+    t =    21.63s Tap "addItem.saveButton" Button
+    t =    21.63s     Wait for me.subasically.pantrypal to idle
+    t =    21.64s     Find the "addItem.saveButton" Button
+    t =    21.80s     Check for interrupting elements affecting "addItem.saveButton" Button
+    t =    21.99s     Synthesize event
+    t =    22.33s     Wait for me.subasically.pantrypal to idle
+    t =    22.35s Checking existence of `"inventory.list" Table`
+    t =    22.53s Checking existence of `"inventory.list" ScrollView`
+    t =    22.70s Waiting 3.0s for "inventory.list" Other to exist
+    t =    23.74s     Checking `Expect predicate `existsNoRetry == 1` for object "inventory.list" Other`
+    t =    23.75s         Checking existence of `"inventory.list" Other`
+    t =    23.88s         Capturing element debug description
+    t =    24.72s     Checking `Expect predicate `existsNoRetry == 1` for object "inventory.list" Other`
+    t =    24.72s         Checking existence of `"inventory.list" Other`
+    t =    24.85s         Capturing element debug description
+    t =    25.71s     Checking `Expect predicate `existsNoRetry == 1` for object "inventory.list" Other`
+    t =    25.71s         Checking existence of `"inventory.list" Other`
+    t =    25.84s         Capturing element debug description
+    t =    25.84s     Checking existence of `"inventory.list" Other`
+    t =    25.93s Collecting debug information to assist test failure triage
+    t =    25.94s     Requesting snapshot of accessibility hierarchy for app with pid 49434
+/Users/subasically/Desktop/github/PantryPal/ios/PantryPalUITests/PantryPalUITests.swift:75: error: -[PantryPalUITests.PantryPalUITests test02_AddCustomItem_Success] : XCTAssertTrue failed
+    t =    26.24s Tear Down
+    t =    26.24s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =    26.33s     Checking existence of `"settings.button" Button`
+    t =    26.42s     Waiting 2.0s for "settings.button" Button to exist
+    t =    27.45s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.button" Button`
+    t =    27.46s             Checking existence of `"settings.button" Button`
+    t =    27.55s     Tap "settings.button" Button
+    t =    27.55s         Wait for me.subasically.pantrypal to idle
+    t =    27.56s         Find the "settings.button" Button
+    t =    27.65s         Check for interrupting elements affecting "settings.button" Button
+    t =    27.74s         Synthesize event
+    t =    28.06s         Wait for me.subasically.pantrypal to idle
+    t =    28.53s     Waiting 2.0s for "settings.signOutButton" Button to exist
+    t =    29.57s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.signOutButton" Button`
+    t =    29.57s             Checking existence of `"settings.signOutButton" Button`
+    t =    29.76s     Tap "settings.signOutButton" Button
+    t =    29.76s         Wait for me.subasically.pantrypal to idle
+    t =    29.77s         Find the "settings.signOutButton" Button
+    t =    29.93s         Check for interrupting elements affecting "settings.signOutButton" Button
+    t =    30.09s         Synthesize event
+    t =    30.39s         Wait for me.subasically.pantrypal to idle
+    t =    30.88s     Waiting 5.0s for "login.continueWithEmailButton" Button to exist
+    t =    31.92s         Checking `Expect predicate `existsNoRetry == 1` for object "login.continueWithEmailButton" Button`
+    t =    31.92s             Checking existence of `"login.continueWithEmailButton" Button`
+    t =    31.94s     Terminate me.subasically.pantrypal:49434
+Test Case '-[PantryPalUITests.PantryPalUITests test02_AddCustomItem_Success]' failed (35.025 seconds).
+Test Case '-[PantryPalUITests.PantryPalUITests test03_InventoryQuantity_IncrementAndDecrement]' started.
+    t =     0.00s Start Test at 2026-01-02 15:59:36.581
+    t =     0.02s Set Up
+    t =     0.03s     Open me.subasically.pantrypal
+    t =     0.03s         Launch me.subasically.pantrypal
+    t =     1.52s             Setting up automation session
+    t =     2.82s             Wait for me.subasically.pantrypal to idle
+    t =     5.02s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     5.02s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     5.13s     Find the "login.continueWithEmailButton" Button
+    t =     5.16s Tap "login.continueWithEmailButton" Button
+    t =     5.16s     Wait for me.subasically.pantrypal to idle
+    t =     5.17s     Find the "login.continueWithEmailButton" Button
+    t =     5.18s     Check for interrupting elements affecting "login.continueWithEmailButton" Button
+    t =     5.20s     Synthesize event
+    t =     5.50s     Wait for me.subasically.pantrypal to idle
+    t =     5.50s Tap "login.emailField" TextField
+    t =     5.50s     Wait for me.subasically.pantrypal to idle
+    t =     5.50s     Find the "login.emailField" TextField
+    t =     5.52s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     5.54s     Synthesize event
+    t =     5.84s     Wait for me.subasically.pantrypal to idle
+    t =     6.42s Type 'test@pantrypal.com' into "login.emailField" TextField
+    t =     6.42s     Wait for me.subasically.pantrypal to idle
+    t =     6.76s     Find the "login.emailField" TextField
+    t =     6.82s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     6.86s     Synthesize event
+    t =     7.36s     Wait for me.subasically.pantrypal to idle
+    t =     7.36s Tap "login.passwordField" SecureTextField
+    t =     7.36s     Wait for me.subasically.pantrypal to idle
+    t =     7.37s     Find the "login.passwordField" SecureTextField
+    t =     7.43s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     7.47s     Synthesize event
+    t =     7.78s     Wait for me.subasically.pantrypal to idle
+    t =     7.78s Type '<redacted>' into "login.passwordField" SecureTextField
+    t =     7.78s     Wait for me.subasically.pantrypal to idle
+    t =     7.78s     Find the "login.passwordField" SecureTextField
+    t =     7.83s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     7.90s     Synthesize event
+    t =     8.24s     Wait for me.subasically.pantrypal to idle
+    t =     9.27s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.loginButton" Button`
+    t =     9.27s     Checking existence of `"login.loginButton" Button`
+    t =     9.34s     Find the "login.loginButton" Button
+    t =     9.42s Tap "login.loginButton" Button
+    t =     9.42s     Wait for me.subasically.pantrypal to idle
+    t =     9.42s     Find the "login.loginButton" Button
+    t =     9.47s     Check for interrupting elements affecting "login.loginButton" Button
+    t =     9.51s     Synthesize event
+    t =     9.80s     Wait for me.subasically.pantrypal to idle
+    t =    10.14s Checking existence of `"householdSetup.container" Other`
+    t =    10.26s Checking existence of `"mainTab.container" Other`
+    t =    10.36s Waiting 2.0s for "onboarding.skipButton" Button to exist
+    t =    11.41s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    11.41s         Checking existence of `"onboarding.skipButton" Button`
+    t =    11.51s         Capturing element debug description
+    t =    12.37s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    12.37s         Checking existence of `"onboarding.skipButton" Button`
+    t =    12.51s         Capturing element debug description
+    t =    12.51s     Checking existence of `"onboarding.skipButton" Button`
+    t =    12.60s Collecting debug information to assist test failure triage
+    t =    12.60s     Requesting snapshot of accessibility hierarchy for app with pid 49772
+    t =    12.74s Get number of matches for: Elements matching predicate 'identifier BEGINSWITH "inventory.increment"'
+    t =    12.82s Checking existence of `"inventory.list" Table`
+    t =    12.90s Checking existence of `"inventory.list" ScrollView`
+    t =    12.99s Checking existence of `"inventory.list" Other`
+/Users/subasically/Desktop/github/PantryPal/ios/PantryPalUITests/PantryPalUITests.swift:95: error: -[PantryPalUITests.PantryPalUITests test03_InventoryQuantity_IncrementAndDecrement] : XCTAssertTrue failed
+    t =    13.09s Tear Down
+    t =    13.09s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =    13.18s     Checking existence of `"settings.button" Button`
+    t =    13.27s     Waiting 2.0s for "settings.button" Button to exist
+    t =    14.29s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.button" Button`
+    t =    14.29s             Checking existence of `"settings.button" Button`
+    t =    14.43s     Tap "settings.button" Button
+    t =    14.43s         Wait for me.subasically.pantrypal to idle
+    t =    14.43s         Find the "settings.button" Button
+    t =    14.53s         Check for interrupting elements affecting "settings.button" Button
+    t =    14.62s         Synthesize event
+    t =    14.93s         Wait for me.subasically.pantrypal to idle
+    t =    15.42s     Waiting 2.0s for "settings.signOutButton" Button to exist
+    t =    16.47s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.signOutButton" Button`
+    t =    16.47s             Checking existence of `"settings.signOutButton" Button`
+    t =    16.67s     Tap "settings.signOutButton" Button
+    t =    16.67s         Wait for me.subasically.pantrypal to idle
+    t =    16.67s         Find the "settings.signOutButton" Button
+    t =    16.83s         Check for interrupting elements affecting "settings.signOutButton" Button
+    t =    16.97s         Synthesize event
+    t =    17.28s         Wait for me.subasically.pantrypal to idle
+    t =    17.46s     Waiting 5.0s for "login.continueWithEmailButton" Button to exist
+    t =    18.49s         Checking `Expect predicate `existsNoRetry == 1` for object "login.continueWithEmailButton" Button`
+    t =    18.50s             Checking existence of `"login.continueWithEmailButton" Button`
+    t =    18.52s     Terminate me.subasically.pantrypal:49772
+Test Case '-[PantryPalUITests.PantryPalUITests test03_InventoryQuantity_IncrementAndDecrement]' failed (19.673 seconds).
+Test Case '-[PantryPalUITests.PantryPalUITests test04_NavigateToGroceryTab]' started.
+    t =     0.00s Start Test at 2026-01-02 15:59:56.255
+    t =     0.03s Set Up
+    t =     0.03s     Open me.subasically.pantrypal
+    t =     0.03s         Launch me.subasically.pantrypal
+    t =     1.52s             Setting up automation session
+    t =     2.79s             Wait for me.subasically.pantrypal to idle
+    t =     5.01s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     5.01s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     5.11s     Find the "login.continueWithEmailButton" Button
+    t =     5.14s Tap "login.continueWithEmailButton" Button
+    t =     5.14s     Wait for me.subasically.pantrypal to idle
+    t =     5.15s     Find the "login.continueWithEmailButton" Button
+    t =     5.16s     Check for interrupting elements affecting "login.continueWithEmailButton" Button
+    t =     5.18s     Synthesize event
+    t =     5.47s     Wait for me.subasically.pantrypal to idle
+    t =     5.48s Tap "login.emailField" TextField
+    t =     5.48s     Wait for me.subasically.pantrypal to idle
+    t =     5.48s     Find the "login.emailField" TextField
+    t =     5.52s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     5.56s     Synthesize event
+    t =     5.85s     Wait for me.subasically.pantrypal to idle
+    t =     6.19s Type 'test@pantrypal.com' into "login.emailField" TextField
+    t =     6.19s     Wait for me.subasically.pantrypal to idle
+    t =     6.56s     Find the "login.emailField" TextField
+    t =     6.63s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     6.70s     Synthesize event
+    t =     7.20s     Wait for me.subasically.pantrypal to idle
+    t =     7.21s Tap "login.passwordField" SecureTextField
+    t =     7.21s     Wait for me.subasically.pantrypal to idle
+    t =     7.21s     Find the "login.passwordField" SecureTextField
+    t =     7.28s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     7.33s     Synthesize event
+    t =     7.62s     Wait for me.subasically.pantrypal to idle
+    t =     7.63s Type '<redacted>' into "login.passwordField" SecureTextField
+    t =     7.63s     Wait for me.subasically.pantrypal to idle
+    t =     7.63s     Find the "login.passwordField" SecureTextField
+    t =     7.69s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     7.77s     Synthesize event
+    t =     8.10s     Wait for me.subasically.pantrypal to idle
+    t =     9.15s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.loginButton" Button`
+    t =     9.16s     Checking existence of `"login.loginButton" Button`
+    t =     9.25s     Find the "login.loginButton" Button
+    t =     9.31s Tap "login.loginButton" Button
+    t =     9.31s     Wait for me.subasically.pantrypal to idle
+    t =     9.31s     Find the "login.loginButton" Button
+    t =     9.36s     Check for interrupting elements affecting "login.loginButton" Button
+    t =     9.41s     Synthesize event
+    t =     9.71s     Wait for me.subasically.pantrypal to idle
+    t =    10.06s Checking existence of `"householdSetup.container" Other`
+    t =    10.19s Checking existence of `"mainTab.container" Other`
+    t =    10.28s Waiting 2.0s for "onboarding.skipButton" Button to exist
+    t =    11.32s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    11.32s         Checking existence of `"onboarding.skipButton" Button`
+    t =    11.47s         Capturing element debug description
+    t =    12.29s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    12.29s         Checking existence of `"onboarding.skipButton" Button`
+    t =    12.44s         Capturing element debug description
+    t =    12.44s     Checking existence of `"onboarding.skipButton" Button`
+    t =    12.53s Collecting debug information to assist test failure triage
+    t =    12.53s     Requesting snapshot of accessibility hierarchy for app with pid 49974
+    t =    13.69s Checking `Expect predicate `exists == 1 AND hittable == 1` for object Button (First Match)`
+    t =    13.69s     Checking existence of `Button (First Match)`
+    t =    13.78s     Find the Button (First Match)
+    t =    13.82s Tap "cart" Button
+    t =    13.82s     Wait for me.subasically.pantrypal to idle
+    t =    13.82s     Find the "cart" Button
+    t =    13.83s     Check for interrupting elements affecting "cart" Button
+    t =    13.91s     Synthesize event
+    t =    14.21s     Wait for me.subasically.pantrypal to idle
+    t =    14.72s Tear Down
+    t =    14.72s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =    14.80s     Checking existence of `"settings.button" Button`
+    t =    14.87s     Waiting 2.0s for "settings.button" Button to exist
+    t =    15.91s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.button" Button`
+    t =    15.91s             Checking existence of `"settings.button" Button`
+    t =    15.97s     Tap "settings.button" Button
+    t =    15.97s         Wait for me.subasically.pantrypal to idle
+    t =    15.97s         Find the "settings.button" Button
+    t =    16.03s         Check for interrupting elements affecting "settings.button" Button
+    t =    16.09s         Synthesize event
+    t =    16.40s         Wait for me.subasically.pantrypal to idle
+    t =    16.89s     Waiting 2.0s for "settings.signOutButton" Button to exist
+    t =    17.93s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.signOutButton" Button`
+    t =    17.93s             Checking existence of `"settings.signOutButton" Button`
+    t =    18.08s     Tap "settings.signOutButton" Button
+    t =    18.08s         Wait for me.subasically.pantrypal to idle
+    t =    18.08s         Find the "settings.signOutButton" Button
+    t =    18.19s         Check for interrupting elements affecting "settings.signOutButton" Button
+    t =    18.29s         Synthesize event
+    t =    18.62s         Wait for me.subasically.pantrypal to idle
+    t =    18.66s     Waiting 5.0s for "login.continueWithEmailButton" Button to exist
+    t =    19.70s         Checking `Expect predicate `existsNoRetry == 1` for object "login.continueWithEmailButton" Button`
+    t =    19.70s             Checking existence of `"login.continueWithEmailButton" Button`
+    t =    19.73s     Terminate me.subasically.pantrypal:49974
+Test Case '-[PantryPalUITests.PantryPalUITests test04_NavigateToGroceryTab]' passed (20.937 seconds).
+Test Case '-[PantryPalUITests.PantryPalUITests test05_NavigateToCheckoutTab]' started.
+    t =     0.00s Start Test at 2026-01-02 16:00:17.191
+    t =     0.03s Set Up
+    t =     0.03s     Open me.subasically.pantrypal
+    t =     0.03s         Launch me.subasically.pantrypal
+    t =     1.49s             Setting up automation session
+    t =     2.70s             Wait for me.subasically.pantrypal to idle
+    t =     4.87s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     4.87s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     5.00s     Find the "login.continueWithEmailButton" Button
+    t =     5.03s Tap "login.continueWithEmailButton" Button
+    t =     5.03s     Wait for me.subasically.pantrypal to idle
+    t =     5.03s     Find the "login.continueWithEmailButton" Button
+    t =     5.05s     Check for interrupting elements affecting "login.continueWithEmailButton" Button
+    t =     5.07s     Synthesize event
+    t =     5.36s     Wait for me.subasically.pantrypal to idle
+    t =     5.37s Tap "login.emailField" TextField
+    t =     5.37s     Wait for me.subasically.pantrypal to idle
+    t =     5.37s     Find the "login.emailField" TextField
+    t =     5.39s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     5.41s     Synthesize event
+    t =     5.70s     Wait for me.subasically.pantrypal to idle
+    t =     6.15s Type 'test@pantrypal.com' into "login.emailField" TextField
+    t =     6.15s     Wait for me.subasically.pantrypal to idle
+    t =     6.50s     Find the "login.emailField" TextField
+    t =     6.56s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     6.60s     Synthesize event
+    t =     7.10s     Wait for me.subasically.pantrypal to idle
+    t =     7.11s Tap "login.passwordField" SecureTextField
+    t =     7.11s     Wait for me.subasically.pantrypal to idle
+    t =     7.11s     Find the "login.passwordField" SecureTextField
+    t =     7.17s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     7.23s     Synthesize event
+    t =     7.53s     Wait for me.subasically.pantrypal to idle
+    t =     7.53s Type '<redacted>' into "login.passwordField" SecureTextField
+    t =     7.53s     Wait for me.subasically.pantrypal to idle
+    t =     7.53s     Find the "login.passwordField" SecureTextField
+    t =     7.58s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     7.63s     Synthesize event
+    t =     7.98s     Wait for me.subasically.pantrypal to idle
+    t =     9.05s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.loginButton" Button`
+    t =     9.06s     Checking existence of `"login.loginButton" Button`
+    t =     9.12s     Find the "login.loginButton" Button
+    t =     9.18s Tap "login.loginButton" Button
+    t =     9.18s     Wait for me.subasically.pantrypal to idle
+    t =     9.18s     Find the "login.loginButton" Button
+    t =     9.22s     Check for interrupting elements affecting "login.loginButton" Button
+    t =     9.27s     Synthesize event
+    t =     9.57s     Wait for me.subasically.pantrypal to idle
+    t =     9.91s Checking existence of `"householdSetup.container" Other`
+    t =    10.04s Checking existence of `"mainTab.container" Other`
+    t =    10.13s Waiting 2.0s for "onboarding.skipButton" Button to exist
+    t =    11.18s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    11.18s         Checking existence of `"onboarding.skipButton" Button`
+    t =    11.28s         Capturing element debug description
+    t =    12.14s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    12.14s         Checking existence of `"onboarding.skipButton" Button`
+    t =    12.27s         Capturing element debug description
+    t =    12.27s     Checking existence of `"onboarding.skipButton" Button`
+    t =    12.36s Collecting debug information to assist test failure triage
+    t =    12.36s     Requesting snapshot of accessibility hierarchy for app with pid 50197
+    t =    12.50s Waiting 3.0s for Button (First Match) to exist
+    t =    13.53s     Checking `Expect predicate `existsNoRetry == 1` for object Button (First Match)`
+    t =    13.54s         Checking existence of `Button (First Match)`
+    t =    14.60s Checking `Expect predicate `exists == 1 AND hittable == 1` for object Button (First Match)`
+    t =    14.60s     Checking existence of `Button (First Match)`
+    t =    14.62s     Find the Button (First Match)
+    t =    14.66s Tap "barcode.viewfinder" Button
+    t =    14.66s     Wait for me.subasically.pantrypal to idle
+    t =    14.66s     Find the "barcode.viewfinder" Button
+    t =    14.68s     Check for interrupting elements affecting "barcode.viewfinder" Button
+    t =    14.76s     Synthesize event
+    t =    15.06s     Wait for me.subasically.pantrypal to idle
+    t =    15.56s Tear Down
+    t =    15.56s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =    15.62s     Checking existence of `"settings.button" Button`
+    t =    15.64s     Checking existence of `"inventory.addButton" Button`
+    t =    15.67s     Terminate me.subasically.pantrypal:50197
+Test Case '-[PantryPalUITests.PantryPalUITests test05_NavigateToCheckoutTab]' passed (16.715 seconds).
+Test Case '-[PantryPalUITests.PantryPalUITests test06_NavigateToSettings_AndSignOut]' started.
+    t =     0.00s Start Test at 2026-01-02 16:00:33.907
+    t =     0.03s Set Up
+    t =     0.03s     Open me.subasically.pantrypal
+    t =     0.03s         Launch me.subasically.pantrypal
+    t =     1.47s             Setting up automation session
+    t =     2.69s             Wait for me.subasically.pantrypal to idle
+    t =     4.87s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     4.87s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     5.09s     Capturing element debug description
+    t =     5.91s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     5.92s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     6.05s     Capturing element debug description
+    t =     6.86s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     6.87s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     7.00s     Capturing element debug description
+    t =     7.94s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     7.94s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     8.07s     Capturing element debug description
+    t =     8.86s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     8.86s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     8.99s     Capturing element debug description
+    t =     8.99s Requesting snapshot of accessibility hierarchy for app with pid 50352
+    t =     9.11s Find: Descendants matching type Button
+    t =     9.11s Find: Elements matching predicate '"login.continueWithEmailButton" IN identifiers'
+/Users/subasically/Desktop/github/PantryPal/ios/PantryPalUITests/Helpers/WaitHelpers.swift:19: error: -[PantryPalUITests.PantryPalUITests test06_NavigateToSettings_AndSignOut] : XCTAssertTrue failed - Element not tappable: Query chain:
+ →Find: Target Application 'me.subasically.pantrypal'
+  ↪︎Find: Descendants matching type Button
+    ↪︎Find: Elements matching predicate '"login.continueWithEmailButton" IN identifiers'
+No matches found for Elements matching predicate '"login.continueWithEmailButton" IN identifiers' from input {(
+    Button, {{2.0, 874.0}, {143.0, 48.0}}, identifier: 'refrigerator', label: 'Pantry', Selected,
+    Button, {{149.0, 874.0}, {142.0, 48.0}}, identifier: 'cart', label: 'Grocery',
+    Button, {{295.0, 874.0}, {143.0, 48.0}}, identifier: 'barcode.viewfinder', label: 'Checkout',
+    Button, {{20.0, 61.3}, {34.0, 34.0}}, identifier: 'settings.button', label: 'person.circle',
+    Button, {{338.0, 61.7}, {31.3, 33.3}}, identifier: 'inventory.addButton', label: 'Add',
+    Button, {{385.3, 61.7}, {34.7, 33.3}}, identifier: 'inventory.scanButton', label: 'Scan Barcode',
+    Button, {{0.0, 248.3}, {440.0, 80.0}}, label: 'UI Test Banana, Pantry, 1',
+    Button, {{0.0, 328.3}, {440.0, 80.0}}, label: 'UI Test Banana, Pantry, 1',
+    Button, {{0.0, 408.3}, {440.0, 80.0}}, label: 'UI Test Banana, Pantry, 1',
+    Button, {{0.0, 488.3}, {440.0, 87.0}}, label: 'Bread, Test Bakery, Pantry, 1',
+    Button, {{0.0, 575.3}, {440.0, 105.3}}, label: 'Milk, Test Brand, Fridge, Feb 1, 2025, 2',
+    Button, {{20.0, 211.0}, {132.0, 32.0}}, label: 'All', Selected,
+    Button, {{153.0, 211.0}, {133.0, 32.0}}, label: 'Expiring Soon',
+    Button, {{287.0, 211.0}, {133.0, 32.0}}, label: 'Expired',
+    Button, {{324.0, 277.3}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 277.3}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add',
+    Button, {{324.0, 357.3}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 357.3}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add',
+    Button, {{324.0, 437.3}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 437.3}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add',
+    Button, {{324.0, 521.0}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 521.0}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add',
+    Button, {{324.0, 617.0}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 617.0}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add'
+)}
+
+    t =     9.11s Tear Down
+    t =     9.11s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     9.21s     Checking existence of `"settings.button" Button`
+    t =     9.29s     Waiting 2.0s for "settings.button" Button to exist
+    t =    10.34s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.button" Button`
+    t =    10.34s             Checking existence of `"settings.button" Button`
+    t =    10.45s     Tap "settings.button" Button
+    t =    10.45s         Wait for me.subasically.pantrypal to idle
+    t =    10.46s         Find the "settings.button" Button
+    t =    10.55s         Check for interrupting elements affecting "settings.button" Button
+    t =    10.64s         Synthesize event
+    t =    10.95s         Wait for me.subasically.pantrypal to idle
+    t =    11.45s     Waiting 2.0s for "settings.signOutButton" Button to exist
+    t =    12.50s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.signOutButton" Button`
+    t =    12.50s             Checking existence of `"settings.signOutButton" Button`
+    t =    12.71s     Tap "settings.signOutButton" Button
+    t =    12.71s         Wait for me.subasically.pantrypal to idle
+    t =    12.71s         Find the "settings.signOutButton" Button
+    t =    12.86s         Check for interrupting elements affecting "settings.signOutButton" Button
+    t =    13.00s         Synthesize event
+    t =    13.30s         Wait for me.subasically.pantrypal to idle
+    t =    13.31s     Waiting 5.0s for "login.continueWithEmailButton" Button to exist
+    t =    14.34s         Checking `Expect predicate `existsNoRetry == 1` for object "login.continueWithEmailButton" Button`
+    t =    14.34s             Checking existence of `"login.continueWithEmailButton" Button`
+    t =    14.39s     Terminate me.subasically.pantrypal:50352
+Test Case '-[PantryPalUITests.PantryPalUITests test06_NavigateToSettings_AndSignOut]' failed (15.497 seconds).
+Test Case '-[PantryPalUITests.PantryPalUITests test07_SearchInventory]' started.
+    t =     0.00s Start Test at 2026-01-02 16:00:49.405
+    t =     0.03s Set Up
+    t =     0.03s     Open me.subasically.pantrypal
+    t =     0.04s         Launch me.subasically.pantrypal
+    t =     1.50s             Setting up automation session
+    t =     2.70s             Wait for me.subasically.pantrypal to idle
+    t =     4.88s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     4.88s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     5.04s     Find the "login.continueWithEmailButton" Button
+    t =     5.07s Tap "login.continueWithEmailButton" Button
+    t =     5.07s     Wait for me.subasically.pantrypal to idle
+    t =     5.07s     Find the "login.continueWithEmailButton" Button
+    t =     5.08s     Check for interrupting elements affecting "login.continueWithEmailButton" Button
+    t =     5.11s     Synthesize event
+    t =     5.40s     Wait for me.subasically.pantrypal to idle
+    t =     5.40s Tap "login.emailField" TextField
+    t =     5.40s     Wait for me.subasically.pantrypal to idle
+    t =     5.41s     Find the "login.emailField" TextField
+    t =     5.44s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     5.46s     Synthesize event
+    t =     5.76s     Wait for me.subasically.pantrypal to idle
+    t =     6.21s Type 'test@pantrypal.com' into "login.emailField" TextField
+    t =     6.21s     Wait for me.subasically.pantrypal to idle
+    t =     6.55s     Find the "login.emailField" TextField
+    t =     6.61s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     6.66s     Synthesize event
+    t =     7.16s     Wait for me.subasically.pantrypal to idle
+    t =     7.17s Tap "login.passwordField" SecureTextField
+    t =     7.17s     Wait for me.subasically.pantrypal to idle
+    t =     7.17s     Find the "login.passwordField" SecureTextField
+    t =     7.23s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     7.27s     Synthesize event
+    t =     7.58s     Wait for me.subasically.pantrypal to idle
+    t =     7.58s Type '<redacted>' into "login.passwordField" SecureTextField
+    t =     7.58s     Wait for me.subasically.pantrypal to idle
+    t =     7.59s     Find the "login.passwordField" SecureTextField
+    t =     7.63s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     7.68s     Synthesize event
+    t =     8.01s     Wait for me.subasically.pantrypal to idle
+    t =     9.05s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.loginButton" Button`
+    t =     9.05s     Checking existence of `"login.loginButton" Button`
+    t =     9.11s     Find the "login.loginButton" Button
+    t =     9.18s Tap "login.loginButton" Button
+    t =     9.18s     Wait for me.subasically.pantrypal to idle
+    t =     9.18s     Find the "login.loginButton" Button
+    t =     9.22s     Check for interrupting elements affecting "login.loginButton" Button
+    t =     9.26s     Synthesize event
+    t =     9.55s     Wait for me.subasically.pantrypal to idle
+    t =     9.96s Checking existence of `"householdSetup.container" Other`
+    t =    10.10s Checking existence of `"mainTab.container" Other`
+    t =    10.19s Waiting 2.0s for "onboarding.skipButton" Button to exist
+    t =    11.22s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    11.22s         Checking existence of `"onboarding.skipButton" Button`
+    t =    11.32s         Capturing element debug description
+    t =    12.20s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.skipButton" Button`
+    t =    12.20s         Checking existence of `"onboarding.skipButton" Button`
+    t =    12.33s         Capturing element debug description
+    t =    12.33s     Checking existence of `"onboarding.skipButton" Button`
+    t =    12.43s Collecting debug information to assist test failure triage
+    t =    12.43s     Requesting snapshot of accessibility hierarchy for app with pid 50516
+    t =    12.56s Tap SearchField (First Match)
+    t =    12.56s     Wait for me.subasically.pantrypal to idle
+    t =    12.56s     Find the SearchField (First Match)
+    t =    12.59s     Check for interrupting elements affecting "Search items" SearchField
+    t =    12.69s     Synthesize event
+    t =    13.01s     Wait for me.subasically.pantrypal to idle
+    t =    13.45s Type 'milk' into SearchField (First Match)
+    t =    13.45s     Wait for me.subasically.pantrypal to idle
+    t =    13.45s     Find the SearchField (First Match)
+    t =    13.50s     Check for interrupting elements affecting "Search items" SearchField
+    t =    13.59s     Synthesize event
+    t =    13.87s     Wait for me.subasically.pantrypal to idle
+    t =    13.87s Checking existence of `"Clear text" Button`
+    t =    13.92s Tap "Clear text" Button
+    t =    13.92s     Wait for me.subasically.pantrypal to idle
+    t =    13.92s     Find the "Clear text" Button
+    t =    13.97s     Check for interrupting elements affecting "Clear text" Button
+    t =    14.03s     Synthesize event
+    t =    14.33s     Wait for me.subasically.pantrypal to idle
+    t =    14.48s Checking existence of `"inventory.list" Table`
+    t =    14.60s Checking existence of `"inventory.list" ScrollView`
+    t =    14.71s Checking existence of `"inventory.list" Other`
+/Users/subasically/Desktop/github/PantryPal/ios/PantryPalUITests/PantryPalUITests.swift:144: error: -[PantryPalUITests.PantryPalUITests test07_SearchInventory] : XCTAssertTrue failed
+    t =    14.81s Tear Down
+    t =    14.81s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =    14.92s     Checking existence of `"settings.button" Button`
+    t =    15.03s     Checking existence of `"inventory.addButton" Button`
+    t =    15.16s     Terminate me.subasically.pantrypal:50516
+Test Case '-[PantryPalUITests.PantryPalUITests test07_SearchInventory]' failed (16.284 seconds).
+Test Case '-[PantryPalUITests.PantryPalUITests test08_PullToRefresh]' started.
+    t =     0.00s Start Test at 2026-01-02 16:01:05.690
+    t =     0.04s Set Up
+    t =     0.04s     Open me.subasically.pantrypal
+    t =     0.04s         Launch me.subasically.pantrypal
+    t =     1.50s             Setting up automation session
+    t =     2.75s             Wait for me.subasically.pantrypal to idle
+    t =     4.94s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     4.94s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     5.20s     Capturing element debug description
+    t =     5.92s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     5.92s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     6.06s     Capturing element debug description
+    t =     6.99s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     6.99s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     7.12s     Capturing element debug description
+    t =     7.94s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     7.94s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     8.06s     Capturing element debug description
+    t =     8.92s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     8.92s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     9.04s     Capturing element debug description
+    t =     9.05s Requesting snapshot of accessibility hierarchy for app with pid 50660
+    t =     9.16s Find: Descendants matching type Button
+    t =     9.16s Find: Elements matching predicate '"login.continueWithEmailButton" IN identifiers'
+/Users/subasically/Desktop/github/PantryPal/ios/PantryPalUITests/Helpers/WaitHelpers.swift:19: error: -[PantryPalUITests.PantryPalUITests test08_PullToRefresh] : XCTAssertTrue failed - Element not tappable: Query chain:
+ →Find: Target Application 'me.subasically.pantrypal'
+  ↪︎Find: Descendants matching type Button
+    ↪︎Find: Elements matching predicate '"login.continueWithEmailButton" IN identifiers'
+No matches found for Elements matching predicate '"login.continueWithEmailButton" IN identifiers' from input {(
+    Button, {{2.0, 874.0}, {143.0, 48.0}}, identifier: 'refrigerator', label: 'Pantry', Selected,
+    Button, {{149.0, 874.0}, {142.0, 48.0}}, identifier: 'cart', label: 'Grocery',
+    Button, {{295.0, 874.0}, {143.0, 48.0}}, identifier: 'barcode.viewfinder', label: 'Checkout',
+    Button, {{20.0, 61.3}, {34.0, 34.0}}, identifier: 'settings.button', label: 'person.circle',
+    Button, {{338.0, 61.7}, {31.3, 33.3}}, identifier: 'inventory.addButton', label: 'Add',
+    Button, {{385.3, 61.7}, {34.7, 33.3}}, identifier: 'inventory.scanButton', label: 'Scan Barcode',
+    Button, {{0.0, 248.3}, {440.0, 87.0}}, label: 'Bread, Test Bakery, Pantry, 1',
+    Button, {{0.0, 335.3}, {440.0, 80.0}}, label: 'UI Test Banana, Pantry, 1',
+    Button, {{0.0, 415.3}, {440.0, 80.0}}, label: 'UI Test Banana, Pantry, 1',
+    Button, {{0.0, 495.3}, {440.0, 80.0}}, label: 'UI Test Banana, Pantry, 1',
+    Button, {{0.0, 575.3}, {440.0, 105.3}}, label: 'Milk, Test Brand, Fridge, Feb 1, 2025, 2',
+    Button, {{20.0, 211.0}, {132.0, 32.0}}, label: 'All', Selected,
+    Button, {{153.0, 211.0}, {133.0, 32.0}}, label: 'Expiring Soon',
+    Button, {{287.0, 211.0}, {133.0, 32.0}}, label: 'Expired',
+    Button, {{324.0, 281.0}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 281.0}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add',
+    Button, {{324.0, 364.3}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 364.3}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add',
+    Button, {{324.0, 444.3}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 444.3}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add',
+    Button, {{324.0, 524.3}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 524.3}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add',
+    Button, {{324.0, 617.0}, {22.0, 22.0}}, identifier: 'minus.circle.fill', label: 'Remove',
+    Button, {{396.0, 617.0}, {22.0, 22.0}}, identifier: 'plus.circle.fill', label: 'Add'
+)}
+
+    t =     9.17s Tear Down
+    t =     9.17s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     9.27s     Checking existence of `"settings.button" Button`
+    t =     9.35s     Waiting 2.0s for "settings.button" Button to exist
+    t =    10.40s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.button" Button`
+    t =    10.40s             Checking existence of `"settings.button" Button`
+    t =    10.52s     Tap "settings.button" Button
+    t =    10.52s         Wait for me.subasically.pantrypal to idle
+    t =    10.52s         Find the "settings.button" Button
+    t =    10.61s         Check for interrupting elements affecting "settings.button" Button
+    t =    10.71s         Synthesize event
+    t =    11.02s         Wait for me.subasically.pantrypal to idle
+    t =    11.53s     Waiting 2.0s for "settings.signOutButton" Button to exist
+    t =    12.56s         Checking `Expect predicate `existsNoRetry == 1` for object "settings.signOutButton" Button`
+    t =    12.56s             Checking existence of `"settings.signOutButton" Button`
+    t =    12.76s     Tap "settings.signOutButton" Button
+    t =    12.76s         Wait for me.subasically.pantrypal to idle
+    t =    12.76s         Find the "settings.signOutButton" Button
+    t =    12.92s         Check for interrupting elements affecting "settings.signOutButton" Button
+    t =    13.08s         Synthesize event
+    t =    13.37s         Wait for me.subasically.pantrypal to idle
+    t =    13.89s     Waiting 5.0s for "login.continueWithEmailButton" Button to exist
+    t =    14.92s         Checking `Expect predicate `existsNoRetry == 1` for object "login.continueWithEmailButton" Button`
+    t =    14.92s             Checking existence of `"login.continueWithEmailButton" Button`
+    t =    14.97s     Terminate me.subasically.pantrypal:50660
+Test Case '-[PantryPalUITests.PantryPalUITests test08_PullToRefresh]' failed (16.099 seconds).
+Test Case '-[PantryPalUITests.PantryPalUITests test09_Registration_CreateNewAccount]' started.
+    t =     0.00s Start Test at 2026-01-02 16:01:21.789
+    t =     0.03s Set Up
+    t =     0.03s     Open me.subasically.pantrypal
+    t =     0.03s         Launch me.subasically.pantrypal
+    t =     1.50s             Setting up automation session
+    t =     2.72s             Wait for me.subasically.pantrypal to idle
+    t =     4.91s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "login.continueWithEmailButton" Button`
+    t =     4.92s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =     5.00s     Find the "login.continueWithEmailButton" Button
+    t =     5.04s Tap "login.continueWithEmailButton" Button
+    t =     5.04s     Wait for me.subasically.pantrypal to idle
+    t =     5.04s     Find the "login.continueWithEmailButton" Button
+    t =     5.06s     Check for interrupting elements affecting "login.continueWithEmailButton" Button
+    t =     5.07s     Synthesize event
+    t =     5.37s     Wait for me.subasically.pantrypal to idle
+    t =     5.37s Checking existence of `Button (First Match)`
+    t =     5.39s Tap Button (First Match)
+    t =     5.39s     Wait for me.subasically.pantrypal to idle
+    t =     5.39s     Find the Button (First Match)
+    t =     5.40s     Check for interrupting elements affecting "Register" Button
+    t =     5.42s     Synthesize event
+    t =     5.72s     Wait for me.subasically.pantrypal to idle
+    t =     5.72s Waiting 2.0s for "login.firstNameField" TextField to exist
+    t =     6.76s     Checking `Expect predicate `existsNoRetry == 1` for object "login.firstNameField" TextField`
+    t =     6.76s         Checking existence of `"login.firstNameField" TextField`
+    t =     6.80s         Capturing element debug description
+    t =     7.72s     Checking `Expect predicate `existsNoRetry == 1` for object "login.firstNameField" TextField`
+    t =     7.72s         Checking existence of `"login.firstNameField" TextField`
+    t =     7.74s         Capturing element debug description
+    t =     7.74s     Checking existence of `"login.firstNameField" TextField`
+    t =     7.76s Collecting debug information to assist test failure triage
+    t =     7.76s     Requesting snapshot of accessibility hierarchy for app with pid 50829
+    t =     7.79s Tap "login.emailField" TextField
+    t =     7.79s     Wait for me.subasically.pantrypal to idle
+    t =     7.79s     Find the "login.emailField" TextField
+    t =     7.80s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     7.82s     Synthesize event
+    t =     8.13s     Wait for me.subasically.pantrypal to idle
+    t =     8.46s Type 'uitest69684@test.c...' into "login.emailField" TextField
+    t =     8.46s     Wait for me.subasically.pantrypal to idle
+    t =     8.84s     Find the "login.emailField" TextField
+    t =     8.91s     Check for interrupting elements affecting "login.emailField" TextField
+    t =     8.98s     Synthesize event
+    t =     9.52s     Wait for me.subasically.pantrypal to idle
+    t =     9.52s Tap "login.passwordField" SecureTextField
+    t =     9.52s     Wait for me.subasically.pantrypal to idle
+    t =     9.52s     Find the "login.passwordField" SecureTextField
+    t =     9.58s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =     9.62s     Synthesize event
+    t =     9.92s     Wait for me.subasically.pantrypal to idle
+    t =     9.92s Type '<redacted>' into "login.passwordField" SecureTextField
+    t =     9.92s     Wait for me.subasically.pantrypal to idle
+    t =     9.93s     Find the "login.passwordField" SecureTextField
+    t =     9.98s     Check for interrupting elements affecting "login.passwordField" SecureTextField
+    t =    10.03s     Synthesize event
+    t =    10.38s     Wait for me.subasically.pantrypal to idle
+    t =    10.38s Checking existence of `"login.registerButton" Button`
+    t =    11.48s Checking `Expect predicate `exists == 1 AND hittable == 1` for object "Register" Button`
+    t =    11.48s     Checking existence of `"Register" Button`
+    t =    11.54s     Find the "Register" Button
+    t =    11.61s Tap "Register" Button
+    t =    11.61s     Wait for me.subasically.pantrypal to idle
+    t =    11.61s     Find the "Register" Button
+    t =    11.65s     Check for interrupting elements affecting "Register" Button
+    t =    11.69s     Synthesize event
+    t =    11.99s     Wait for me.subasically.pantrypal to idle
+    t =    11.99s Checking existence of `"inventory.list" Table`
+    t =    12.05s Checking existence of `"inventory.list" ScrollView`
+    t =    12.10s Checking existence of `"onboarding.skipButton" Button`
+    t =    12.15s Checking existence of `"inventory.list" Other`
+    t =    12.31s Checking existence of `"onboarding.skipButton" Button`
+    t =    12.36s Checking existence of `"inventory.list" Other`
+    t =    12.51s Checking existence of `"onboarding.skipButton" Button`
+    t =    12.56s Checking existence of `"inventory.list" Other`
+    t =    12.71s Checking existence of `"onboarding.skipButton" Button`
+    t =    12.76s Checking existence of `"inventory.list" Other`
+    t =    12.91s Checking existence of `"onboarding.skipButton" Button`
+    t =    12.96s Checking existence of `"inventory.list" Other`
+    t =    13.10s Checking existence of `"onboarding.skipButton" Button`
+    t =    13.16s Checking existence of `"inventory.list" Other`
+    t =    13.30s Checking existence of `"onboarding.skipButton" Button`
+    t =    13.36s Checking existence of `"inventory.list" Other`
+    t =    13.51s Checking existence of `"onboarding.skipButton" Button`
+    t =    13.56s Checking existence of `"inventory.list" Other`
+    t =    13.71s Checking existence of `"onboarding.skipButton" Button`
+    t =    13.76s Checking existence of `"inventory.list" Other`
+    t =    13.91s Checking existence of `"onboarding.skipButton" Button`
+    t =    13.97s Checking existence of `"inventory.list" Other`
+    t =    14.12s Checking existence of `"onboarding.skipButton" Button`
+    t =    14.17s Checking existence of `"inventory.list" Other`
+    t =    14.32s Checking existence of `"onboarding.skipButton" Button`
+    t =    14.37s Checking existence of `"inventory.list" Other`
+    t =    14.52s Checking existence of `"onboarding.skipButton" Button`
+    t =    14.58s Checking existence of `"inventory.list" Other`
+    t =    14.72s Checking existence of `"onboarding.skipButton" Button`
+    t =    14.77s Checking existence of `"inventory.list" Other`
+    t =    14.93s Checking existence of `"onboarding.skipButton" Button`
+    t =    14.97s Checking existence of `"inventory.list" Other`
+    t =    15.12s Checking existence of `"onboarding.skipButton" Button`
+    t =    15.17s Checking existence of `"inventory.list" Other`
+    t =    15.32s Checking existence of `"onboarding.skipButton" Button`
+    t =    15.37s Checking existence of `"inventory.list" Other`
+    t =    15.52s Checking existence of `"onboarding.skipButton" Button`
+    t =    15.57s Checking existence of `"inventory.list" Other`
+    t =    15.73s Checking existence of `"onboarding.skipButton" Button`
+    t =    15.78s Checking existence of `"inventory.list" Other`
+    t =    15.93s Checking existence of `"onboarding.skipButton" Button`
+    t =    15.98s Checking existence of `"inventory.list" Other`
+    t =    16.13s Checking existence of `"onboarding.skipButton" Button`
+    t =    16.19s Checking existence of `"inventory.list" Other`
+    t =    16.34s Checking existence of `"onboarding.skipButton" Button`
+    t =    16.39s Checking existence of `"inventory.list" Other`
+    t =    16.53s Checking existence of `"onboarding.skipButton" Button`
+    t =    16.58s Checking existence of `"inventory.list" Other`
+    t =    16.74s Checking existence of `"onboarding.skipButton" Button`
+    t =    16.78s Checking existence of `"inventory.list" Other`
+    t =    16.93s Checking existence of `"onboarding.skipButton" Button`
+    t =    16.98s Checking existence of `"inventory.list" Other`
+/Users/subasically/Desktop/github/PantryPal/ios/PantryPalUITests/PantryPalUITests.swift:171: error: -[PantryPalUITests.PantryPalUITests test09_Registration_CreateNewAccount] : XCTAssertNotNil failed - Should reach onboarding or inventory after registration
+    t =    17.13s Tear Down
+    t =    17.13s     Checking existence of `"login.continueWithEmailButton" Button`
+    t =    17.18s     Checking existence of `"settings.button" Button`
+    t =    17.22s     Checking existence of `"inventory.addButton" Button`
+    t =    17.26s     Terminate me.subasically.pantrypal:50829
+Test Case '-[PantryPalUITests.PantryPalUITests test09_Registration_CreateNewAccount]' failed (18.324 seconds).
+Test Suite 'PantryPalUITests' failed at 2026-01-02 16:01:40.113.
+	 Executed 9 tests, with 6 failures (0 unexpected) in 180.260 (180.267) seconds

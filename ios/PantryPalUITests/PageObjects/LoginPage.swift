@@ -58,12 +58,16 @@ struct LoginPage {
     func registerWithEmail(_ email: String, password: String, firstName: String, lastName: String) {
         continueWithEmailButton.safeTap()
         
-        // Toggle to registration mode (if needed)
-        let registerToggle = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'register'")).firstMatch
-        if registerToggle.exists {
+        // Wait for email form to appear
+        _ = emailField.waitForExistence(timeout: 3)
+        
+        // Toggle to registration mode - look for "Register" text button
+        let registerToggle = app.buttons["Register"]
+        if registerToggle.waitForExistence(timeout: 2) {
             registerToggle.tap()
         }
         
+        // Wait for name fields to appear after toggling to registration
         if firstNameField.waitForExistence(timeout: 2) {
             firstNameField.tap()
             firstNameField.typeText(firstName)

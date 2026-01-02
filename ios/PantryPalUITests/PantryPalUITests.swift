@@ -163,11 +163,11 @@ final class PantryPalUITests: BaseUITest {
         let randomEmail = "uitest\(Int.random(in: 10000...99999))@test.com"
         loginPage.registerWithEmail(randomEmail, password: "Test123!", firstName: "Test", lastName: "UIUser")
         
-        // THEN: Should reach onboarding or inventory
-        let onboarded = waitForAnyElement([
-            app.buttons["onboarding.skipButton"],
-            inventoryPage.inventoryList
-        ], timeout: 5)
-        XCTAssertNotNil(onboarded, "Should reach onboarding or inventory after registration")
+        // THEN: Should reach main screen (either household setup or inventory)
+        let mainScreenElement = waitForAnyElement([
+            app.otherElements["householdSetup.container"],
+            app.buttons["inventory.addButton"]
+        ], timeout: 10)
+        XCTAssertNotNil(mainScreenElement, "Should reach main screen after registration")
     }
 }
