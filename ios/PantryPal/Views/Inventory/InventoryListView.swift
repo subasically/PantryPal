@@ -392,6 +392,7 @@ struct InventoryListView: View {
         guard item.quantity > 0 else { return }
         
         // Premium-only feature
+        let isPremium = authViewModel.currentHousehold?.isPremiumActive ?? false
         guard isPremium else {
             print("🛒 [AutoRemove] Skipping - user is not Premium")
             return
@@ -412,6 +413,7 @@ struct InventoryListView: View {
     /// Try auto-remove using name and UPC
     private func tryAutoRemoveFromGrocery(name: String, upc: String?) async {
         // Premium-only feature
+        let isPremium = authViewModel.currentHousehold?.isPremiumActive ?? false
         guard isPremium else {
             print("🛒 [AutoRemove] Skipping - user is not Premium")
             return
