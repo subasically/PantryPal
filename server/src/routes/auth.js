@@ -162,10 +162,12 @@ router.get('/household/invites', authenticateToken, (req, res) => {
 // Reset household data (wipe inventory, history, custom products, locations)
 router.delete('/household/data', authenticateToken, (req, res) => {
     try {
+        console.log(`🗑️ [Auth] DELETE /household/data - User ${req.user.id}, Household ${req.user.householdId}`);
         const result = householdService.resetHouseholdData(req.user.householdId, req.user.id);
+        console.log(`✅ [Auth] Household data reset completed successfully`);
         res.json(result);
     } catch (error) {
-        console.error('Reset household data error:', error);
+        console.error('❌ [Auth] Reset household data error:', error);
         res.status(500).json({ error: 'Failed to reset household data' });
     }
 });

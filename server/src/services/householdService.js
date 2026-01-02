@@ -205,7 +205,7 @@ function getActiveInviteCodes(householdId) {
  * @param {string} userId - User ID performing the reset
  */
 function resetHouseholdData(householdId, userId) {
-    console.log(`[Reset] Wiping data for household ${householdId} by user ${userId}`);
+    console.log(`🗑️ [Reset] Wiping data for household ${householdId} by user ${userId}`);
 
     const deleteInventory = db.prepare('DELETE FROM inventory WHERE household_id = ?');
     const deleteHistory = db.prepare('DELETE FROM checkout_history WHERE household_id = ?');
@@ -214,17 +214,28 @@ function resetHouseholdData(householdId, userId) {
     const deleteGrocery = db.prepare('DELETE FROM grocery_items WHERE household_id = ?');
 
     const transaction = db.transaction(() => {
-        deleteInventory.run(householdId);
-        deleteHistory.run(householdId);
-        deleteCustomProducts.run(householdId);
-        deleteLocations.run(householdId);
-        deleteGrocery.run(householdId);
+        const invResult = deleteInventory.run(householdId);
+        console.log(`🗑️ [Reset] Deleted ${invResult.changes} inventory items`);
+        
+        const histResult = deleteHistory.run(householdId);
+        console.log(`🗑️ [Reset] Deleted ${histResult.changes} history records`);
+        
+        const prodResult = deleteCustomProducts.run(householdId);
+        console.log(`🗑️ [Reset] Deleted ${prodResult.changes} custom products`);
+        
+        const locResult = deleteLocations.run(householdId);
+        console.log(`🗑️ [Reset] Deleted ${locResult.changes} locations`);
+        
+        const groceryResult = deleteGrocery.run(householdId);
+        console.log(`🗑️ [Reset] Deleted ${groceryResult.changes} grocery items`);
         
         // Re-seed default locations so the app isn't empty
         createDefaultLocations(householdId);
+        console.log(`🗑️ [Reset] Re-created default locations`);
     });
 
     transaction();
+    console.log(`✅ [Reset] Transaction completed for household ${householdId}`);
 
     return { success: true, message: 'Household data reset successfully' };
 }

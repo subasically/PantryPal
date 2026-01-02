@@ -10,7 +10,9 @@ const FREE_LIMIT = 25;
 // GET /api/grocery - Get all grocery items for household
 router.get('/', authenticateToken, (req, res) => {
     try {
+        console.log(`🛒 [Grocery GET] Fetching items for household: ${req.user.householdId}`);
         const items = groceryService.getAllGroceryItems(req.user.householdId);
+        console.log(`🛒 [Grocery GET] Returning ${items.length} items for household ${req.user.householdId}`);
         res.json(items);
     } catch (error) {
         console.error('Error fetching grocery items:', error);
