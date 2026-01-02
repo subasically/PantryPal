@@ -109,7 +109,14 @@ struct CheckoutView: View {
         // Check if item was deleted (quantity went to 0)
         if response.itemDeleted == true, let productName = response.productName {
             print("🛒 [CheckoutGrocery] Item hit zero during checkout")
-            // Show confirmation prompt for ALL users
+            
+            // Only Premium users get the confirmation prompt
+            guard isPremium else {
+                print("🛒 [CheckoutGrocery] User is not Premium, skipping grocery prompt")
+                ToastCenter.shared.show("Checked out last \(productName)", type: .success)
+                return
+            }
+            
             print("🛒 [CheckoutGrocery] Showing confirmation prompt")
             pendingGroceryItem = productName
             showGroceryPrompt = true

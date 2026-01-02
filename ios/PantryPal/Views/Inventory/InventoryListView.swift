@@ -361,7 +361,12 @@ struct InventoryListView: View {
         print("🛒 [GroceryLogic] - itemName: \(itemName)")
         print("🛒 [GroceryLogic] - isPremium: \(isPremium)")
         
-        // Show confirmation prompt for ALL users (Premium and Free)
+        // Only Premium users get the confirmation prompt
+        guard isPremium else {
+            print("🛒 [GroceryLogic] User is not Premium, skipping grocery prompt")
+            return
+        }
+        
         print("🛒 [GroceryLogic] Showing confirmation prompt for: \(itemName)")
         pendingGroceryItem = itemName
         showGroceryPrompt = true
