@@ -32,7 +32,9 @@ struct SplashView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(UIColor.systemBackground))
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                // Skip splash delay during UI testing
+                let delay = CommandLine.arguments.contains("--uitesting") ? 0.1 : 2.0
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                     withAnimation {
                         self.isActive = true
                     }
