@@ -88,17 +88,37 @@ struct LoginView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                     
-                                    // Use Email Option
-                                    Button(action: {
-                                        withAnimation {
-                                            showEmailForm = true
+                                    // Email Login/Registration Options
+                                    VStack(spacing: 12) {
+                                        Button(action: {
+                                            withAnimation {
+                                                isRegistering = false
+                                                showEmailForm = true
+                                            }
+                                        }) {
+                                            Text("Sign in with email")
+                                                .fontWeight(.medium)
                                         }
-                                    }) {
-                                        Text("Continue with email")
-                                            .fontWeight(.medium)
+                                        .accessibilityIdentifier(AccessibilityIdentifiers.Login.continueWithEmailButton)
+                                        
+                                        HStack(spacing: 4) {
+                                            Text("Don't have an account?")
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                            
+                                            Button(action: {
+                                                withAnimation {
+                                                    isRegistering = true
+                                                    showEmailForm = true
+                                                }
+                                            }) {
+                                                Text("Sign up")
+                                                    .font(.subheadline)
+                                                    .fontWeight(.semibold)
+                                            }
+                                        }
                                     }
                                     .padding(.top, 8)
-                                    .accessibilityIdentifier(AccessibilityIdentifiers.Login.continueWithEmailButton)
                                     
                                     // Back to Face ID if available
                                     if authViewModel.canUseBiometricLogin {

@@ -325,6 +325,9 @@ struct SettingsView: View {
             let items = try modelContext.fetch(FetchDescriptor<SDInventoryItem>())
             for item in items { modelContext.delete(item) }
             
+            let groceryItems = try modelContext.fetch(FetchDescriptor<SDGroceryItem>())
+            for groceryItem in groceryItems { modelContext.delete(groceryItem) }
+            
             let products = try modelContext.fetch(FetchDescriptor<SDProduct>())
             for product in products { modelContext.delete(product) }
             
