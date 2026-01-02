@@ -473,7 +473,6 @@
 				2F3780242F04F1C5006F4E33 /* AppErrorMapper.swift in Sources */,
 				2F3780252F04F1C5006F4E33 /* AppLogger.swift in Sources */,
 				2F377FFA2EFB7975006F4E33 /* SplashView.swift in Sources */,
-				115 /* HouseholdSharingView.swift in Sources */,
 				7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */,
 				EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */,
 				BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */,
