@@ -36,6 +36,12 @@ final class APIService: Sendable {
     private var token: String?
     
     private init() {
+        // Check for UI testing environment variable
+        if let testBaseURL = ProcessInfo.processInfo.environment["API_BASE_URL"] {
+            baseURL = testBaseURL
+            print("🧪 [APIService] Using test server: \(testBaseURL)")
+        }
+        
         // Load token from keychain/userdefaults
         token = UserDefaults.standard.string(forKey: "authToken")
     }
