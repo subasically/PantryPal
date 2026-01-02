@@ -342,8 +342,14 @@ struct SettingsView: View {
             // 3. Re-sync to get default locations
             try await SyncService.shared.syncFromRemote(modelContext: modelContext)
             
-            // 4. Success feedback
+            // 4. Post notification to refresh inventory view
+            await MainActor.run {
+                NotificationCenter.default.post(name: NSNotification.Name("householdDataDeleted"), object: nil)
+            }
+            
+            // 5. Success feedback
             HapticService.shared.success()
+            ToastCenter.shared.show("All household data deleted", type: .success)
             dismiss()
         } catch {
             resetError = error.localizedDescription

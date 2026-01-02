@@ -268,6 +268,14 @@ struct InventoryListView: View {
                     Task { await viewModel.loadInventory() }
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("householdDataDeleted"))) { _ in
+                print("🗑️ [InventoryListView] Household data deleted, reloading inventory")
+                Task {
+                    await viewModel.loadInventory()
+                    await viewModel.loadLocations()
+                    await groceryViewModel.fetchItems()
+                }
+            }
             .alert("Add to Grocery List?", isPresented: $showGroceryPrompt) {
                 Button("Not now", role: .cancel) {
                     pendingGroceryItem = nil

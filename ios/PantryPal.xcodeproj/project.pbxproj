@@ -19,7 +19,6 @@
 		011 /* BiometricAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112 /* BiometricAuthService.swift */; };
 		012 /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113 /* UserPreferences.swift */; };
 		013 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114 /* NotificationService.swift */; };
-		115 /* HouseholdSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116 /* HouseholdSharingView.swift */; };
 		2F377FFA2EFB7975006F4E33 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FF92EFB7975006F4E33 /* SplashView.swift */; };
 		2F377FFC2EFC65D4006F4E33 /* SwiftDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FFB2EFC65D4006F4E33 /* SwiftDataModels.swift */; };
 		2F377FFF2EFC6621006F4E33 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F377FFE2EFC6621006F4E33 /* SyncService.swift */; };
