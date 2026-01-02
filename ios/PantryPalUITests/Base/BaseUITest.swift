@@ -85,8 +85,15 @@ class BaseUITest: XCTestCase {
             return // Already logged out
         }
         
-        // Try to navigate to settings and sign out
+        // Check if we can see inventory/settings (i.e., we're logged in)
         let settingsBtn = app.buttons["settings.button"]
+        let addBtn = app.buttons["inventory.addButton"]
+        
+        if !settingsBtn.exists && !addBtn.exists {
+            return // Not logged in or in unknown state
+        }
+        
+        // Try to navigate to settings and sign out
         if settingsBtn.waitForExistence(timeout: 2) {
             settingsBtn.tap()
             

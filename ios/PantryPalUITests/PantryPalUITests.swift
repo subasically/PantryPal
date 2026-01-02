@@ -51,7 +51,7 @@ final class PantryPalUITests: BaseUITest {
         loginAsTestUser()
         
         // THEN: Should reach main screen and see inventory
-        XCTAssertTrue(inventoryPage.inventoryList.exists, "Inventory list should be visible after login")
+        XCTAssertTrue(inventoryPage.addButton.exists, "Add button should be visible after login")
     }
     
     func test02_AddCustomItem_Success() throws {
