@@ -1,5 +1,6 @@
 import StoreKit
 import Foundation
+import StoreKit
 
 enum StoreError: LocalizedError {
     case failedVerification
@@ -27,8 +28,8 @@ final class StoreKitService: ObservableObject {
     static let shared = StoreKitService()
     
     // Products
-    @Published var monthlyProduct: Product?
-    @Published var annualProduct: Product?
+    @Published var monthlyProduct: StoreKit.Product?
+    @Published var annualProduct: StoreKit.Product?
     @Published var isLoading = false
     @Published var purchaseInProgress = false
     
@@ -56,7 +57,8 @@ final class StoreKitService: ObservableObject {
         defer { isLoading = false }
         
         do {
-            let products = try await Product.products(for: [monthlyProductID, annualProductID])
+            let productIDs: Set<String> = [monthlyProductID, annualProductID]
+            let products = try await StoreKit.Product.products(for: productIDs)
             
             for product in products {
                 switch product.id {
@@ -85,7 +87,7 @@ final class StoreKitService: ObservableObject {
     /// Purchase a subscription product
     /// - Parameter product: The subscription product to purchase
     /// - Returns: The verified transaction if successful, nil if cancelled
-    func purchase(_ product: Product) async throws -> Transaction? {
+    func purchase(_ product: StoreKit.Product) async throws -> StoreKit.Transaction? {
         guard !purchaseInProgress else {
             print("⚠️ [StoreKit] Purchase already in progress")
             return nil
@@ -137,7 +139,7 @@ final class StoreKitService: ObservableObject {
         
         var restoredCount = 0
         
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreKit.Transaction.currentEntitlements {
             do {
                 let transaction = try checkVerified(result)
                 
@@ -167,7 +169,7 @@ final class StoreKitService: ObservableObject {
         return Task.detached {
             print("👂 [StoreKit] Listening for transaction updates...")
             
-            for await result in Transaction.updates {
+            for await result in StoreKit.Transaction.updates {
                 do {
                     let transaction = try self.checkVerified(result)
                     print("🔔 [StoreKit] Transaction update received: \(transaction.id)")
@@ -184,7 +186,7 @@ final class StoreKitService: ObservableObject {
     // MARK: - Verification
     
     /// Verify the transaction cryptographic signature
-    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+    nonisolated private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
         case .unverified:
             print("❌ [StoreKit] Transaction failed verification")
@@ -195,7 +197,7 @@ final class StoreKitService: ObservableObject {
     }
     
     /// Verify transaction with backend and update Premium status
-    private func verifyAndSync(_ transaction: Transaction) async {
+    private func verifyAndSync(_ transaction: StoreKit.Transaction) async {
         print("🔐 [StoreKit] Verifying transaction with server: \(transaction.id)")
         
         do {
@@ -226,7 +228,7 @@ final class StoreKitService: ObservableObject {
     
     /// Check if user has an active subscription
     func hasActiveSubscription() async -> Bool {
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreKit.Transaction.currentEntitlements {
             if let transaction = try? checkVerified(result),
                let expirationDate = transaction.expirationDate,
                expirationDate > Date() {

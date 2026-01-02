@@ -391,6 +391,12 @@ struct InventoryListView: View {
     private func attemptGroceryAutoRemove(forItem item: InventoryItem) async {
         guard item.quantity > 0 else { return }
         
+        // Premium-only feature
+        guard isPremium else {
+            print("🛒 [AutoRemove] Skipping - user is not Premium")
+            return
+        }
+        
         let removed = await groceryViewModel.attemptAutoRemove(
             upc: item.productUpc,
             name: item.productName ?? item.displayName,
@@ -405,6 +411,12 @@ struct InventoryListView: View {
     
     /// Try auto-remove using name and UPC
     private func tryAutoRemoveFromGrocery(name: String, upc: String?) async {
+        // Premium-only feature
+        guard isPremium else {
+            print("🛒 [AutoRemove] Skipping - user is not Premium")
+            return
+        }
+        
         let removed = await groceryViewModel.attemptAutoRemove(
             upc: upc,
             name: name,

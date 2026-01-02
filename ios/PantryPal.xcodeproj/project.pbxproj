@@ -52,6 +52,7 @@
 		2F37804E2F07431B006F4E33 /* AddCustomItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780472F07431B006F4E33 /* AddCustomItemView.swift */; };
 		2F3780522F07433F006F4E33 /* ScannerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37804F2F07433F006F4E33 /* ScannerSheet.swift */; };
 		2F3780532F07433F006F4E33 /* UPCScannerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780502F07433F006F4E33 /* UPCScannerSheet.swift */; };
+		2F37806F2F085D94006F4E33 /* StoreKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37806E2F085D94006F4E33 /* StoreKitService.swift */; };
 		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
 		7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */; };
 		933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */; };
@@ -122,6 +123,7 @@
 		2F3780482F07431B006F4E33 /* EditItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemView.swift; sourceTree = "<group>"; };
 		2F37804F2F07433F006F4E33 /* ScannerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerSheet.swift; sourceTree = "<group>"; };
 		2F3780502F07433F006F4E33 /* UPCScannerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UPCScannerSheet.swift; sourceTree = "<group>"; };
+		2F37806E2F085D94006F4E33 /* StoreKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitService.swift; sourceTree = "<group>"; };
 		2F74C56F2EDE639E006E985C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastHostView.swift; sourceTree = "<group>"; };
 		3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationsSettingsView.swift; sourceTree = "<group>"; };
@@ -269,6 +271,7 @@
 		306 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2F37806E2F085D94006F4E33 /* StoreKitService.swift */,
 				2F37800B2EFC7274006F4E33 /* ActionQueueService.swift */,
 				103 /* APIService.swift */,
 				112 /* BiometricAuthService.swift */,
@@ -449,6 +452,7 @@
 				2F377FFC2EFC65D4006F4E33 /* SwiftDataModels.swift in Sources */,
 				2F37801B2F04A6C8006F4E33 /* QRScannerView.swift in Sources */,
 				2F3780022EFC6A97006F4E33 /* OCRService.swift in Sources */,
+				2F37806F2F085D94006F4E33 /* StoreKitService.swift in Sources */,
 				2F3780112EFC7A7E006F4E33 /* HouseholdSetupView.swift in Sources */,
 				2F3780132F01F56F006F4E33 /* PaywallView.swift in Sources */,
 				2F37804A2F07431B006F4E33 /* HouseholdSharingView.swift in Sources */,
