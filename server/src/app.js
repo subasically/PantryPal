@@ -14,6 +14,7 @@ function createApp() {
     const notificationsRoutes = require('./routes/notifications');
     const syncRoutes = require('./routes/sync');
     const groceryRoutes = require('./routes/grocery');
+    const subscriptionsRoutes = require('./routes/subscriptions');
 
     const app = express();
 
@@ -42,6 +43,7 @@ function createApp() {
     app.use('/api/notifications', notificationsRoutes);
     app.use('/api/sync', syncRoutes);
     app.use('/api/grocery', groceryRoutes);
+    app.use('/api/subscriptions', subscriptionsRoutes);
     
     // Test endpoints (only in non-production)
     if (process.env.NODE_ENV !== 'production' || process.env.ALLOW_TEST_ENDPOINTS === 'true') {

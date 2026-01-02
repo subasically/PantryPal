@@ -422,6 +422,31 @@ final class APIService: Sendable {
         return response.removed
     }
     
+    // MARK: - Subscriptions
+    
+    /// Validate a StoreKit transaction receipt with the server
+    func validateReceipt(_ validationData: [String: Any]) async throws -> ValidateReceiptResponse {
+        struct ReceiptValidationRequest: Codable, Sendable {
+            let transactionId: String
+            let productId: String
+            let originalTransactionId: String
+            let expiresAt: String
+        }
+        
+        let request = ReceiptValidationRequest(
+            transactionId: validationData["transactionId"] as? String ?? "",
+            productId: validationData["productId"] as? String ?? "",
+            originalTransactionId: validationData["originalTransactionId"] as? String ?? "",
+            expiresAt: validationData["expiresAt"] as? String ?? ""
+        )
+        
+        return try await self.request(
+            endpoint: "/subscriptions/validate",
+            method: "POST",
+            body: request
+        )
+    }
+    
     // MARK: - Admin (DEBUG ONLY)
     
     #if DEBUG

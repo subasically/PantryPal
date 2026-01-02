@@ -83,6 +83,19 @@ struct Household: Codable, Identifiable, Sendable {
     }
 }
 
+// MARK: - Subscriptions
+
+struct ValidateReceiptResponse: Codable, Sendable {
+    let household: Household
+    let subscription: SubscriptionInfo
+}
+
+struct SubscriptionInfo: Codable, Sendable {
+    let productId: String
+    let expiresAt: String?
+    let isActive: Bool
+}
+
 // MARK: - Product
 
 struct Product: Codable, Identifiable, Sendable {
