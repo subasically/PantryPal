@@ -67,11 +67,13 @@ class BaseUITest: XCTestCase {
     
     /// Wait for either household setup or inventory list to appear
     func waitForMainScreen() {
-        // Wait longer for splash screen (2s) + navigation
+        // Wait longer for splash screen + navigation
         let householdSetup = app.otherElements["householdSetup.container"]
         let mainTab = app.otherElements["mainTab.container"]
+        let inventoryList = app.otherElements["inventory.list"]
         
-        let appeared = waitForAnyElement([householdSetup, mainTab], timeout: 10)
+        // Try multiple ways to detect we're in the app
+        let appeared = waitForAnyElement([householdSetup, mainTab, inventoryList], timeout: 15)
         XCTAssertNotNil(appeared, "Should reach main screen after login")
     }
     

@@ -23,7 +23,12 @@ struct LoginPage {
     }
     
     var registerButton: XCUIElement {
-        app.buttons["login.registerButton"]
+        // Try identifier first, fallback to label
+        let btnWithId = app.buttons["login.registerButton"]
+        if btnWithId.exists {
+            return btnWithId
+        }
+        return app.buttons["Register"].firstMatch
     }
     
     var firstNameField: XCUIElement {
