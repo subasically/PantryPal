@@ -212,6 +212,8 @@ function resetHouseholdData(householdId, userId) {
     const deleteCustomProducts = db.prepare('DELETE FROM products WHERE household_id = ? AND is_custom = 1');
     const deleteLocations = db.prepare('DELETE FROM locations WHERE household_id = ?');
     const deleteGrocery = db.prepare('DELETE FROM grocery_items WHERE household_id = ?');
+    const deleteSyncLog = db.prepare('DELETE FROM sync_log WHERE household_id = ?');
+    const deleteInviteCodes = db.prepare('DELETE FROM invite_codes WHERE household_id = ?');
 
     const transaction = db.transaction(() => {
         const invResult = deleteInventory.run(householdId);
@@ -228,6 +230,12 @@ function resetHouseholdData(householdId, userId) {
         
         const groceryResult = deleteGrocery.run(householdId);
         console.log(`🗑️ [Reset] Deleted ${groceryResult.changes} grocery items`);
+        
+        const syncResult = deleteSyncLog.run(householdId);
+        console.log(`🗑️ [Reset] Deleted ${syncResult.changes} sync log entries`);
+        
+        const inviteResult = deleteInviteCodes.run(householdId);
+        console.log(`🗑️ [Reset] Deleted ${inviteResult.changes} invite codes`);
         
         // Re-seed default locations so the app isn't empty
         createDefaultLocations(householdId);
