@@ -50,9 +50,12 @@ struct GroceryListView: View {
                 await viewModel.fetchItems()
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("householdDataDeleted"))) { _ in
-                print("🗑️ [GroceryListView] Household data deleted, reloading grocery list")
+                print("🗑️ [GroceryListView] Household data deleted notification received")
+                print("🗑️ [GroceryListView] Current items count before reload: \(viewModel.items.count)")
                 Task {
+                    print("🗑️ [GroceryListView] Starting fetchItems()...")
                     await viewModel.fetchItems()
+                    print("🗑️ [GroceryListView] After fetchItems(), items count: \(viewModel.items.count)")
                 }
             }
         }

@@ -27,11 +27,13 @@ final class GroceryViewModel {
     }
     
     func fetchItems() async {
+        print("🛒 [GroceryViewModel] fetchItems() called")
         isLoading = true
         errorMessage = nil
         
         do {
             let remoteItems = try await APIService.shared.fetchGroceryItems()
+            print("🛒 [GroceryViewModel] Fetched \(remoteItems.count) items from server")
             items = remoteItems
             
             // Update local cache
@@ -57,12 +59,14 @@ final class GroceryViewModel {
                 }
                 
                 try? context.save()
+                print("🛒 [GroceryViewModel] Updated cache with \(remoteItems.count) items")
             }
         } catch {
             errorMessage = "Failed to load grocery list"
-            print("Fetch grocery error: \(error)")
+            print("❌ [GroceryViewModel] fetchItems error: \(error)")
         }
         
+        print("🛒 [GroceryViewModel] fetchItems() completed, items count: \(items.count)")
         isLoading = false
     }
     
