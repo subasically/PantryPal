@@ -31,7 +31,7 @@ class BaseUITest: XCTestCase {
         app = XCUIApplication()
         app.launchArguments = ["--uitesting"]
         app.launchEnvironment = [
-            "API_BASE_URL": "http://localhost:3002",
+            "API_BASE_URL": "http://localhost:3002/api",
             "UI_TEST_DISABLE_APP_LOCK": "true"
         ]
         
