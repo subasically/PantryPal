@@ -46,6 +46,8 @@
 		2F3780272F04F686006F4E33 /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780262F04F686006F4E33 /* SyncCoordinator.swift */; };
 		2F37802A2F04F854006F4E33 /* UITestingMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780292F04F854006F4E33 /* UITestingMode.swift */; };
 		2F37802B2F04F854006F4E33 /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780282F04F854006F4E33 /* AccessibilityIdentifiers.swift */; };
+		2F3780412F073173006F4E33 /* SyncStatusIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780402F073173006F4E33 /* SyncStatusIndicator.swift */; };
+		2F3780422F073173006F4E33 /* ConfettiModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37803F2F073173006F4E33 /* ConfettiModifier.swift */; };
 		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
 		7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */; };
 		933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */; };
@@ -109,6 +111,8 @@
 		2F3780282F04F854006F4E33 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
 		2F3780292F04F854006F4E33 /* UITestingMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestingMode.swift; sourceTree = "<group>"; };
 		2F3780302F04F886006F4E33 /* PantryPalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PantryPalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F37803F2F073173006F4E33 /* ConfettiModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiModifier.swift; sourceTree = "<group>"; };
+		2F3780402F073173006F4E33 /* SyncStatusIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusIndicator.swift; sourceTree = "<group>"; };
 		2F74C56F2EDE639E006E985C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastHostView.swift; sourceTree = "<group>"; };
 		3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationsSettingsView.swift; sourceTree = "<group>"; };
@@ -258,6 +262,8 @@
 		7155113A53D7C3F6CB2C86DE /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				2F37803F2F073173006F4E33 /* ConfettiModifier.swift */,
+				2F3780402F073173006F4E33 /* SyncStatusIndicator.swift */,
 				2F37801E2F04E9BD006F4E33 /* ConfettiOverlay.swift */,
 				2F3780032EFC6AAD006F4E33 /* PhotoCaptureView.swift */,
 				ED4A7C84F0B02C27FF31131A /* ToastView.swift */,
@@ -413,6 +419,8 @@
 				2F3780152F031DC4006F4E33 /* GroceryViewModel.swift in Sources */,
 				933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */,
 				2F37801D2F04E9B3006F4E33 /* ConfettiCenter.swift in Sources */,
+				2F3780412F073173006F4E33 /* SyncStatusIndicator.swift in Sources */,
+				2F3780422F073173006F4E33 /* ConfettiModifier.swift in Sources */,
 				2F3780232F04F1C5006F4E33 /* AppError.swift in Sources */,
 				2F3780242F04F1C5006F4E33 /* AppErrorMapper.swift in Sources */,
 				2F3780252F04F1C5006F4E33 /* AppLogger.swift in Sources */,
