@@ -49,6 +49,12 @@ struct GroceryListView: View {
             .refreshable {
                 await viewModel.fetchItems()
             }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("householdDataDeleted"))) { _ in
+                print("🗑️ [GroceryListView] Household data deleted, reloading grocery list")
+                Task {
+                    await viewModel.fetchItems()
+                }
+            }
         }
     }
     
