@@ -6,6 +6,7 @@ struct GroceryListView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = GroceryViewModel()
     @State private var showingAddSheet = false
+    @State private var showingSettings = false
     @State private var newItemName = ""
     @FocusState private var isInputFocused: Bool
     
@@ -27,6 +28,13 @@ struct GroceryListView: View {
             .accessibilityIdentifier("grocery.list")
             .navigationTitle("Grocery List")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showingSettings = true }) {
+                        Image(systemName: "person.circle")
+                    }
+                    .accessibilityIdentifier("settings.button")
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingAddSheet = true
@@ -39,6 +47,11 @@ struct GroceryListView: View {
             }
             .sheet(isPresented: $showingAddSheet) {
                 addItemSheet
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+                    .environment(authViewModel)
+                    .environmentObject(NotificationService.shared)
             }
             .task {
                 viewModel.setModelContext(modelContext)
