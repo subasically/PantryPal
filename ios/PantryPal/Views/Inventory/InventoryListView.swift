@@ -165,7 +165,7 @@ struct InventoryListView: View {
         }
     }
     
-    private var configuredInventoryList: some View {
+    private var inventoryListWithToolbar: some View {
         inventoryList
             .navigationTitle("Pantry (\(viewModel.items.count))")
             .toolbar {
@@ -173,6 +173,10 @@ struct InventoryListView: View {
                 settingsToolbarItem
                 actionButtonsToolbarItem
             }
+    }
+    
+    private var configuredInventoryList: some View {
+        inventoryListWithToolbar
             .refreshable {
                 print("🔄 [InventoryListView] Pull-to-refresh triggered")
                 await SyncCoordinator.shared.syncNow(
@@ -201,9 +205,9 @@ struct InventoryListView: View {
                     .presentationDetents([.large])
                 } else {
                     ScannerSheet(viewModel: $viewModel, isPresented: $showingScanner, onItemAdded: { message in
-                        ToastCenter.shared.show(message.contains("Added") || message.contains("Updated") ? message : "Added \(message) to pantry!", type: .success)
-                        // Trigger auto-remove check after scanner success
                         Task {
+                            ToastCenter.shared.show(message.contains("Added") || message.contains("Updated") ? message : "Added \(message) to pantry!", type: .success)
+                            // Trigger auto-remove check after scanner success
                             await checkRecentlyAddedForGroceryRemoval()
                         }
                     })
@@ -213,9 +217,9 @@ struct InventoryListView: View {
             }
             .sheet(isPresented: $showingAddCustom) {
                 AddCustomItemView(viewModel: $viewModel, isPresented: $showingAddCustom, onItemAdded: { name in
-                    ToastCenter.shared.show("Added \(name) to pantry!", type: .success)
-                    // Auto-remove from grocery if item was restocked
                     Task {
+                        ToastCenter.shared.show("Added \(name) to pantry!", type: .success)
+                        // Auto-remove from grocery if item was restocked
                         await tryAutoRemoveFromGrocery(name: name, upc: nil)
                     }
                 })
@@ -261,8 +265,8 @@ struct InventoryListView: View {
                 await viewModel.loadInventory(withLoadingState: false)
                 await viewModel.loadLocations()
             }
-            .onChange(of: scenePhase) { oldPhase, newPhase in
-                if newPhase == .active {
+            .onChange(of: scenePhase) {
+                if scenePhase == .active {
                     print("🔄 [InventoryListView] App became active, syncing...")
                     Task {
                         await ActionQueueService.shared.processQueue(modelContext: modelContext)
@@ -312,7 +316,7 @@ struct InventoryListView: View {
                             await SyncCoordinator.shared.syncNow(
                                 householdId: authViewModel.currentUser?.householdId,
                                 modelContext: modelContext,
-                                reason: .manual
+                                reason: .pullToRefresh
                             )
                             await viewModel.loadInventory(withLoadingState: false)
                         }
@@ -336,7 +340,6 @@ struct InventoryListView: View {
                     Text("You're out of \(itemName). Add it to your grocery list?")
                 }
             }
-        }
     }
     
     private func checkLimit() -> Bool {
@@ -447,7 +450,7 @@ struct InventoryListView: View {
         let removed = await groceryViewModel.attemptAutoRemove(
             upc: upc,
             name: name,
-            brand: nil
+            brand: nil as String?
         )
         
         if removed {
@@ -543,5 +546,5 @@ struct InventoryListView: View {
             }
         }
     }
-
+}
 
