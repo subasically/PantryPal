@@ -255,12 +255,11 @@ struct InventoryListView: View {
                 
                 // Initial sync sequence
                 await ActionQueueService.shared.processQueue(modelContext: modelContext)
-                do {
-                    try await SyncService.shared.syncFromRemote(modelContext: modelContext)
-                    print("✅ [InventoryListView] Initial sync completed")
-                } catch {
-                    print("❌ [InventoryListView] Initial sync failed: \(error)")
-                }
+                await SyncCoordinator.shared.syncNow(
+                    householdId: authViewModel.currentUser?.householdId,
+                    modelContext: modelContext,
+                    reason: .bootstrap
+                )
                 // Reload without triggering full loading state to avoid flash
                 await viewModel.loadInventory(withLoadingState: false)
                 await viewModel.loadLocations()
