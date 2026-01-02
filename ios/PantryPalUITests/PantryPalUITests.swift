@@ -1,50 +1,11 @@
 import XCTest
 
-final class PantryPalUITests: XCTestCase {
+final class PantryPalUITests: BaseUITest {
     
-    var app: XCUIApplication!
     let testServerURL = "http://localhost:3002"
     let testAdminKey = "pantrypal-test-key-2025"
     
-    override func setUpWithError() throws {
-        continueAfterFailure = false
-        
-        app = XCUIApplication()
-        app.launchArguments = ["--uitesting"] // Enable UI testing mode to clear app state
-        app.launchEnvironment = [
-            "API_BASE_URL": testServerURL,
-            "UI_TEST_DISABLE_APP_LOCK": "true"
-        ]
-        
-        // NOTE: Server should already be running and seeded
-        // Run: ./scripts/start-test-server.sh before running tests
-        // The server will have test data already seeded from previous run
-        
-        app.launch()
-    }
-    
-    override func tearDownWithError() throws {
-        // Logout to ensure clean state for next test
-        if app.otherElements["mainTab.container"].exists {
-            // Tap Settings button (person icon in top left of Inventory)
-            let settingsBtn = app.buttons["settings.button"]
-            if settingsBtn.waitForExistence(timeout: 2) {
-                settingsBtn.tap()
-                sleep(1)
-                
-                // Tap Sign Out button
-                let signOutBtn = app.buttons["settings.signOutButton"]
-                if signOutBtn.waitForExistence(timeout: 2) {
-                    signOutBtn.tap()
-                    sleep(2)
-                }
-            }
-        }
-        
-        // Terminate app to force clean state
-        app.terminate()
-        app = nil
-    }
+    // MARK: - Setup removed (using BaseUITest)
     
     // MARK: - Server Helpers
     
@@ -80,339 +41,135 @@ final class PantryPalUITests: XCTestCase {
         wait(for: [exp], timeout: 5)
     }
     
-    // MARK: - Helper Methods
-    
-    func loginTestUser() {
-        // Check if already at main screen (shouldn't happen with tearDown but be safe)
-        if app.otherElements["mainTab.container"].exists || app.otherElements["inventory.list"].exists {
-            return // Already logged in
-        }
-        
-        let continueBtn = app.buttons["login.continueWithEmailButton"]
-        if continueBtn.waitForExistence(timeout: 5) {
-            continueBtn.tap()
-        } else {
-            return // Not at login screen, probably already past it
-        }
-        
-        let emailField = app.textFields["login.emailField"]
-        XCTAssertTrue(emailField.waitForExistence(timeout: 3))
-        emailField.tap()
-        sleep(1) // Wait for keyboard
-        emailField.typeText("test@pantrypal.com")
-        
-        let passwordField = app.secureTextFields["login.passwordField"]
-        passwordField.doubleTap() // Double tap works better for SecureTextField
-        sleep(2) // Longer wait for keyboard focus
-        passwordField.typeText("Test123!")
-        
-        app.buttons["login.loginButton"].tap()
-        
-        // Wait for navigation to complete (household setup OR main tab)
-        let householdSetup = app.otherElements["householdSetup.container"]
-        let mainTab = app.otherElements["mainTab.container"]
-        
-        // Wait up to 8 seconds for either view to appear (includes API call time)
-        var waited = 0
-        while waited < 8 && !householdSetup.exists && !mainTab.exists {
-            sleep(1)
-            waited += 1
-        }
-    }
-    
-    func skipOnboardingIfNeeded() {
-        let skipBtn = app.buttons["onboarding.skipButton"]
-        if skipBtn.waitForExistence(timeout: 2) {
-            skipBtn.tap()
-            sleep(1)
-        }
-    }
-    
-    // MARK: - Test Cases
+    // MARK: - Test Cases (Refactored with Page Objects)
     
     func test01_LoginWithEmail_Success() throws {
-        let continueBtn = app.buttons["login.continueWithEmailButton"]
-        XCTAssertTrue(continueBtn.waitForExistence(timeout: 5), "Continue button should exist")
+        // GIVEN: At login screen
+        loginPage.assertAtLoginScreen()
         
-        continueBtn.tap()
+        // WHEN: Logging in with valid credentials
+        loginPage.loginWithEmail("test@pantrypal.com", password: "Test123!")
         
-        let emailField = app.textFields["login.emailField"]
-        XCTAssertTrue(emailField.waitForExistence(timeout: 3))
-        emailField.tap()
-        sleep(1) // Wait for keyboard to appear
-        emailField.typeText("test@pantrypal.com")
-        
-        let passwordField = app.secureTextFields["login.passwordField"]
-        passwordField.doubleTap() // Double tap works better for SecureTextField
-        sleep(2) // Longer wait for keyboard focus
-        passwordField.typeText("Test123!")
-        
-        app.buttons["login.loginButton"].tap()
-        
-        sleep(3)
-        
-        // Should see one of: household setup, main tab view, or inventory list
-        let householdSetup = app.otherElements["householdSetup.container"]
-        let mainTabView = app.otherElements["mainTab.container"]
-        let inventoryList = app.otherElements["inventory.list"]
-        
-        XCTAssertTrue(
-            householdSetup.waitForExistence(timeout: 5) || mainTabView.exists || inventoryList.exists,
-            "Should reach household setup, main tab, or inventory after login"
-        )
+        // THEN: Should reach main screen
+        skipOnboardingIfNeeded()
+        waitForMainScreen()
+        XCTAssertTrue(inventoryPage.inventoryList.exists)
     }
     
     func test02_AddCustomItem_Success() throws {
-        loginTestUser()
-        skipOnboardingIfNeeded()
+        // GIVEN: User is logged in
+        loginAsTestUser()
         
-        // Verify inventory list exists
-        let inventoryList = app.otherElements["inventory.list"]
-        XCTAssertTrue(inventoryList.waitForExistence(timeout: 5), "Inventory list should be visible")
+        // WHEN: Adding a new item
+        inventoryPage.tapAddButton()
         
-        // Tap add button
-        let addBtn = app.buttons["inventory.addButton"]
-        XCTAssertTrue(addBtn.waitForExistence(timeout: 3), "Add button should exist")
-        addBtn.tap()
-        
-        sleep(1)
-        
-        // Fill name field using accessibility identifier
         let nameField = app.textFields["addItem.nameField"]
-        XCTAssertTrue(nameField.waitForExistence(timeout: 3), "Name field should exist")
+        XCTAssertTrue(nameField.waitForExistence(timeout: 3))
         nameField.tap()
         nameField.typeText("UI Test Banana")
         
-        // Wait for location to auto-select and save button to become enabled
-        // The form needs both a name and a location before enabling the save button
         let saveBtn = app.buttons["addItem.saveButton"]
-        XCTAssertTrue(saveBtn.waitForExistence(timeout: 3), "Save button should exist")
+        _ = saveBtn.waitForExistence(timeout: 5)
+        XCTAssertTrue(saveBtn.isEnabled, "Save button should be enabled")
+        saveBtn.safeTap()
         
-        // Wait for save button to become enabled (location should auto-select)
-        let saveBtnEnabled = saveBtn.waitForExistence(timeout: 5) && saveBtn.isEnabled
-        if !saveBtnEnabled {
-            // If still disabled after 5s, wait a bit longer for location to load
-            sleep(2)
-        }
-        
-        XCTAssertTrue(saveBtn.isEnabled, "Save button should be enabled after location auto-select")
-        saveBtn.tap()
-        
-        sleep(2)
-        
-        // Verify still on inventory
-        XCTAssertTrue(inventoryList.exists, "Should return to inventory list")
+        // THEN: Should return to inventory
+        XCTAssertTrue(inventoryPage.inventoryList.waitForExistence(timeout: 3))
     }
     
     func test03_InventoryQuantity_IncrementAndDecrement() throws {
-        loginTestUser()
-        skipOnboardingIfNeeded()
+        // GIVEN: User is logged in
+        loginAsTestUser()
         
-        sleep(2)
-        
-        // Find seeded milk item (should have ID from seed)
+        // WHEN: Incrementing first item
         let incrementButtons = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'inventory.increment'"))
-        let decrementButtons = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'inventory.decrement'"))
-        
         if incrementButtons.count > 0 {
-            // Test increment
-            let incrementBtn = incrementButtons.element(boundBy: 0)
-            incrementBtn.tap()
-            sleep(1)
+            incrementButtons.element(boundBy: 0).safeTap()
             
-            // Test decrement
+            // AND: Decrementing
+            let decrementButtons = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'inventory.decrement'"))
             if decrementButtons.count > 0 {
-                let decrementBtn = decrementButtons.element(boundBy: 0)
-                decrementBtn.tap()
-                sleep(1)
+                decrementButtons.element(boundBy: 0).safeTap()
             }
         }
         
-        // Verify inventory still exists
-        XCTAssertTrue(app.otherElements["inventory.list"].exists)
+        // THEN: Inventory still exists
+        XCTAssertTrue(inventoryPage.inventoryList.exists)
     }
     
     func test04_NavigateToGroceryTab() throws {
-        loginTestUser()
-        skipOnboardingIfNeeded()
+        // GIVEN: User is logged in
+        loginAsTestUser()
         
-        sleep(2)
+        // WHEN: Navigating to grocery
+        groceryPage.navigateToGrocery()
         
-        // Find grocery tab button
-        let groceryTab = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'grocery'")).firstMatch
-        XCTAssertTrue(groceryTab.waitForExistence(timeout: 5))
-        groceryTab.tap()
-        
-        sleep(1)
-        
-        // Verify on grocery view (look for common elements)
+        // THEN: On grocery view
         XCTAssertTrue(app.exists)
     }
     
     func test05_NavigateToCheckoutTab() throws {
-        loginTestUser()
-        skipOnboardingIfNeeded()
+        // GIVEN: User is logged in
+        loginAsTestUser()
         
-        sleep(2)
+        // WHEN: Navigating to checkout
+        navigateToTab("checkout")
         
-        // Find checkout tab
-        let checkoutTab = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'checkout' OR label CONTAINS[c] 'history'")).firstMatch
-        if checkoutTab.waitForExistence(timeout: 5) {
-            checkoutTab.tap()
-            sleep(1)
-        }
-        
+        // THEN: View exists
         XCTAssertTrue(app.exists)
     }
     
     func test06_NavigateToSettings_AndSignOut() throws {
-        loginTestUser()
-        skipOnboardingIfNeeded()
+        // GIVEN: User is logged in
+        loginAsTestUser()
         
-        sleep(2)
+        // WHEN: Opening settings and signing out
+        settingsPage.openSettings()
+        settingsPage.assertAtSettings()
+        settingsPage.signOut()
         
-        // Navigate to settings
-        let settingsTab = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'settings'")).firstMatch
-        XCTAssertTrue(settingsTab.waitForExistence(timeout: 5))
-        settingsTab.tap()
-        
-        sleep(1)
-        
-        // Find and tap sign out
-        let signOutBtn = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'sign out'")).firstMatch
-        XCTAssertTrue(signOutBtn.waitForExistence(timeout: 3))
-        signOutBtn.tap()
-        
-        // Should return to login
-        sleep(2)
-        let continueBtn = app.buttons["login.continueWithEmailButton"]
-        XCTAssertTrue(continueBtn.waitForExistence(timeout: 5), "Should return to login screen")
+        // THEN: Should return to login
+        loginPage.assertAtLoginScreen()
     }
     
     func test07_SearchInventory() throws {
-        loginTestUser()
-        skipOnboardingIfNeeded()
+        // GIVEN: User is logged in
+        loginAsTestUser()
         
-        sleep(2)
+        // WHEN: Searching for milk
+        inventoryPage.searchFor("milk")
         
-        // Find search field
-        let searchField = app.searchFields.firstMatch
-        if searchField.waitForExistence(timeout: 5) {
-            searchField.tap()
-            searchField.typeText("milk")
-            sleep(1)
-            
-            // Clear search
-            let clearBtn = searchField.buttons["Clear text"]
-            if clearBtn.exists {
-                clearBtn.tap()
-            }
-        }
+        // AND: Clearing search
+        inventoryPage.clearSearch()
         
-        XCTAssertTrue(app.otherElements["inventory.list"].exists)
+        // THEN: Inventory still visible
+        XCTAssertTrue(inventoryPage.inventoryList.exists)
     }
     
     func test08_PullToRefresh() throws {
-        loginTestUser()
-        skipOnboardingIfNeeded()
+        // GIVEN: User is logged in
+        loginAsTestUser()
         
-        sleep(2)
+        // WHEN: Pull to refresh
+        inventoryPage.pullToRefresh()
         
-        let inventoryList = app.otherElements["inventory.list"]
-        XCTAssertTrue(inventoryList.exists)
-        
-        // Perform pull-to-refresh gesture
-        let start = inventoryList.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2))
-        let end = inventoryList.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
-        start.press(forDuration: 0, thenDragTo: end)
-        
-        sleep(2)
-        
-        XCTAssertTrue(inventoryList.exists)
+        // THEN: Inventory still visible
+        _ = inventoryPage.inventoryList.waitForExistence(timeout: 3)
+        XCTAssertTrue(inventoryPage.inventoryList.exists)
     }
     
-    func test09_FullUserFlow_AddEditNavigate() throws {
-        // 1. Login
-        loginTestUser()
-        skipOnboardingIfNeeded()
+    func test09_Registration_CreateNewAccount() throws {
+        // GIVEN: At login screen
         
-        let inventoryList = app.otherElements["inventory.list"]
-        XCTAssertTrue(inventoryList.waitForExistence(timeout: 5))
-        
-        // 2. Add item
-        app.buttons["inventory.addButton"].tap()
-        sleep(1)
-        
-        let nameFields = app.textFields.matching(NSPredicate(format: "placeholderValue CONTAINS[c] 'name'"))
-        if nameFields.count > 0 {
-            nameFields.firstMatch.tap()
-            nameFields.firstMatch.typeText("Full Flow Test Item")
-            app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'save'")).firstMatch.tap()
-            sleep(2)
-        }
-        
-        // 3. Navigate to Grocery
-        app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'grocery'")).firstMatch.tap()
-        sleep(1)
-        
-        // 4. Navigate to Settings
-        app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'settings'")).firstMatch.tap()
-        sleep(1)
-        
-        // 5. Sign out
-        app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'sign out'")).firstMatch.tap()
-        sleep(2)
-        
-        // 6. Verify back at login
-        XCTAssertTrue(app.buttons["login.continueWithEmailButton"].waitForExistence(timeout: 5))
-    }
-    
-    func test10_Registration_CreateNewAccount() throws {
-        // Tap continue with email
-        let continueBtn = app.buttons["login.continueWithEmailButton"]
-        XCTAssertTrue(continueBtn.waitForExistence(timeout: 5))
-        continueBtn.tap()
-        
-        sleep(1)
-        
-        // Toggle to registration mode
-        let registerToggle = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'register'")).firstMatch
-        if registerToggle.exists {
-            registerToggle.tap()
-            sleep(1)
-        }
-        
-        // Fill registration form
-        let firstNameField = app.textFields["login.firstNameField"]
-        if firstNameField.waitForExistence(timeout: 2) {
-            firstNameField.tap()
-            firstNameField.typeText("Test")
-            
-            app.textFields["login.lastNameField"].tap()
-            app.textFields["login.lastNameField"].typeText("UIUser")
-        }
-        
-        let emailField = app.textFields["login.emailField"]
-        emailField.tap()
+        // WHEN: Registering with new account
         let randomEmail = "uitest\(Int.random(in: 10000...99999))@test.com"
-        emailField.typeText(randomEmail)
+        loginPage.registerWithEmail(randomEmail, password: "Test123!", firstName: "Test", lastName: "UIUser")
         
-        let passwordField = app.secureTextFields["login.passwordField"]
-        passwordField.tap()
-        passwordField.typeText("Test123!")
-        
-        // Submit
-        let registerBtn = app.buttons["login.registerButton"]
-        if registerBtn.waitForExistence(timeout: 2) {
-            registerBtn.tap()
-            
-            sleep(3)
-            
-            // Should reach onboarding or inventory
-            XCTAssertTrue(
-                app.buttons["onboarding.skipButton"].waitForExistence(timeout: 5) ||
-                app.otherElements["inventory.list"].exists
-            )
-        }
+        // THEN: Should reach onboarding or inventory
+        let onboarded = waitForAnyElement([
+            app.buttons["onboarding.skipButton"],
+            inventoryPage.inventoryList
+        ], timeout: 5)
+        XCTAssertNotNil(onboarded, "Should reach onboarding or inventory after registration")
     }
 }
