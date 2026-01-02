@@ -46,8 +46,8 @@ struct SettingsView: View {
                                     Text(user.displayName)
                                         .font(.headline)
                                     
-                                    // Premium Badge
-                                    if authViewModel.currentHousehold?.isPremium == true {
+                                    // Premium/Free Badge
+                                    if authViewModel.currentHousehold?.isPremiumActive == true {
                                         Text("Premium")
                                             .font(.caption2)
                                             .fontWeight(.semibold)
@@ -61,6 +61,15 @@ struct SettingsView: View {
                                                     endPoint: .trailing
                                                 )
                                             )
+                                            .cornerRadius(6)
+                                    } else {
+                                        Text("Free")
+                                            .font(.caption2)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.secondary)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(Color(.systemGray5))
                                             .cornerRadius(6)
                                     }
                                 }
