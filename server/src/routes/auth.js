@@ -20,16 +20,16 @@ router.post('/apple', async (req, res) => {
 router.post('/register', async (req, res) => {
     try {
         const { email, password, firstName, lastName, name } = req.body;
-        
+
         // Validate required fields
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
-        
+
         // Support both new (firstName/lastName) and legacy (name) formats
         let finalFirstName = firstName || '';
         let finalLastName = lastName || '';
-        
+
         if (name && !firstName && !lastName) {
             const nameParts = name.trim().split(/\s+/);
             finalFirstName = nameParts[0] || '';
@@ -49,12 +49,12 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        
+
         // Validate required fields
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
-        
+
         const result = await authService.loginUser(email, password);
         res.json(result);
     } catch (error) {
@@ -98,7 +98,7 @@ router.post('/household/invite', authenticateToken, (req, res) => {
     } catch (error) {
         console.error('Generate invite error:', error);
         if (error.code === 'PREMIUM_REQUIRED') {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 error: error.message,
                 code: 'PREMIUM_REQUIRED',
                 upgradeRequired: true
@@ -124,11 +124,11 @@ router.get('/household/invite/:code', (req, res) => {
 router.post('/household/join', authenticateToken, (req, res) => {
     try {
         const { code } = req.body;
-        
+
         if (!code) {
             return res.status(400).json({ error: 'Invite code is required' });
         }
-        
+
         const result = householdService.joinHousehold(req.user.id, code);
         res.json(result);
     } catch (error) {

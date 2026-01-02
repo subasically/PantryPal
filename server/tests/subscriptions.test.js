@@ -154,7 +154,7 @@ describe('Subscriptions API', () => {
         it('should detect expired Premium subscriptions', async () => {
             // Activate Premium with expired date
             const expiredDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(); // Yesterday
-            
+
             await request(app)
                 .post('/api/subscriptions/validate')
                 .set('Authorization', `Bearer ${authToken}`)

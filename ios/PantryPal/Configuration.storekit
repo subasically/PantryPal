@@ -1,0 +1,119 @@
+{
+  "identifier" : "9A8F4B3E",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6739538603",
+    "_developerTeamID" : "WJ5BP82B27",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 757470960.55838299,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21548829",
+      "localizations" : [
+
+      ],
+      "name" : "Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6739539030",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlimited items and household sharing",
+              "displayName" : "PantryPal Premium Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.pantrypal.premium.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "PantryPal Premium Monthly",
+          "subscriptionGroupID" : "21548829",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6746959479",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlimited items and household sharing",
+              "displayName" : "PantryPal Premium Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.pantrypal.premium.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "PantryPal Premium Annual",
+          "subscriptionGroupID" : "21548829",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

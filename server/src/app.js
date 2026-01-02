@@ -25,17 +25,17 @@ function createApp() {
     app.use(cors());
     app.use(express.json());
     app.use(requestLogger); // Log all HTTP requests
-    
+
     // Apply general rate limiter to all API routes (except health check)
     app.use('/api', generalLimiter);
 
     // Routes with specific rate limiters
     app.use('/api/auth', authLimiter, authRoutes);
-    
+
     // Apply UPC lookup rate limiter before product routes
     app.use('/api/products/lookup', upcLookupLimiter);
     app.use('/api/products', productRoutes);
-    
+
     // Other routes (general limiter already applied above)
     app.use('/api/inventory', inventoryRoutes);
     app.use('/api/locations', locationsRoutes);
@@ -44,14 +44,14 @@ function createApp() {
     app.use('/api/sync', syncRoutes);
     app.use('/api/grocery', groceryRoutes);
     app.use('/api/subscriptions', subscriptionsRoutes);
-    
+
     // Test endpoints (only in non-production)
     if (process.env.NODE_ENV !== 'production' || process.env.ALLOW_TEST_ENDPOINTS === 'true') {
         const testRoutes = require('./routes/test');
         app.use('/api/test', testRoutes);
         logger.warn('⚠️  [DEV] Test endpoints enabled at /api/test');
     }
-    
+
     // Admin routes (DEV/TEST ONLY - protected by env var)
     if (process.env.ENABLE_ADMIN_ROUTES === 'true') {
         const adminRoutes = require('./routes/admin');

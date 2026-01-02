@@ -28,7 +28,7 @@ router.post('/validate', authenticateToken, (req, res) => {
 
         // Get user's household
         const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
-        
+
         if (!user) {
             logger.error(`❌ [StoreKit] User not found: ${userId}`);
             return res.status(404).json({ error: 'User not found' });
@@ -132,21 +132,21 @@ router.get('/status', authenticateToken, (req, res) => {
 
         // Check if Premium is still active (handle expiration)
         let isPremiumActive = Boolean(result.is_premium);
-        
+
         if (isPremiumActive && result.premium_expires_at) {
             const expiresAt = new Date(result.premium_expires_at);
             const now = new Date();
-            
+
             if (expiresAt < now) {
                 // Premium has expired - update in database
                 logger.info(`⏰ [Premium] Subscription expired for household ${result.household_id}`);
-                
+
                 db.prepare(`
                     UPDATE households 
                     SET is_premium = 0 
                     WHERE id = ?
                 `).run(result.household_id);
-                
+
                 isPremiumActive = false;
             }
         }

@@ -13,12 +13,12 @@ function createDefaultLocations(householdId) {
         { name: 'Freezer', sortOrder: 2 },
         { name: 'Other', sortOrder: 3 }
     ];
-    
+
     const insertLocation = db.prepare(`
         INSERT INTO locations (id, household_id, name, parent_id, level, sort_order, created_at, updated_at)
         VALUES (?, ?, ?, NULL, 0, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `);
-    
+
     defaultLocations.forEach(loc => {
         insertLocation.run(uuidv4(), householdId, loc.name, loc.sortOrder);
     });
@@ -38,20 +38,20 @@ function createHousehold(userId, name = 'My Household') {
     }
 
     const householdId = uuidv4();
-    
+
     const transaction = db.transaction(() => {
         // Create household
         db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(householdId, name);
-        
+
         // Update user
         db.prepare('UPDATE users SET household_id = ? WHERE id = ?').run(householdId, userId);
-        
+
         // Create default locations
         createDefaultLocations(householdId);
     });
-    
+
     transaction();
-    
+
     return {
         id: householdId,
         name,
@@ -80,15 +80,15 @@ function generateInviteCode(householdId, userId) {
     for (let i = 0; i < 6; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    
+
     const id = uuidv4();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
-    
+
     db.prepare(`
         INSERT INTO invite_codes (id, household_id, code, created_by, expires_at)
         VALUES (?, ?, ?, ?, ?)
     `).run(id, householdId, code, userId, expiresAt);
-    
+
     return {
         code,
         expiresAt,
@@ -108,14 +108,14 @@ function validateInviteCode(code) {
         JOIN households h ON ic.household_id = h.id
         WHERE ic.code = ? AND ic.used_by IS NULL AND ic.expires_at > datetime('now')
     `).get(code.toUpperCase());
-    
+
     if (!invite) {
         throw new Error('Invalid or expired invite code');
     }
-    
+
     // Count household members
     const memberCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?').get(invite.household_id);
-    
+
     return {
         valid: true,
         householdId: invite.household_id,
@@ -136,21 +136,21 @@ function joinHousehold(userId, code) {
         SELECT * FROM invite_codes
         WHERE code = ? AND used_by IS NULL AND expires_at > datetime('now')
     `).get(code.toUpperCase());
-    
+
     if (!invite) {
         throw new Error('Invalid or expired invite code');
     }
-    
+
     // Update user's household
     db.prepare('UPDATE users SET household_id = ?, updated_at = ? WHERE id = ?')
         .run(invite.household_id, new Date().toISOString(), userId);
-    
+
     // Mark invite as used
     db.prepare('UPDATE invite_codes SET used_by = ?, used_at = ? WHERE id = ?')
         .run(userId, new Date().toISOString(), invite.id);
-    
+
     const household = db.prepare('SELECT * FROM households WHERE id = ?').get(invite.household_id);
-    
+
     return {
         success: true,
         household: {
@@ -172,7 +172,7 @@ function getHouseholdMembers(householdId) {
         WHERE household_id = ?
         ORDER BY created_at ASC
     `).all(householdId);
-    
+
     return members.map(m => ({
         id: m.id,
         email: m.email,
@@ -195,7 +195,7 @@ function getActiveInviteCodes(householdId) {
         WHERE household_id = ? AND used_by IS NULL AND expires_at > datetime('now')
         ORDER BY created_at DESC
     `).all(householdId);
-    
+
     return invites;
 }
 
@@ -218,25 +218,25 @@ function resetHouseholdData(householdId, userId) {
     const transaction = db.transaction(() => {
         const invResult = deleteInventory.run(householdId);
         console.log(`🗑️ [Reset] Deleted ${invResult.changes} inventory items`);
-        
+
         const histResult = deleteHistory.run(householdId);
         console.log(`🗑️ [Reset] Deleted ${histResult.changes} history records`);
-        
+
         const prodResult = deleteCustomProducts.run(householdId);
         console.log(`🗑️ [Reset] Deleted ${prodResult.changes} custom products`);
-        
+
         const locResult = deleteLocations.run(householdId);
         console.log(`🗑️ [Reset] Deleted ${locResult.changes} locations`);
-        
+
         const groceryResult = deleteGrocery.run(householdId);
         console.log(`🗑️ [Reset] Deleted ${groceryResult.changes} grocery items`);
-        
+
         const syncResult = deleteSyncLog.run(householdId);
         console.log(`🗑️ [Reset] Deleted ${syncResult.changes} sync log entries`);
-        
+
         const inviteResult = deleteInviteCodes.run(householdId);
         console.log(`🗑️ [Reset] Deleted ${inviteResult.changes} invite codes`);
-        
+
         // Re-seed default locations so the app isn't empty
         createDefaultLocations(householdId);
         console.log(`🗑️ [Reset] Re-created default locations`);
