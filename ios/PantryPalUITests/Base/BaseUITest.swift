@@ -79,6 +79,13 @@ class BaseUITest: XCTestCase {
     
     /// Sign out if currently logged in
     func signOutIfLoggedIn() {
+        // Check if we're already at login screen
+        let loginBtn = app.buttons["login.continueWithEmailButton"]
+        if loginBtn.exists {
+            return // Already logged out
+        }
+        
+        // Try to navigate to settings and sign out
         let settingsBtn = app.buttons["settings.button"]
         if settingsBtn.waitForExistence(timeout: 2) {
             settingsBtn.tap()
@@ -86,6 +93,9 @@ class BaseUITest: XCTestCase {
             let signOutBtn = app.buttons["settings.signOutButton"]
             if signOutBtn.waitForExistence(timeout: 2) {
                 signOutBtn.tap()
+                
+                // Wait for login screen to appear
+                _ = loginBtn.waitForExistence(timeout: 5)
             }
         }
     }

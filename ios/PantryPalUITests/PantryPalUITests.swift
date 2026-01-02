@@ -48,12 +48,10 @@ final class PantryPalUITests: BaseUITest {
         loginPage.assertAtLoginScreen()
         
         // WHEN: Logging in with valid credentials
-        loginPage.loginWithEmail("test@pantrypal.com", password: "Test123!")
+        loginAsTestUser()
         
-        // THEN: Should reach main screen
-        skipOnboardingIfNeeded()
-        waitForMainScreen()
-        XCTAssertTrue(inventoryPage.inventoryList.exists)
+        // THEN: Should reach main screen and see inventory
+        XCTAssertTrue(inventoryPage.inventoryList.exists, "Inventory list should be visible after login")
     }
     
     func test02_AddCustomItem_Success() throws {
