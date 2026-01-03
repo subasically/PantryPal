@@ -44,8 +44,8 @@ final class PantryPalUITests: BaseUITest {
     // MARK: - Test Cases (Refactored with Page Objects)
     
     func test01_LoginWithEmail_Success() throws {
-        // GIVEN: At login screen (tearDown should have logged us out)
-        XCTAssertTrue(loginPage.continueWithEmailButton.exists, "Should be at login screen")
+        // GIVEN: At login screen (wait for it to appear after splash)
+        XCTAssertTrue(loginPage.continueWithEmailButton.waitForExistence(timeout: 5), "Should be at login screen")
         
         // WHEN: Logging in with valid credentials
         loginAsTestUser()
