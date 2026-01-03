@@ -85,24 +85,17 @@ class BaseUITest: XCTestCase {
             return // Already logged out
         }
         
-        // Try to find Sign Out button (could be in navigation bar or settings)
-        let signOutButtons = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'sign out'"))
-        
-        // Case 1: Sign Out button directly visible (household setup, settings)
-        if signOutButtons.count > 0 && signOutButtons.firstMatch.exists {
-            signOutButtons.firstMatch.tap()
-            _ = loginBtn.waitForExistence(timeout: 5)
-            return
-        }
-        
-        // Case 2: Need to navigate to settings first (inventory screen)
+        // Navigate to settings first - settings button is visible from all main screens
         let settingsBtn = app.buttons["settings.button"]
         if settingsBtn.waitForExistence(timeout: 2) {
             settingsBtn.tap()
             
-            // Now look for sign out button in settings
-            if signOutButtons.count > 0 && signOutButtons.firstMatch.waitForExistence(timeout: 2) {
-                signOutButtons.firstMatch.tap()
+            // Tap the Sign Out button in settings
+            let signOutBtn = app.buttons["settings.signOutButton"]
+            if signOutBtn.waitForExistence(timeout: 2) {
+                signOutBtn.tap()
+                
+                // Wait for login screen to appear
                 _ = loginBtn.waitForExistence(timeout: 5)
             }
         }
