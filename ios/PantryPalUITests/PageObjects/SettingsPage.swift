@@ -26,6 +26,10 @@ struct SettingsPage {
     
     func signOut() {
         signOutButton.safeTap()
+        
+        // Wait for login screen to appear
+        let loginBtn = app.buttons["login.continueWithEmailButton"]
+        _ = loginBtn.waitForExistence(timeout: 5)
     }
     
     func deleteHouseholdData() {
