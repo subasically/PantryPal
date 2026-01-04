@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 enum PaywallReason {
     case itemLimit
@@ -9,7 +10,9 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthViewModel.self) private var authViewModel
     @EnvironmentObject private var confettiCenter: ConfettiCenter
+    @StateObject private var storeKit = StoreKitService.shared
     @State private var isLoading = false
+    @State private var errorMessage: String?
     @State private var showDebugAlert = false
     @State private var debugErrorMessage: String?
     
@@ -72,19 +75,22 @@ struct PaywallView: View {
                 VStack(spacing: 16) {
                     // Yearly (Primary)
                     Button(action: {
-                        isLoading = true
-                        // TODO: Implement In-App Purchase
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            isLoading = false
+                        Task {
+                            await purchaseProduct(storeKit.annualProduct)
                         }
                     }) {
                         VStack(spacing: 4) {
-                            Text("Subscribe for $49.99/year")
-                                .font(.headline)
-                            Text("Save 17% • Best Value")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .opacity(0.9)
+                            if let annual = storeKit.annualProduct {
+                                Text("Subscribe for \(annual.displayPrice)/year")
+                                    .font(.headline)
+                                Text("Save 17% • Best Value")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .opacity(0.9)
+                            } else {
+                                Text("Loading...")
+                                    .font(.headline)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -92,27 +98,31 @@ struct PaywallView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                     }
-                    .disabled(isLoading)
+                    .disabled(isLoading || storeKit.annualProduct == nil)
                     
                     // Monthly (Secondary)
                     Button(action: {
-                        isLoading = true
-                        // TODO: Implement In-App Purchase
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            isLoading = false
+                        Task {
+                            await purchaseProduct(storeKit.monthlyProduct)
                         }
                     }) {
                         VStack(spacing: 4) {
-                            Text("Subscribe for $4.99/month")
-                                .font(.headline)
-                                .foregroundColor(.primary)
+                            if let monthly = storeKit.monthlyProduct {
+                                Text("Subscribe for \(monthly.displayPrice)/month")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                            } else {
+                                Text("Loading...")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color(uiColor: .secondarySystemBackground))
                         .cornerRadius(12)
                     }
-                    .disabled(isLoading)
+                    .disabled(isLoading || storeKit.monthlyProduct == nil)
                     
                     Text("No ads. No tracking. Cancel anytime.")
                         .font(.caption2)
@@ -120,10 +130,8 @@ struct PaywallView: View {
                         .padding(.top, 4)
                     
                     Button("Restore Purchases") {
-                        isLoading = true
-                        // TODO: Implement Restore
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            isLoading = false
+                        Task {
+                            await restorePurchases()
                         }
                     }
                     .font(.caption)
@@ -165,6 +173,15 @@ struct PaywallView: View {
                 }
                 #endif
             }
+            .alert("Error", isPresented: .constant(errorMessage != nil)) {
+                Button("OK") {
+                    errorMessage = nil
+                }
+            } message: {
+                if let error = errorMessage {
+                    Text(error)
+                }
+            }
             .alert("Debug Error", isPresented: .constant(debugErrorMessage != nil)) {
                 Button("OK") {
                     debugErrorMessage = nil
@@ -179,6 +196,81 @@ struct PaywallView: View {
                     ConfettiOverlay()
                 }
             }
+            .task {
+                // Load products when view appears
+                do {
+                    try await storeKit.loadProducts()
+                } catch {
+                    errorMessage = "Failed to load products: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    // MARK: - Purchase Methods
+    
+    private func purchaseProduct(_ product: StoreKit.Product?) async {
+        guard let product = product else {
+            errorMessage = "Product not available"
+            return
+        }
+        
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            let transaction = try await storeKit.purchase(product)
+            
+            if transaction != nil {
+                // Purchase successful - refresh user data
+                await authViewModel.refreshCurrentUser()
+                
+                // Show success with confetti
+                confettiCenter.celebrate()
+                ToastCenter.shared.show(
+                    message: "Welcome to Premium! 🎉",
+                    type: .success
+                )
+                
+                // Dismiss after celebration starts
+                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+                dismiss()
+            }
+            // If transaction is nil, user cancelled - no error needed
+        } catch {
+            if let storeError = error as? StoreError {
+                errorMessage = storeError.errorDescription
+            } else {
+                errorMessage = "Purchase failed: \(error.localizedDescription)"
+            }
+        }
+    }
+    
+    private func restorePurchases() async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            try await storeKit.restorePurchases()
+            
+            // Refresh user data to get updated premium status
+            await authViewModel.refreshCurrentUser()
+            
+            // Check if user is now premium
+            if authViewModel.currentHousehold?.isPremiumActive == true {
+                ToastCenter.shared.show(
+                    message: "Purchases restored successfully!",
+                    type: .success
+                )
+                dismiss()
+            } else {
+                ToastCenter.shared.show(
+                    message: "No active subscriptions found",
+                    type: .info
+                )
+            }
+        } catch {
+            errorMessage = "Failed to restore purchases: \(error.localizedDescription)"
         }
     }
     

@@ -42,8 +42,10 @@ final class APIService: Sendable {
             print("🧪 [APIService] Using test server: \(testBaseURL)")
         }
         
-        // Load token from keychain/userdefaults
-        token = UserDefaults.standard.string(forKey: "authToken")
+        // Don't load token during UI testing (will be cleared by AppDelegate anyway)
+        if !CommandLine.arguments.contains("--uitesting") {
+            token = UserDefaults.standard.string(forKey: "authToken")
+        }
     }
     
     func setBaseURL(_ url: String) {
