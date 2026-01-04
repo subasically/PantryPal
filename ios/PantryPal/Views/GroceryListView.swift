@@ -112,37 +112,15 @@ struct GroceryListView: View {
                 .fontWeight(.semibold)
             
             if isPremium {
-                VStack(spacing: 8) {
-                    Text("PantryPal will auto-add items to your Grocery List when you run out.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                }
+                Text("PantryPal will auto-add items to your Grocery List when you run out.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
             } else {
-                VStack(spacing: 12) {
-                    Text("Add items manually, or upgrade to Premium to auto-add them when you run out.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                    
-                    Button {
-                        // Trigger paywall
-                        NotificationCenter.default.post(name: .showPaywall, object: nil)
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "star.fill")
-                                .font(.caption)
-                            Text("Auto-add is a Premium feature")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color.ppPurple)
-                        .clipShape(Capsule())
-                    }
-                }
+                Text("Add items manually, or upgrade to Premium to auto-add them when you run out.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
             }
             
             Button {

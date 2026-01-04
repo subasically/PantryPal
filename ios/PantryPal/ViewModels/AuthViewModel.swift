@@ -46,9 +46,12 @@ final class AuthViewModel {
     }
     
     var canUseBiometricLogin: Bool {
-        biometricService.isBiometricAvailable && 
-        biometricService.isBiometricLoginEnabled && 
-        biometricService.hasStoredCredentials
+        // Disable biometric login during UI testing
+        guard !CommandLine.arguments.contains("--uitesting") else { return false }
+        
+        return biometricService.isBiometricAvailable && 
+               biometricService.isBiometricLoginEnabled && 
+               biometricService.hasStoredCredentials
     }
     
     var hasPendingCredentials: Bool {

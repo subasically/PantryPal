@@ -107,6 +107,25 @@
   - ⏸️ WebSocket: Best latency, 2-3 days, high complexity
   - Decision: Validate polling is sufficient before upgrading
 
+### Data Integrity & Conflict Resolution
+- [ ] **Concurrent Scan Race Condition:**
+  - [ ] Issue: Two users scanning same item simultaneously can create duplicate entries
+  - [ ] Current: "Last check wins" - if both pass existence check, both INSERT
+  - [ ] Mitigation: 60s sync + action sync helps reconcile
+  - [ ] Solutions to evaluate:
+    - [ ] Database-level UNIQUE constraint on (product_id, expiration_date, location_id, household_id)
+    - [ ] Use UPSERT (INSERT OR REPLACE) instead of SELECT + INSERT/UPDATE
+    - [ ] Optimistic locking with version numbers
+    - [ ] Advisory locks during inventory add operation
+  - [ ] Priority: Low (edge case, auto-reconciles via sync)
+- [ ] **Offline Conflict Resolution:**
+  - [ ] Handle conflicting edits to same item from different devices
+  - [ ] Conflict resolution strategies: Last-write-wins vs merge vs user prompt
+  - [ ] Visual indicator for conflicted items
+- [ ] **Delete Cascading:**
+  - [ ] Validate all foreign key relationships handle deletes properly
+  - [ ] Test household deletion with active inventory/grocery items
+
 ### Push Notifications
 - [ ] Push notification setup (APNs)
 - [ ] Device token registration
@@ -146,7 +165,31 @@
   - [ ] Optional: Price tracking per item
   - [ ] Error handling: Manual entry fallback for OCR failures
   - [ ] Privacy: Process receipts on-device, no cloud storage
-- [ ] Recipe suggestions based on inventory
+- [ ] **Recipe Feature:**
+  - [ ] Recipe database (stored per household)
+  - [ ] Recipe CRUD (create, read, update, delete)
+  - [ ] Recipe fields: name, ingredients list (with quantities), instructions, servings, prep time, cook time
+  - [ ] Link recipes to inventory items (ingredient matching)
+  - [ ] Recipe suggestions based on current inventory
+  - [ ] "Can I make this?" indicator (shows missing ingredients)
+  - [ ] Add missing ingredients to grocery list from recipe
+  - [ ] **Custom Favorite Recipes:**
+    - [ ] User-defined recipe collections
+    - [ ] Pre-loaded recipe templates (optional): Bosnian cuisine (pita, grah, čorba, etc.)
+    - [ ] Category/tag system for recipes (e.g., "Bosnian", "Quick Meals", "Comfort Food")
+    - [ ] Recipe sharing within household
+    - [ ] Photo upload for recipes
+    - [ ] Notes/variations field
+  - [ ] **AI-Assisted Recipe Generation (Optional):**
+    - [ ] User settings: Enable AI features + Bring Your Own Key (BYOK)
+    - [ ] Secure API key storage (encrypted in user settings)
+    - [ ] Generate recipes from inventory items using GPT API
+    - [ ] AI recipe refinement (adjust servings, dietary restrictions, etc.)
+    - [ ] Smart ingredient substitution suggestions
+    - [ ] Cultural/regional recipe adaptations (e.g., "Make this Bosnian-style")
+    - [ ] Recipe translation to other languages
+    - [ ] Privacy: API calls made directly from user's device with their key
+    - [ ] Fallback: Works offline/without API key for manual recipe entry
 - [ ] Nutrition information
 - [ ] Barcode scan history
 - [ ] Product image display (from UPC API)
