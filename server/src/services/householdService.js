@@ -27,14 +27,23 @@ function createDefaultLocations(householdId) {
 /**
  * Create a new household
  * @param {string} userId - User ID
- * @param {string} name - Household name
+ * @param {string} name - Household name (optional, defaults to "<Last Name> Household" or "My Household")
  * @returns {Object} { id, name, isPremium }
  */
-function createHousehold(userId, name = 'My Household') {
+function createHousehold(userId, name) {
     // Check if user already has a household
-    const user = db.prepare('SELECT household_id FROM users WHERE id = ?').get(userId);
+    const user = db.prepare('SELECT household_id, last_name FROM users WHERE id = ?').get(userId);
     if (user.household_id) {
         throw new Error('User already belongs to a household');
+    }
+
+    // Generate default name if not provided
+    if (!name) {
+        if (user.last_name) {
+            name = `${user.last_name} Household`;
+        } else {
+            name = 'My Household';
+        }
     }
 
     const householdId = uuidv4();

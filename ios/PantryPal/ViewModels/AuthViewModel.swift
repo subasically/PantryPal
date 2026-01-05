@@ -90,6 +90,14 @@ final class AuthViewModel {
             
             // Load full household info (for premium status)
             await loadCurrentUser()
+            
+            // Auto-create household if user doesn't have one
+            if currentHousehold == nil {
+                await completeHouseholdSetup()
+            }
+            
+            // Always show household setup to give user choice (or retry if creation failed)
+            showHouseholdSetup = true
         } catch let error as APIError {
             errorMessage = error.userFriendlyMessage
         } catch {
@@ -128,6 +136,14 @@ final class AuthViewModel {
             
             // Load full household info
             await loadCurrentUser()
+            
+            // Auto-create household if user doesn't have one
+            if currentHousehold == nil {
+                await completeHouseholdSetup()
+            }
+            
+            // Always show household setup to give user choice (or retry if creation failed)
+            showHouseholdSetup = true
         } catch let error as APIError {
             errorMessage = error.userFriendlyMessage
         } catch {
@@ -180,6 +196,14 @@ final class AuthViewModel {
                 
                 // Load full household info
                 await loadCurrentUser()
+                
+                // Auto-create household if user doesn't have one
+                if currentHousehold == nil {
+                    await completeHouseholdSetup()
+                }
+                
+                // Always show household setup to give user choice (or retry if creation failed)
+                showHouseholdSetup = true
             } catch let error as APIError {
                 print("Apple Sign In API Error: \(error.localizedDescription)")
                 errorMessage = error.userFriendlyMessage
@@ -272,15 +296,15 @@ final class AuthViewModel {
                 await loadCurrentUser()
             } catch {
                 print("❌ [AuthViewModel] Failed to create household: \(error)")
-                errorMessage = error.userFriendlyMessage
-                // Don't return here - still complete setup even if creation failed
+                errorMessage = "Failed to create household. Please try again or contact support."
+                // Return early if creation failed - don't dismiss setup screen
+                return
             }
         }
         
         print("✅ [AuthViewModel] Household setup completed, user household: \(currentHousehold?.id ?? "nil")")
         
-        // Set this AFTER loadCurrentUser to prevent it from being overridden
-        showHouseholdSetup = false
+        // Don't auto-dismiss - let user choose to join existing or continue with created household
     }
     
     func logout() {

@@ -22,7 +22,7 @@ struct HouseholdSetupView: View {
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
                     
-                    Text("Set up your pantry to start tracking items.")
+                    Text("Create your own household or join an existing one.")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -32,12 +32,13 @@ struct HouseholdSetupView: View {
                 
                 // Options
                 VStack(spacing: 20) {
-                    // Option 1: Create New (Default)
+                    // Option 1: Create Household (Primary)
                     Button {
                         Task {
                             isCreating = true
                             await authViewModel.completeHouseholdSetup()
                             isCreating = false
+                            authViewModel.showHouseholdSetup = false
                         }
                     } label: {
                         VStack(alignment: .leading, spacing: 8) {
@@ -45,17 +46,16 @@ struct HouseholdSetupView: View {
                                 if isCreating {
                                     ProgressView()
                                         .tint(.white)
-                                        .padding(.trailing, 4)
                                 } else {
-                                    Image(systemName: "plus.square.fill")
+                                    Image(systemName: "house.fill")
                                         .font(.title2)
                                         .foregroundColor(.white)
                                 }
-                                Text(isCreating ? "Creating..." : "Start using PantryPal")
+                                Text("Create my Household")
                                     .font(.headline)
                                     .foregroundColor(.white)
                             }
-                            Text("Start a new pantry for yourself or your household.")
+                            Text("Start using your pantry right away.")
                                 .font(.caption)
                                 .foregroundColor(.white.opacity(0.8))
                                 .multilineTextAlignment(.leading)
@@ -64,7 +64,6 @@ struct HouseholdSetupView: View {
                         .padding()
                         .background(Color.ppPurple)
                         .cornerRadius(16)
-                        .opacity(isCreating ? 0.8 : 1.0)
                     }
                     .buttonStyle(.plain)
                     .disabled(isCreating)
@@ -77,8 +76,8 @@ struct HouseholdSetupView: View {
                             HStack {
                                 Image(systemName: "person.2.fill")
                                     .font(.title2)
-                                    .foregroundColor(.ppOrange)
-                                Text("Join with invite code")
+                                    .foregroundColor(.ppPurple)
+                                Text("Join Household with invite code")
                                     .font(.headline)
                                     .foregroundColor(.primary)
                             }
@@ -95,32 +94,19 @@ struct HouseholdSetupView: View {
                             RoundedRectangle(cornerRadius: 16)
                                 .stroke(.quaternary, lineWidth: 1)
                         )
-                        .opacity(isCreating ? 0.5 : 1.0)
                     }
                     .buttonStyle(.plain)
                     .disabled(isCreating)
-                    
-                    // Option 3: Skip (Single User)
-                    Button {
-                        Task {
-                            isCreating = true
-                            await authViewModel.completeHouseholdSetup()
-                            isCreating = false
-                        }
-                    } label: {
-                        if isCreating {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                        } else {
-                            Text("Continue")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.top, 8)
-                    .disabled(isCreating)
                 }
                 .padding(.horizontal)
+                
+                if let errorMessage = authViewModel.errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
                 
                 Spacer(minLength: 40)
             }
@@ -220,7 +206,10 @@ struct JoinHouseholdOnboardingView: View {
                                     await authViewModel.completeHouseholdSetup()
                                     print("✅ [Onboarding] Household setup completed")
                                     
-                                    print("🔘 [Onboarding] showHouseholdSetup is now: \(authViewModel.showHouseholdSetup)")
+                                    // After joining, hide the setup screen
+                                    authViewModel.showHouseholdSetup = false
+                                    print("🔘 [Onboarding] showHouseholdSetup set to false")
+                                    
                                     print("🔘 [Onboarding] Dismissing sheet...")
                                     dismiss()
                                 } else {
