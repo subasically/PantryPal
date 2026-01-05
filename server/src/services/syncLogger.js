@@ -5,11 +5,11 @@ const { v4: uuidv4 } = require('uuid');
  * Log sync operations to sync_log table
  * @param {string} householdId - The household ID
  * @param {string} entityType - Type of entity (product, inventory, location, etc.)
- * @param {string} operation - Operation type (create, update, delete)
  * @param {string} entityId - ID of the entity
+ * @param {string} operation - Operation type (create, update, delete)
  * @param {object} metadata - Additional metadata
  */
-function logSync(householdId, entityType, operation, entityId, metadata = {}) {
+function logSync(householdId, entityType, entityId, operation, metadata = {}) {
     try {
         db.prepare(`
             INSERT INTO sync_log (id, household_id, entity_type, entity_id, action, payload, client_timestamp)
