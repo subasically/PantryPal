@@ -34,10 +34,6 @@ struct PantryPalApp: App {
                     .environmentObject(notificationService)
                     .environmentObject(confettiCenter)
                     .modelContainer(sharedModelContainer)
-                    .task {
-                        // Request notification permission on first launch
-                        _ = await notificationService.requestAuthorization()
-                    }
                     .onChange(of: scenePhase) { _, newPhase in
                         authViewModel.handleScenePhaseChange(newPhase)
                     }
