@@ -47,18 +47,8 @@ struct ThankYouView: View {
                         .multilineTextAlignment(.center)
                     
                     // Personal Message
-                    VStack(spacing: 20) {
-                        Text("From the bottom of my heart, thank you for supporting PantryPal.")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .multilineTextAlignment(.center)
-                        
-                        Text("As a single dad and solo developer, building this app while raising my two wonderful daughters has been quite the journey. Your support means the world to me and helps me continue to improve PantryPal for families like yours.")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                        
-                        Text("Your subscription doesn't just unlock premium features—it helps put food on our table and keeps this dream alive. Thank you for believing in what I'm building and for being part of the PantryPal family.")
+                    VStack(spacing: 16) {
+                        Text("From the bottom of my heart, thank you for supporting PantryPal. As a single dad and solo developer, building this app while raising my two wonderful daughters has been quite the journey. Your support means the world to me and helps me continue to improve PantryPal for families like yours. Your subscription doesn't just unlock premium features—it keeps this dream alive. Thank you for believing in what I'm building and for being part of the PantryPal family.")
                             .font(.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -66,8 +56,9 @@ struct ThankYouView: View {
                         Text("With gratitude,")
                             .font(.body)
                             .italic()
+                            .padding(.top, 8)
                         
-                        Text("Sebastian")
+                        Text("Alen")
                             .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundStyle(

@@ -259,6 +259,23 @@ npm run test:coverage # Coverage report (98%+)
 
 See [UI_TESTING_GUIDE.md](./UI_TESTING_GUIDE.md) for full debugging procedures.
 
+### StoreKit Testing (Sandbox)
+
+**Setup:**
+1. In Xcode: Edit Scheme → Run → Options → StoreKit Configuration → Select `Configuration.storekit`
+2. Create sandbox tester account in App Store Connect (Settings → Users and Access → Sandbox Testers)
+3. Sign out of App Store on device/simulator (Settings → App Store → Sign Out)
+4. Sign in with sandbox account when prompted during purchase
+
+**Test Checklist:**
+- [ ] Products load: $4.99/month and $49.99/year
+- [ ] Purchase flow: Subscribe → StoreKit prompt → Success → Confetti → Premium unlocked
+- [ ] Cancellation: Tap Cancel → Paywall stays open, can retry
+- [ ] Restore purchases: Delete app → Reinstall → Login → Restore → Premium restored
+- [ ] Server validation: Check [server/logs/](server/logs/) for receipt validation
+
+See [STOREKIT_TESTING_GUIDE.md](./STOREKIT_TESTING_GUIDE.md) for detailed testing procedures.
+
 ## 📁 Project Structure
 
 ```
@@ -386,7 +403,43 @@ cd /root/pantrypal-server
 docker-compose up -d --build --force-recreate
 ```
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) and [SERVER_COMMANDS.md](./SERVER_COMMANDS.md) for complete deployment procedures.
+### Deploying Code Changes
+
+From your local machine, copy files to production:
+
+```bash
+# Option A: Sync entire server directory (recommended)
+rsync -avz --exclude='node_modules' --exclude='db/pantrypal.db' \
+  server/ root@62.146.177.62:/root/pantrypal-server/
+
+# Option B: Copy specific files
+scp server/src/routes/*.js root@62.146.177.62:/root/pantrypal-server/src/routes/
+```
+
+Then SSH to production and rebuild:
+
+```bash
+ssh root@62.146.177.62
+cd /root/pantrypal-server
+docker-compose up -d --build --force-recreate
+docker-compose logs -f pantrypal-api  # Watch logs
+```
+
+### Database Operations
+
+```bash
+# Backup database
+docker-compose exec pantrypal-api sh -c "sqlite3 /app/db/pantrypal.db '.backup /app/db/backup.db'"
+
+# Manual SQL query
+docker-compose exec pantrypal-api sh -c "sqlite3 /app/db/pantrypal.db 'SELECT * FROM households;'"
+
+# Run migration script
+docker cp migration.js pantrypal-server-pantrypal-api-1:/app/
+docker-compose exec -T pantrypal-api node /app/migration.js
+```
+
+See [SERVER_COMMANDS.md](./SERVER_COMMANDS.md) for more operations.
 
 ## 📡 API Endpoints
 
@@ -650,14 +703,17 @@ chore: Bump version to 1.0.1
 
 ## 📚 Additional Documentation
 
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Complete deployment procedures + rollback
-- [SERVER_COMMANDS.md](./SERVER_COMMANDS.md) - Quick reference for server operations
-- [STOREKIT_PLAN.md](./STOREKIT_PLAN.md) - In-App Purchase implementation plan
 - [TODO.md](./TODO.md) - Current sprint tasks and priorities
 - [AGENTS.md](./AGENTS.md) - Repository guidelines for AI agents
+- [SERVER_COMMANDS.md](./SERVER_COMMANDS.md) - Complete server operations reference
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Detailed deployment procedures
 - [UI_TESTING_GUIDE.md](./UI_TESTING_GUIDE.md) - XCTest debugging procedures
+- [STOREKIT_TESTING_GUIDE.md](./STOREKIT_TESTING_GUIDE.md) - StoreKit sandbox testing
 - [.github/agents/](/.github/agents/) - Detailed agent documentation (backend, devops, iOS, testing)
-- [.github/skills/](/.github/skills/) - Quick reference skills for GitHub/Claude
+
+**Archived Documentation:**
+- [.archive/storekit-implementation/](./.archive/storekit-implementation/) - StoreKit implementation notes
+- [.archive/historical-summaries/](./.archive/historical-summaries/) - Feature completion summaries
 
 ---
 
