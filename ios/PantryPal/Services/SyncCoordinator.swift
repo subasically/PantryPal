@@ -120,6 +120,13 @@ class SyncCoordinator: ObservableObject {
         }
     }
     
+    /// Clear all sync state (for debugging/testing)
+    func clearAllSyncState() {
+        lastSyncServerTime.removeAll()
+        UserDefaults.standard.removeObject(forKey: "syncCursors")
+        print("🧹 [SyncCoordinator] Cleared all sync state")
+    }
+    
     // MARK: - Persistence
     
     private func loadSyncState() {

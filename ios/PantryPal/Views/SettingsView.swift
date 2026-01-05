@@ -177,6 +177,47 @@ struct SettingsView: View {
         }
     }
     
+    private var debugSection: some View {
+        Section {
+            Button {
+                Task {
+                    // Clear sync state completely (UserDefaults + in-memory)
+                    SyncCoordinator.shared.clearAllSyncState()
+                    
+                    // Clear any stale pending actions with invalid locations
+                    let actions = try? modelContext.fetch(FetchDescriptor<SDPendingAction>())
+                    if let actions = actions {
+                        for action in actions {
+                            modelContext.delete(action)
+                        }
+                        try? modelContext.save()
+                        print("🧹 [Debug] Cleared \(actions.count) pending actions")
+                    }
+                    
+                    // Force immediate full sync
+                    await SyncCoordinator.shared.syncNow(
+                        householdId: authViewModel.currentUser?.householdId,
+                        modelContext: modelContext,
+                        reason: .bootstrap
+                    )
+                    
+                    ToastCenter.shared.show("Full sync completed", type: .success)
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "arrow.clockwise.circle.fill")
+                        .foregroundColor(.blue)
+                        .frame(width: 24)
+                    Text("Force Full Sync Now")
+                }
+            }
+        } header: {
+            Text("Debug")
+        } footer: {
+            Text("Clears sync cursor, removes stale actions, and forces immediate full sync")
+        }
+    }
+    
     private var aboutSection: some View {
         Section("About") {
             HStack {
@@ -304,6 +345,7 @@ struct SettingsView: View {
             householdSection
             notificationsSection
             securitySection
+            debugSection
             aboutSection
             signOutSection
             dangerZoneSection
