@@ -66,8 +66,13 @@ const FREE_LIMIT = 25;  // Max items for free tier
 
 // New user flow:
 // 1. Register/Login → household_id = NULL
-// 2. Show HouseholdSetupView
-// 3. Create/Join/Skip → household_id set
+// 2. AuthViewModel auto-creates household in background
+// 3. If auto-creation fails, show HouseholdSetupView
+// 4. User MUST create or join household (no skip option)
+// 5. HouseholdSetupView dismisses only after household_id is set
+
+// CRITICAL: Never dismiss HouseholdSetupView without calling
+// await authViewModel.completeHouseholdSetup() first!
 ```
 
 ### 3. Sync Strategy
@@ -77,6 +82,13 @@ const FREE_LIMIT = 25;  // Max items for free tier
 // - Download: Server SQLite → Local SwiftData
 // - Conflict resolution: Server wins
 // - Offline: Queue changes locally
+
+// Sync Debugging:
+// 1. Check sync_log table for correct entity_id/action values
+// 2. Verify syncLogger parameter order matches call sites
+// 3. Use Settings → Debug → Force Full Sync to clear stuck cursor
+// 4. Multi-device issues often invisible in single-device dev
+// 5. Console logs: Look for "Received X changes" and "Applied X changes"
 ```
 
 ### 4. Authentication

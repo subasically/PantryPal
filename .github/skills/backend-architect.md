@@ -18,6 +18,8 @@ Expert guidance for designing and implementing PantryPal server features.
 - **Rate Limiting:** express-rate-limit
 - **Testing:** Jest + Supertest (84 tests, 100% pass rate)
 - **Production:** Docker Compose on VPS (62.146.177.62)
+- **Development:** Database reset: `./server/scripts/reset-database.sh`
+- **Testing Guide:** Follow structured test plan in `TESTING.md`
 
 ## Quick Reference
 

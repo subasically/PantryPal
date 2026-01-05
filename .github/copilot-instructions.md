@@ -44,9 +44,11 @@ We are currently in the **Revenue Validation** phase.
 - **Concurrency:** Use `async/await` and `@MainActor` for UI updates.
 - **Onboarding Flow:**
   1. Login/Register (Apple/Email)
-  2. Check `user.householdId`
-  3. If NULL -> Show `HouseholdSetupView` (Create / Join / Skip)
-  4. If EXISTS -> Go to `InventoryListView`
+  2. **Households are auto-created** - `AuthViewModel` automatically calls `completeHouseholdSetup()` after login if `currentHousehold == nil`
+  3. `HouseholdSetupView` only shows if auto-creation fails OR user wants to join existing household
+  4. **No skip option** - Every user MUST have a household (required for inventory, grocery, locations)
+  5. Setup screen options: "Join with invite code" (primary) or "Create my own pantry" (retry creation)
+  6. Errors displayed inline - setup screen stays open until household is successfully created/joined
 - **Paywalls:**
   - Trigger immediately on client-side when hitting limits (don't wait for server 403 if possible).
   - Listen for `Notification.Name("showPaywall")`.
@@ -69,13 +71,18 @@ We are currently in the **Revenue Validation** phase.
 6. **iOS Properties:** AuthViewModel uses `currentUser` and `currentHousehold` (NOT `user` or `householdInfo`).
 7. **SwiftData Models:** Grocery items use `SDGroceryItem`. Inventory uses `SDInventoryItem`. Both are cached locally for offline support.
 8. **SwiftData Import Required:** Files using `@Query`, `FetchDescriptor`, or `modelContext` MUST import SwiftData. Missing this import causes "Cannot find type" errors.
-9. **APIError is File-Level:** `APIError` enum is NOT nested in `APIService` class. Use `APIError.unauthorized`, not `APIService.APIError.unauthorized`.
-
+9. **APIError is File-Level:** `APIError` enum is NOT nested in `APIService` class. Use `APIError.unauthorized`, not `APIService.APIError.unauthorized`.11. **Sync Debug Pattern:** If items aren't syncing, check: (1) syncLogger parameter order matches call sites, (2) sync_log entries have correct entity_id/action values, (3) sync cursor isn't stuck (use Force Full Sync in Settings → Debug).
+12. **Household Setup Flow:** New users MUST have household created before dismissing HouseholdSetupView. "Create" button should call `await authViewModel.completeHouseholdSetup()` then dismiss. Never dismiss without household_id.
+13. **Database Reset:** Use `./server/scripts/reset-database.sh` for clean testing iterations. Removes Docker volume and recreates database. Always confirm before running.
 ## 📝 Current Task Context
 - ✅ New User Onboarding Flow complete
 - ✅ Freemium Model (25 item limits) complete
 - ✅ Grocery List Feature (with Premium auto-add + SwiftData cache) complete
-- The server database schema was recently updated to allow NULL `household_id`.
+- ✅ Multi-Device Sync Bug Fixed (syncLogger parameter order + data migration)
+- ✅ Household Creation Bug Fixed (auto-create on login + manual create button)
+- ✅ Debug Tools Added (Force Full Sync in Settings)
+- ✅ Comprehensive Testing Guide Created (TESTING.md with 7 test scenarios)
+- **Current Phase:** Pre-TestFlight validation. Execute test plan from TESTING.md starting with Test 1 (Free Tier Solo User).
 
 ## 🚀 Server Deployment
 
@@ -105,6 +112,20 @@ curl https://api-pantrypal.subasically.me/health
 # Run migration script inside container
 docker cp migration.js pantrypal-server-pantrypal-api-1:/app/
 docker-compose exec -T pantrypal-api node /app/migration.js
+```
+
+### Testing & Debug:
+```bash
+# Reset database for clean testing
+./server/scripts/reset-database.sh
+
+# Follow structured test plan
+open TESTING.md
+# Start with Test 1 (Free Tier Solo) → Test 2 (Premium) → Test 3 (Multi-Device)
+
+# iOS Debug Tools:
+# Settings → Debug → Force Full Sync Now (clears cursor, triggers bootstrap)
+# Settings → Household Sharing → Delete All Household Data (nuclear reset)
 ```
 
 ## 📦 Version Bumping

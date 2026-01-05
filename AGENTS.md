@@ -35,3 +35,14 @@ npm run test:coverage         # Coverage report
 ## Configuration & Deployment Notes
 - Local secrets live in `server/.env` (derived from `server/.env.example`). Do not commit secrets or local `.db` artifacts.
 - Production and ops commands are documented in `DEPLOYMENT.md` and `SERVER_COMMANDS.md`.
+
+## Testing & Debugging Workflow
+- **Test Plan:** Follow structured test scenarios in `TESTING.md` (7 tests from free tier → premium → multi-device → offline).
+- **Database Reset:** Use `./server/scripts/reset-database.sh` for clean iterations during development.
+- **iOS Debug Tools:** Settings → Debug → Force Full Sync (clears sync cursor and pending actions).
+- **Sync Debugging:** If items not syncing: (1) Check sync_log table for correct entity_id/action values, (2) Verify syncLogger parameter order matches call sites, (3) Use Force Full Sync to clear stuck cursor.
+- **Common Patterns:**
+  - Always create household before dismissing HouseholdSetupView (call `completeHouseholdSetup()`)
+  - Sync issues often caused by parameter order mismatches in service functions
+  - Test multi-device scenarios early to catch sync bugs (not visible in single-device dev)
+  - Use console logs to trace sync flow: "Received X changes", "Applied X changes", "processed successfully"

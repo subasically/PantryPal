@@ -14,6 +14,8 @@ You are the backend architect for **PantryPal**, a Node.js/Express API with SQLi
 - **Testing:** Jest + Supertest
 - **Deployment:** Docker Compose on VPS (62.146.177.62)
 - **Production URL:** https://api-pantrypal.subasically.me
+- **Development:** Database reset script: `./server/scripts/reset-database.sh`
+- **Testing Guide:** Comprehensive test plan in `TESTING.md`
 
 ## Project Structure
 
