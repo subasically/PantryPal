@@ -37,50 +37,7 @@ struct SettingsView: View {
                 // User Info Section
                 if let user = authViewModel.currentUser {
                     Section("Account") {
-                        HStack {
-                            Image(systemName: "person.circle.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(.ppPurple)
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 8) {
-                                    Text(user.displayName)
-                                        .font(.headline)
-                                    
-                                    // Premium/Free Badge
-                                    if authViewModel.currentHousehold?.isPremiumActive == true {
-                                        Text("Premium")
-                                            .font(.caption2)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 3)
-                                            .background(
-                                                LinearGradient(
-                                                    colors: [.ppPurple, .ppBlue],
-                                                    startPoint: .leading,
-                                                    endPoint: .trailing
-                                                )
-                                            )
-                                            .cornerRadius(6)
-                                    } else {
-                                        Text("Free")
-                                            .font(.caption2)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.secondary)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 3)
-                                            .background(Color(.systemGray5))
-                                            .cornerRadius(6)
-                                    }
-                                }
-                                
-                                Text(user.email)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .padding(.vertical, 4)
+                        accountInfoRow(user: user)
                     }
                 }
                 
@@ -410,6 +367,62 @@ struct SettingsView: View {
         }
         
         isResetting = false
+    }
+    
+    // MARK: - Helper Views
+    
+    private func accountInfoRow(user: User) -> some View {
+        HStack {
+            Image(systemName: "person.circle.fill")
+                .font(.system(size: 40))
+                .foregroundColor(.ppPurple)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Text(user.displayName)
+                        .font(.headline)
+                    
+                    premiumBadge
+                }
+                
+                Text(user.email)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+    
+    private var premiumBadge: some View {
+        Group {
+            if authViewModel.currentHousehold?.isPremiumActive == true {
+                Text("Premium")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(premiumGradient)
+                    .cornerRadius(6)
+            } else {
+                Text("Free")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(6)
+            }
+        }
+    }
+    
+    private var premiumGradient: LinearGradient {
+        LinearGradient(
+            colors: [.ppPurple, .ppBlue],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
     }
 }
 
