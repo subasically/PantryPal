@@ -4,6 +4,7 @@ import SwiftData
 struct SettingsView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @EnvironmentObject private var notificationService: NotificationService
+    @EnvironmentObject private var confettiCenter: ConfettiCenter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
@@ -31,260 +32,289 @@ struct SettingsView: View {
         _appLockEnabled = State(initialValue: UserPreferences.shared.appLockEnabled)
     }
     
-    var body: some View {
-        NavigationStack {
-            List {
-                // User Info Section
-                if let user = authViewModel.currentUser {
-                    Section("Account") {
-                        accountRow(for: user)
+    // MARK: - Body Sections
+    
+    @ViewBuilder
+    private var accountSection: some View {
+        if let user = authViewModel.currentUser {
+            Section("Account") {
+                accountRow(for: user)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var premiumSection: some View {
+        if authViewModel.currentHousehold?.isPremiumActive != true {
+            premiumUpgradeSection
+        }
+    }
+    
+    private var householdSection: some View {
+        Section("Household") {
+            NavigationLink {
+                HouseholdSharingView()
+            } label: {
+                HStack {
+                    Image(systemName: "person.2.fill")
+                        .foregroundColor(.ppPurple)
+                        .frame(width: 24)
+                    Text("Household Sharing")
+                }
+            }
+        }
+    }
+    
+    private var notificationsSection: some View {
+        Section("Notifications") {
+            if notificationService.isAuthorized {
+                HStack {
+                    Image(systemName: "bell.badge.fill")
+                        .foregroundColor(.ppGreen)
+                        .frame(width: 24)
+                    Text("Notifications enabled")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.ppGreen)
+                }
+                
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "gear")
+                            .foregroundColor(.ppPurple)
+                            .frame(width: 24)
+                        Text("Manage in Settings")
                     }
                 }
-                
-                // Premium Section (for Free users)
-                if authViewModel.currentHousehold?.isPremiumActive != true {
-                    premiumUpgradeSection
+            } else {
+                HStack {
+                    Image(systemName: "bell.slash.fill")
+                        .foregroundColor(.ppOrange)
+                        .frame(width: 24)
+                    Text("Notifications disabled")
+                        .foregroundColor(.secondary)
                 }
                 
-                // Household Section
-                Section("Household") {
-                    NavigationLink {
-                        HouseholdSharingView()
-                    } label: {
+                Button {
+                    Task {
+                        await notificationService.requestAuthorization()
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "bell.fill")
+                            .foregroundColor(.ppPurple)
+                            .frame(width: 24)
+                        Text("Enable Notifications")
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var securitySection: some View {
+        if authViewModel.isBiometricAvailable {
+            Section("Security") {
+                if authViewModel.isPasswordLogin {
+                    Toggle(isOn: Binding(
+                        get: { biometricEnabled },
+                        set: { newValue in
+                            if newValue {
+                                // Turning ON
+                                if authViewModel.hasPendingCredentials {
+                                    authViewModel.enableBiometricLogin()
+                                    biometricEnabled = true
+                                } else {
+                                    biometricEnabled = false
+                                    showingEnableError = true
+                                }
+                            } else {
+                                // Turning OFF
+                                biometricEnabled = false
+                                showingDisableAlert = true
+                            }
+                        }
+                    )) {
                         HStack {
-                            Image(systemName: "person.2.fill")
+                            Image(systemName: authViewModel.biometricIcon)
                                 .foregroundColor(.ppPurple)
                                 .frame(width: 24)
-                            Text("Household Sharing")
-                        }
-                    }
-                }
-                
-                // Notifications Section
-                Section("Notifications") {
-                    if notificationService.isAuthorized {
-                        HStack {
-                            Image(systemName: "bell.badge.fill")
-                                .foregroundColor(.ppGreen)
-                                .frame(width: 24)
-                            Text("Notifications enabled")
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.ppGreen)
-                        }
-                        
-                        Button {
-                            if let url = URL(string: UIApplication.openSettingsURLString) {
-                                UIApplication.shared.open(url)
-                            }
-                        } label: {
-                            HStack {
-                                Image(systemName: "gear")
-                                    .foregroundColor(.ppPurple)
-                                    .frame(width: 24)
-                                Text("Manage in Settings")
-                            }
-                        }
-                    } else {
-                        HStack {
-                            Image(systemName: "bell.slash.fill")
-                                .foregroundColor(.ppOrange)
-                                .frame(width: 24)
-                            Text("Notifications disabled")
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        Button {
-                            Task {
-                                await notificationService.requestAuthorization()
-                            }
-                        } label: {
-                            HStack {
-                                Image(systemName: "bell.fill")
-                                    .foregroundColor(.ppPurple)
-                                    .frame(width: 24)
-                                Text("Enable Notifications")
+                            VStack(alignment: .leading) {
+                                Text("Use \(authViewModel.biometricName)")
+                                Text("Log in with \(authViewModel.biometricName)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
                         }
                     }
                 }
                 
-                // Security Section
-                if authViewModel.isBiometricAvailable {
-                    Section("Security") {
-                        if authViewModel.isPasswordLogin {
-                            Toggle(isOn: Binding(
-                                get: { biometricEnabled },
-                                set: { newValue in
-                                    if newValue {
-                                        // Turning ON
-                                        if authViewModel.hasPendingCredentials {
-                                            authViewModel.enableBiometricLogin()
-                                            biometricEnabled = true
-                                        } else {
-                                            biometricEnabled = false
-                                            showingEnableError = true
-                                        }
-                                    } else {
-                                        // Turning OFF
-                                        biometricEnabled = false
-                                        showingDisableAlert = true
-                                    }
-                                }
-                            )) {
-                                HStack {
-                                    Image(systemName: authViewModel.biometricIcon)
-                                        .foregroundColor(.ppPurple)
-                                        .frame(width: 24)
-                                    VStack(alignment: .leading) {
-                                        Text("Use \(authViewModel.biometricName)")
-                                        Text("Log in with \(authViewModel.biometricName)")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
-                        }
-                        
-                        Toggle(isOn: Binding(
-                            get: { appLockEnabled },
-                            set: { newValue in
-                                appLockEnabled = newValue
-                                authViewModel.appLockEnabled = newValue
-                            }
-                        )) {
-                            HStack {
-                                Image(systemName: "lock.shield")
-                                    .foregroundColor(.ppPurple)
-                                    .frame(width: 24)
-                                VStack(alignment: .leading) {
-                                    Text("Require \(authViewModel.biometricName) to Open")
-                                    Text("Lock app when backgrounded")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                        }
+                Toggle(isOn: Binding(
+                    get: { appLockEnabled },
+                    set: { newValue in
+                        appLockEnabled = newValue
+                        authViewModel.appLockEnabled = newValue
                     }
-                }
-                
-                // About Section
-                Section("About") {
+                )) {
                     HStack {
-                        Text("Version")
-                        Spacer()
-                        Text(appVersion)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Link(destination: URL(string: "https://world.openfoodfacts.org")!) {
-                        HStack {
-                            Text("Product data provided by Open Food Facts (ODbL)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.leading)
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
+                        Image(systemName: "lock.shield")
+                            .foregroundColor(.ppPurple)
+                            .frame(width: 24)
+                        VStack(alignment: .leading) {
+                            Text("Require \(authViewModel.biometricName) to Open")
+                            Text("Lock app when backgrounded")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
                 }
-                
-                // Sign Out Section
-                Section {
-                    Button(role: .destructive) {
-                        authViewModel.logout()
-                        dismiss()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
-                            Spacer()
-                        }
+            }
+        }
+    }
+    
+    private var aboutSection: some View {
+        Section("About") {
+            HStack {
+                Text("Version")
+                Spacer()
+                Text(appVersion)
+                    .foregroundColor(.secondary)
+            }
+            
+            Link(destination: URL(string: "https://world.openfoodfacts.org")!) {
+                HStack {
+                    Text("Product data provided by Open Food Facts (ODbL)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+    
+    private var signOutSection: some View {
+        Section {
+            Button(role: .destructive) {
+                authViewModel.logout()
+                dismiss()
+            } label: {
+                HStack {
+                    Spacer()
+                    Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                    Spacer()
+                }
+            }
+            .accessibilityIdentifier("settings.signOutButton")
+        }
+    }
+    
+    private var dangerZoneSection: some View {
+        Section {
+            Button(role: .destructive) {
+                showingResetConfirmation = true
+            } label: {
+                HStack {
+                    Spacer()
+                    if isResetting {
+                        ProgressView()
+                            .tint(.red)
+                    } else {
+                        Label("Delete Household Data", systemImage: "trash.fill")
                     }
-                    .accessibilityIdentifier("settings.signOutButton")
-                }
-                
-                // Danger Zone
-                Section {
-                    Button(role: .destructive) {
-                        showingResetConfirmation = true
-                    } label: {
-                        HStack {
-                            Spacer()
-                            if isResetting {
-                                ProgressView()
-                                    .tint(.red)
-                            } else {
-                                Label("Delete Household Data", systemImage: "trash.fill")
-                            }
-                            Spacer()
-                        }
-                    }
-                    .disabled(isResetting)
-                } header: {
-                    Text("Danger Zone")
-                } footer: {
-                    Text("This will permanently delete all inventory, history, and custom products for your household.")
+                    Spacer()
                 }
             }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
+            .disabled(isResetting)
+        } header: {
+            Text("Danger Zone")
+        } footer: {
+            Text("This will permanently delete all inventory, history, and custom products for your household.")
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            settingsList
+                .navigationTitle("Settings")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { toolbarContent }
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView()
+                .environment(authViewModel)
+                .environmentObject(confettiCenter)
+        }
+        .alert("Disable \(authViewModel.biometricName)?", isPresented: $showingDisableAlert) {
+            Button("Cancel", role: .cancel) {
+                biometricEnabled = true
+            }
+            Button("Disable", role: .destructive) {
+                authViewModel.disableBiometricLogin()
+            }
+        } message: {
+            Text("You will need to enter your email and password to sign in.")
+        }
+        .alert("Cannot Enable \(authViewModel.biometricName)", isPresented: $showingEnableError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("For security, please log out and log in again to enable \(authViewModel.biometricName).")
+        }
+        .alert("Delete Household Data?", isPresented: $showingResetConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Continue", role: .destructive) {
+                resetVerificationText = ""
+                showingResetVerification = true
+            }
+        } message: {
+            Text("This action cannot be undone. All data will be wiped from all devices in your household.")
+        }
+        .alert("Verify Reset", isPresented: $showingResetVerification) {
+            TextField("Type 'RESET'", text: $resetVerificationText)
+                .textInputAutocapitalization(.never)
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                if resetVerificationText == "RESET" {
+                    Task { await performReset() }
                 }
             }
-            .alert("Disable \(authViewModel.biometricName)?", isPresented: $showingDisableAlert) {
-                Button("Cancel", role: .cancel) {
-                    biometricEnabled = true
-                }
-                Button("Disable", role: .destructive) {
-                    authViewModel.disableBiometricLogin()
-                }
-            } message: {
-                Text("You will need to enter your email and password to sign in.")
-            }
-            .alert("Cannot Enable \(authViewModel.biometricName)", isPresented: $showingEnableError) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text("For security, please log out and log in again to enable \(authViewModel.biometricName).")
-            }
-            .alert("Delete Household Data?", isPresented: $showingResetConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Continue", role: .destructive) {
-                    resetVerificationText = ""
-                    showingResetVerification = true
-                }
-            } message: {
-                Text("This action cannot be undone. All data will be wiped from all devices in your household.")
-            }
-            .alert("Verify Reset", isPresented: $showingResetVerification) {
-                TextField("Type 'RESET'", text: $resetVerificationText)
-                    .textInputAutocapitalization(.never)
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
-                    if resetVerificationText == "RESET" {
-                        Task { await performReset() }
-                    }
-                }
-                .disabled(resetVerificationText != "RESET")
-            } message: {
-                Text("Type 'RESET' to confirm.")
-            }
-            .alert("Error", isPresented: Binding(get: { resetError != nil }, set: { if !$0 { resetError = nil } })) {
-                Button("OK") { resetError = nil }
-            } message: {
-                Text(resetError ?? "Unknown error")
-            }
-            .sheet(isPresented: $showingPaywall) {
-                PaywallView()
-                    .environment(authViewModel)
-                    .environmentObject(ConfettiCenter.shared)
+            .disabled(resetVerificationText != "RESET")
+        } message: {
+            Text("Type 'RESET' to confirm.")
+        }
+        .alert("Error", isPresented: Binding(get: { resetError != nil }, set: { if !$0 { resetError = nil } })) {
+            Button("OK") { resetError = nil }
+        } message: {
+            Text(resetError ?? "Unknown error")
+        }
+    }
+    
+    private var settingsList: some View {
+        List {
+            accountSection
+            premiumSection
+            householdSection
+            notificationsSection
+            securitySection
+            aboutSection
+            signOutSection
+            dangerZoneSection
+        }
+    }
+    
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button("Done") {
+                dismiss()
             }
         }
     }

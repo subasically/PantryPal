@@ -15,6 +15,7 @@ struct PaywallView: View {
     @State private var errorMessage: String?
     @State private var showDebugAlert = false
     @State private var debugErrorMessage: String?
+    @State private var showThankYou = false
     
     var limit: Int = 25
     var reason: PaywallReason = .itemLimit
@@ -204,6 +205,14 @@ struct PaywallView: View {
                     errorMessage = "Failed to load products: \(error.localizedDescription)"
                 }
             }
+            .fullScreenCover(isPresented: $showThankYou) {
+                ThankYouView()
+                    .environmentObject(confettiCenter)
+                    .onDisappear {
+                        // Dismiss the paywall when thank you view is dismissed
+                        dismiss()
+                    }
+            }
         }
     }
     
@@ -225,16 +234,8 @@ struct PaywallView: View {
                 // Purchase successful - refresh user data
                 await authViewModel.refreshCurrentUser()
                 
-                // Show success with confetti
-                confettiCenter.celebrate()
-                ToastCenter.shared.show(
-                    "Welcome to Premium! 🎉",
-                    type: .success
-                )
-                
-                // Dismiss after celebration starts
-                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-                dismiss()
+                // Show Thank You view instead of dismissing
+                showThankYou = true
             }
             // If transaction is nil, user cancelled - no error needed
         } catch {

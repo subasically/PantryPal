@@ -348,11 +348,11 @@ final class APIService: Sendable {
     // MARK: - Household Sharing
     
     func generateInviteCode() async throws -> InviteCodeResponse {
-        try await request(endpoint: "/auth/household/invite", method: "POST")
+        try await request(endpoint: "/household/invite", method: "POST")
     }
     
     func validateInviteCode(_ code: String) async throws -> InviteValidationResponse {
-        try await request(endpoint: "/auth/household/invite/\(code)")
+        try await request(endpoint: "/household/invite/\(code)")
     }
     
     func joinHousehold(code: String) async throws -> JoinHouseholdResponse {
@@ -360,7 +360,7 @@ final class APIService: Sendable {
             let code: String
         }
         let body = JoinRequest(code: code)
-        return try await request(endpoint: "/auth/household/join", method: "POST", body: body)
+        return try await request(endpoint: "/household/join", method: "POST", body: body)
     }
     
     func createHousehold(name: String? = nil) async throws -> Household {
@@ -368,15 +368,15 @@ final class APIService: Sendable {
             let name: String?
         }
         let body = CreateHouseholdRequest(name: name)
-        return try await request(endpoint: "/auth/household", method: "POST", body: body)
+        return try await request(endpoint: "/household", method: "POST", body: body)
     }
     
     func getHouseholdMembers() async throws -> HouseholdMembersResponse {
-        try await request(endpoint: "/auth/household/members")
+        try await request(endpoint: "/household/members")
     }
     
     func getActiveInvites() async throws -> ActiveInvitesResponse {
-        try await request(endpoint: "/auth/household/invites")
+        try await request(endpoint: "/household/invites")
     }
     
     func resetHouseholdData() async throws {
@@ -384,7 +384,7 @@ final class APIService: Sendable {
             let success: Bool
             let message: String
         }
-        let _: ResetResponse = try await request(endpoint: "/auth/household/data", method: "DELETE")
+        let _: ResetResponse = try await request(endpoint: "/household/data", method: "DELETE")
     }
     
     // MARK: - Grocery

@@ -54,11 +54,13 @@
 		2F3780532F07433F006F4E33 /* UPCScannerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3780502F07433F006F4E33 /* UPCScannerSheet.swift */; };
 		2F37806F2F085D94006F4E33 /* StoreKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F37806E2F085D94006F4E33 /* StoreKitService.swift */; };
 		2F74C5702EDE639E006E985C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F74C56F2EDE639E006E985C /* SettingsView.swift */; };
+		68C6CE661A94D62DEC30A1D8 /* ThankYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E915A7DDBE15C9196C72F0C6 /* ThankYouView.swift */; };
 		7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */; };
 		933762D568E4D874355B4CBA /* LocationsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6BDEDDC3438E288D69D87D /* LocationsSettingsView.swift */; };
 		A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */; };
 		B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4A7C84F0B02C27FF31131A /* ToastView.swift */; };
 		BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */; };
+		E2D1270CD03B316B03D4A15C /* ThankYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EAED54E236807573864AA8 /* ThankYouView.swift */; };
 		EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60392A419ED813B3C8B0683E /* ToastCenter.swift */; };
 /* End PBXBuildFile section */
 
@@ -73,6 +75,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		05EAED54E236807573864AA8 /* ThankYouView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThankYouView.swift; sourceTree = "<group>"; };
 		100 /* PantryPal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PantryPal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		101 /* PantryPalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryPalApp.swift; sourceTree = "<group>"; };
 		102 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -130,12 +133,15 @@
 		52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CheckoutView.swift; sourceTree = "<group>"; };
 		6029D3F1D4BB7B8115B730B4 /* AppTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppTextField.swift; sourceTree = "<group>"; };
 		60392A419ED813B3C8B0683E /* ToastCenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastCenter.swift; sourceTree = "<group>"; };
+		E915A7DDBE15C9196C72F0C6 /* ThankYouView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThankYouView.swift; sourceTree = "<group>"; };
 		ED4A7C84F0B02C27FF31131A /* ToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2F3780312F04F886006F4E33 /* PantryPalUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = PantryPalUITests;
 			sourceTree = "<group>";
 		};
@@ -253,6 +259,8 @@
 				2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */,
 				2F377FF92EFB7975006F4E33 /* SplashView.swift */,
 				3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */,
+				E915A7DDBE15C9196C72F0C6 /* ThankYouView.swift */,
+				05EAED54E236807573864AA8 /* ThankYouView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -332,8 +340,6 @@
 				2F3780312F04F886006F4E33 /* PantryPalUITests */,
 			);
 			name = PantryPalUITests;
-			packageProductDependencies = (
-			);
 			productName = PantryPalUITests;
 			productReference = 2F3780302F04F886006F4E33 /* PantryPalUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -475,6 +481,8 @@
 				7CA7951127F4F53E15D55BEA /* AppTextField.swift in Sources */,
 				EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */,
 				BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */,
+				68C6CE661A94D62DEC30A1D8 /* ThankYouView.swift in Sources */,
+				E2D1270CD03B316B03D4A15C /* ThankYouView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -667,7 +675,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20260104171000;
+				CURRENT_PROJECT_VERSION = 20260104192001;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -683,7 +691,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8.1;
+				MARKETING_VERSION = 0.8.2;
 				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -703,7 +711,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20260104171000;
+				CURRENT_PROJECT_VERSION = 20260104192001;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -719,7 +727,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8.1;
+				MARKETING_VERSION = 0.8.2;
 				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

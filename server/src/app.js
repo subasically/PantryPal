@@ -7,6 +7,7 @@ const { generalLimiter, upcLookupLimiter, authLimiter } = require('./middleware/
 
 function createApp() {
     const authRoutes = require('./routes/auth');
+    const householdRoutes = require('./routes/household');
     const productRoutes = require('./routes/products');
     const inventoryRoutes = require('./routes/inventory');
     const locationsRoutes = require('./routes/locations');
@@ -31,6 +32,10 @@ function createApp() {
 
     // Routes with specific rate limiters
     app.use('/api/auth', authLimiter, authRoutes);
+
+    // Household routes - use general limiter only (not auth limiter)
+    // These need more lenient limits for onboarding flow (join/invite validation)
+    app.use('/api/household', householdRoutes);
 
     // Apply UPC lookup rate limiter before product routes
     app.use('/api/products/lookup', upcLookupLimiter);
