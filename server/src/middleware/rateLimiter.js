@@ -65,12 +65,15 @@ const upcLookupLimiter = rateLimit({
 
 /**
  * Authentication rate limiter
- * 5 requests per 5 minutes per IP (prevent brute force attacks)
+ * 20 requests per 5 minutes per IP
+ * More lenient than before because /auth/me is called during:
+ * - Initial sync, household creation, member management, etc.
+ * Still protects against brute force on login/register endpoints
  */
 const authLimiter = rateLimit({
     windowMs: 5 * 60 * 1000, // 5 minutes
-    max: 5, // Limit each IP to 5 auth attempts per 5 minutes
-    message: 'Too many authentication attempts, please try again later.',
+    max: 20, // Limit each IP to 20 auth requests per 5 minutes
+    message: 'Too many authentication requests, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
     skip: () => skipRateLimiting,
