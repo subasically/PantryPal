@@ -16,6 +16,7 @@ Expert guidance for implementing PantryPal iOS features with SwiftUI and SwiftDa
 - **Storage:** SwiftData (offline-first caching)
 - **Auth:** JWT + Apple Sign In
 - **API:** URLSession (async/await)
+- **Testing:** Follow `TESTING.md` for comprehensive test scenarios
 
 ## Quick Reference
 

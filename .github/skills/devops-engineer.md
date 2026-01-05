@@ -15,7 +15,8 @@ Deploy, monitor, and troubleshoot PantryPal API on production VPS.
 - **URL:** https://api-pantrypal.subasically.me
 - **Container:** `pantrypal-api`
 - **Port:** 3002
-- **Database:** SQLite in Docker volume `pantrypal-data`
+- **Database:** SQLite in Docker volume `pantrypal-server_pantrypal-data` at `/app/db/pantrypal.db`
+- **Testing:** Follow `TESTING.md` for structured test scenarios
 
 ## Quick Deploy
 

@@ -47,7 +47,7 @@ If schema changes are needed:
 # Create migration file locally
 cat > migration.js << 'EOF'
 const Database = require('better-sqlite3');
-const db = new Database('/app/data/pantrypal.db');
+const db = new Database('/app/db/pantrypal.db');  // Correct path!
 
 // Your migration SQL here
 db.exec(`
@@ -63,12 +63,22 @@ scp migration.js root@62.146.177.62:/root/pantrypal-server/
 ssh root@62.146.177.62 "cd /root/pantrypal-server && docker cp migration.js pantrypal-server-pantrypal-api-1:/app/ && docker-compose exec -T pantrypal-api node /app/migration.js"
 ```
 
+## Database Reset (Development)
+
+For clean testing iterations:
+```bash
+./server/scripts/reset-database.sh
+```
+
+This removes the Docker volume and recreates a fresh database.
+
 ## IMPORTANT NOTES
 - ⚠️ **NO GIT REPO** on production server - must use SCP
-- ⚠️ Database is in Docker volume `pantrypal-data`
-- ⚠️ Always test locally first
+- ⚠️ Database is in Docker volume `pantrypal-server_pantrypal-data` at `/app/db/pantrypal.db`
+- ⚠️ Always test locally first (use `TESTING.md` test plan)
 - ⚠️ Check logs after deployment
 - ⚠️ Backup database before schema changes
+- ⚠️ **MVP Mode:** Skip migrations, update `db/schema.sql` directly and reset DB
 
 ## Quick Health Check
 ```bash

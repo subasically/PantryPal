@@ -38,8 +38,10 @@ Run PantryPal's UI test suite on simulator or device.
 - Test server must be running on localhost:3002
 - Tests take ~5-8 minutes total
 - Expected pass rate: 36% (4/11 tests)
+- **For comprehensive testing:** Follow `TESTING.md` test plan (7 scenarios)
 
 ## Troubleshooting
 - "Connection refused" → Start test server
 - "Build failed" → Check for compilation errors
 - "Tests hanging" → Kill simulator and retry
+- "Items not syncing" → See `.github/skills/debug-sync.md`

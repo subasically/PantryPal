@@ -68,9 +68,11 @@ cd ios && xcodebuild test -scheme PantryPal \
 "settings.button"
 "settings.signOutButton"
 
-// Onboarding
+// Onboarding / Household Setup
 "householdSetup.container"
-"onboarding.skipButton"
+"householdSetup.createButton"  // Primary action
+"householdSetup.joinButton"    // Secondary action
+// NOTE: No skip button - household creation is REQUIRED
 
 // Add Item
 "addItem.nameField"
@@ -98,6 +100,9 @@ addButton.tap()
 ```
 
 ## Common Test Issues
+
+### 0. Items Not Syncing Between Devices
+**See:** `.github/skills/debug-sync.md` for comprehensive sync debugging
 
 ### 1. Element Not Found
 **Symptoms:** `XCTAssertTrue failed - Element doesn't exist`
