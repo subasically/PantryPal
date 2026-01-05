@@ -20,9 +20,10 @@ struct AppErrorMapper {
     }
     
     /// Convert HTTP status code to AppError
-    static func map(statusCode: Int, endpoint: String, serverMessage: String? = nil, responseBody: String? = nil) -> AppError {
+    static func map(statusCode: Int, endpoint: String, method: String = "GET", serverMessage: String? = nil, responseBody: String? = nil) -> AppError {
         AppLogger.logAPIError(
             endpoint: endpoint,
+            method: method,
             statusCode: statusCode,
             responseBody: responseBody
         )

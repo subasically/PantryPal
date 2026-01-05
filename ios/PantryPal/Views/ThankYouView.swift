@@ -30,30 +30,19 @@ struct ThankYouView: View {
                             .padding(.top, 40)
                     }
                     
-                    // Crown Icon
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 60))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.ppPurple, .ppBlue],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                    
                     // Title
                     Text("Thank You! 🎉")
                         .font(.system(size: 36, weight: .bold))
                         .multilineTextAlignment(.center)
                     
                     // Personal Message
-                    VStack(spacing: 16) {
-                        Text("From the bottom of my heart, thank you for supporting PantryPal. As a single dad and solo developer, building this app while raising my two wonderful daughters has been quite the journey. Your support means the world to me and helps me continue to improve PantryPal for families like yours. Your subscription doesn't just unlock premium features—it keeps this dream alive. Thank you for believing in what I'm building and for being part of the PantryPal family.")
+                    VStack(spacing: 24) {
+                        Text("Thank you for supporting PantryPal! As a solo developer, father, and husband, your subscription means everything to me. It helps me continue building this app for families like yours. You're not just unlocking premium features—you're keeping this dream alive.")
                             .font(.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                         
-                        Text("With gratitude,")
+                        Text("With gratitude 🙏")
                             .font(.body)
                             .italic()
                             .padding(.top, 8)

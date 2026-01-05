@@ -120,6 +120,7 @@ final class APIService: Sendable {
                 throw AppErrorMapper.map(
                     statusCode: httpResponse.statusCode,
                     endpoint: endpoint,
+                    method: method,
                     serverMessage: serverMessage,
                     responseBody: responseString
                 )

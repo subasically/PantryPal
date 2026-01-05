@@ -140,8 +140,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2F3780312F04F886006F4E33 /* PantryPalUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = PantryPalUITests;
 			sourceTree = "<group>";
 		};
@@ -675,7 +673,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20260104192001;
+				CURRENT_PROJECT_VERSION = 202601051210;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -691,7 +689,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8.2;
+				MARKETING_VERSION = 0.8.3;
 				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -711,7 +709,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20260104192001;
+				CURRENT_PROJECT_VERSION = 202601051210;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -727,7 +725,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8.2;
+				MARKETING_VERSION = 0.8.3;
 				PRODUCT_BUNDLE_IDENTIFIER = me.subasically.pantrypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

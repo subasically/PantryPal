@@ -10,7 +10,13 @@ final class ActionQueueService: Sendable {
     private init() {}
     
     func processQueue(modelContext: ModelContext) async {
-        if isProcessing { return }
+        print("📤 [ActionQueue] processQueue() called")
+        
+        if isProcessing {
+            print("⚠️ [ActionQueue] Already processing, skipping")
+            return
+        }
+        
         isProcessing = true
         defer { isProcessing = false }
         
@@ -19,10 +25,11 @@ final class ActionQueueService: Sendable {
             let descriptor = FetchDescriptor<SDPendingAction>(sortBy: [SortDescriptor(\.createdAt)])
             
             guard let actions = try? modelContext.fetch(descriptor), !actions.isEmpty else {
+                print("✅ [ActionQueue] No pending actions to process")
                 break
             }
             
-            print("Processing \(actions.count) pending actions...")
+            print("📤 [ActionQueue] Processing \(actions.count) pending actions...")
             
             for action in actions {
                 // Re-check if action is still valid/exists in context to be safe
@@ -116,15 +123,31 @@ final class ActionQueueService: Sendable {
     }
     
     func enqueue(context: ModelContext, type: SDPendingAction.ActionType, endpoint: String, method: String, body: (any Encodable)? = nil) {
+        print("📥 [ActionQueue] enqueue() called - type: \(type), endpoint: \(endpoint), method: \(method)")
+        
         var payload: Data? = nil
         if let body = body {
-            payload = try? JSONEncoder().encode(body)
+            do {
+                payload = try JSONEncoder().encode(body)
+                print("✅ [ActionQueue] Encoded payload: \(payload?.count ?? 0) bytes")
+            } catch {
+                print("❌ [ActionQueue] Failed to encode body: \(error)")
+                return
+            }
         }
         
         let action = SDPendingAction(type: type, endpoint: endpoint, method: method, payload: payload)
         context.insert(action)
-        try? context.save()
         
+        do {
+            try context.save()
+            print("✅ [ActionQueue] Action saved to queue")
+        } catch {
+            print("❌ [ActionQueue] Failed to save action: \(error)")
+            return
+        }
+        
+        print("🚀 [ActionQueue] Triggering immediate processing...")
         // Trigger processing immediately (fire and forget)
         Task {
             await processQueue(modelContext: context)

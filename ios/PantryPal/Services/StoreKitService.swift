@@ -6,16 +6,19 @@ enum StoreError: LocalizedError {
     case failedVerification
     case pending
     case unknown
+    case interrupted
     case purchaseFailed(Error)
     
     var errorDescription: String? {
         switch self {
         case .failedVerification:
-            return "Transaction verification failed"
+            return "Transaction verification failed. Please try again."
         case .pending:
-            return "Purchase is pending approval"
+            return "Purchase is pending approval. Check back later."
+        case .interrupted:
+            return "Purchase was interrupted. Please try again."
         case .unknown:
-            return "An unknown error occurred"
+            return "An unknown error occurred. Please try again."
         case .purchaseFailed(let error):
             return "Purchase failed: \(error.localizedDescription)"
         }
@@ -86,11 +89,11 @@ final class StoreKitService: ObservableObject {
     
     /// Purchase a subscription product
     /// - Parameter product: The subscription product to purchase
-    /// - Returns: The verified transaction if successful, nil if cancelled
-    func purchase(_ product: StoreKit.Product) async throws -> StoreKit.Transaction? {
+    /// - Returns: A tuple with the verified transaction (if successful, nil if cancelled) and updated household (if available)
+    func purchase(_ product: StoreKit.Product) async throws -> (StoreKit.Transaction?, Household?) {
         guard !purchaseInProgress else {
             print("⚠️ [StoreKit] Purchase already in progress")
-            return nil
+            return (nil, nil)
         }
         
         print("🛒 [StoreKit] Starting purchase: \(product.id)")
@@ -102,20 +105,27 @@ final class StoreKitService: ObservableObject {
             
             switch result {
             case .success(let verification):
-                let transaction = try checkVerified(verification)
-                print("✅ [StoreKit] Purchase successful: \(transaction.id)")
+                // Verify the transaction
+                let transaction: StoreKit.Transaction
+                do {
+                    transaction = try checkVerified(verification)
+                    print("✅ [StoreKit] Purchase successful: \(transaction.id)")
+                } catch {
+                    print("❌ [StoreKit] Transaction verification failed: \(error)")
+                    throw StoreError.failedVerification
+                }
                 
-                // Sync with server
-                await verifyAndSync(transaction)
+                // Sync with server and get updated household
+                let updatedHousehold = await verifyAndSync(transaction)
                 
                 // Finish the transaction
                 await transaction.finish()
                 
-                return transaction
+                return (transaction, updatedHousehold)
                 
             case .userCancelled:
                 print("ℹ️ [StoreKit] User cancelled purchase")
-                return nil
+                return (nil, nil)
                 
             case .pending:
                 print("⏳ [StoreKit] Purchase pending approval")
@@ -125,8 +135,19 @@ final class StoreKitService: ObservableObject {
                 print("❌ [StoreKit] Unknown purchase result")
                 throw StoreError.unknown
             }
+        } catch let error as StoreError {
+            // Re-throw our custom errors
+            throw error
         } catch {
+            // Catch interrupted purchases or other StoreKit errors
             print("❌ [StoreKit] Purchase failed: \(error)")
+            
+            // Check if it's an interrupted purchase (SKError.paymentCancelled = 2)
+            if (error as NSError).domain == "SKErrorDomain" && (error as NSError).code == 2 {
+                print("🔄 [StoreKit] Purchase was interrupted")
+                throw StoreError.interrupted
+            }
+            
             throw StoreError.purchaseFailed(error)
         }
     }
@@ -146,7 +167,7 @@ final class StoreKitService: ObservableObject {
                 // Only process active subscriptions
                 if let expirationDate = transaction.expirationDate,
                    expirationDate > Date() {
-                    await verifyAndSync(transaction)
+                    _ = await verifyAndSync(transaction) // Ignore household in restore flow
                     restoredCount += 1
                 }
             } catch {
@@ -174,7 +195,7 @@ final class StoreKitService: ObservableObject {
                     let transaction = try self.checkVerified(result)
                     print("🔔 [StoreKit] Transaction update received: \(transaction.id)")
                     
-                    await self.verifyAndSync(transaction)
+                    _ = await self.verifyAndSync(transaction) // Ignore household in background updates
                     await transaction.finish()
                 } catch {
                     print("❌ [StoreKit] Transaction verification failed: \(error)")
@@ -197,7 +218,7 @@ final class StoreKitService: ObservableObject {
     }
     
     /// Verify transaction with backend and update Premium status
-    private func verifyAndSync(_ transaction: StoreKit.Transaction) async {
+    private func verifyAndSync(_ transaction: StoreKit.Transaction) async -> Household? {
         print("🔐 [StoreKit] Verifying transaction with server: \(transaction.id)")
         
         do {
@@ -214,13 +235,14 @@ final class StoreKitService: ObservableObject {
             
             print("✅ [StoreKit] Server validated subscription. Premium expires: \(response.household.premiumExpiresAt ?? "N/A")")
             
-            // The server response will trigger a sync that updates local Premium status
-            // No need to manually update here - let the sync system handle it
+            // Return the updated household so caller can update local state immediately
+            return response.household
             
         } catch {
             print("❌ [StoreKit] Failed to verify with server: \(error)")
             // Don't throw - we don't want to block the purchase flow
             // The transaction listener will retry on next app launch
+            return nil
         }
     }
     

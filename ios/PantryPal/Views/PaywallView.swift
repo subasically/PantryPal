@@ -224,21 +224,39 @@ struct PaywallView: View {
             return
         }
         
+        errorMessage = nil // Clear any previous errors
         isLoading = true
         defer { isLoading = false }
         
         do {
-            let transaction = try await storeKit.purchase(product)
+            let (transaction, updatedHousehold) = try await storeKit.purchase(product)
             
-            if transaction != nil {
-                // Purchase successful - refresh user data
-                await authViewModel.refreshCurrentUser()
+            if let transaction = transaction {
+                // Purchase successful - update local household immediately with server response
+                if let household = updatedHousehold {
+                    print("📦 [PaywallView] Household from response:")
+                    print("  - ID: \(household.id)")
+                    print("  - isPremium: \(household.isPremium ?? false)")
+                    print("  - premiumExpiresAt: \(household.premiumExpiresAt ?? "nil")")
+                    print("  - isPremiumActive: \(household.isPremiumActive)")
+                    
+                    authViewModel.currentHousehold = household
+                    print("✅ [PaywallView] Updated authViewModel.currentHousehold")
+                    print("🔍 [PaywallView] Verifying update - authViewModel.currentHousehold.isPremiumActive: \(authViewModel.currentHousehold?.isPremiumActive ?? false)")
+                } else {
+                    // Fallback to refresh if household wasn't in response
+                    print("⚠️ [PaywallView] No household in response, refreshing from server...")
+                    await authViewModel.refreshCurrentUser()
+                }
                 
-                // Show Thank You view instead of dismissing
+                // Show Thank You view
                 showThankYou = true
+            } else {
+                // Transaction is nil - user cancelled or interrupted
+                print("ℹ️ [PaywallView] Purchase cancelled or interrupted, no error shown")
             }
-            // If transaction is nil, user cancelled - no error needed
         } catch {
+            print("❌ [PaywallView] Purchase error: \(error)")
             if let storeError = error as? StoreError {
                 errorMessage = storeError.errorDescription
             } else {

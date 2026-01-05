@@ -5,6 +5,7 @@ const fs = require('fs');
 const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../../db/pantrypal.db');
 const schemaPath = path.join(__dirname, '../../db/schema.sql');
 
+console.log('📂 [Database] Opening database at:', dbPath);
 const db = new Database(dbPath);
 
 // Enable foreign keys
@@ -21,12 +22,12 @@ console.log('✅ SQLite configured: WAL mode enabled, busy_timeout = 5000ms');
 function initializeDatabase() {
     const schema = fs.readFileSync(schemaPath, 'utf8');
     db.exec(schema);
-    
+
     // Migration: Add apple_id to users if it doesn't exist
     try {
         const tableInfo = db.prepare("PRAGMA table_info(users)").all();
         const hasAppleId = tableInfo.some(col => col.name === 'apple_id');
-        
+
         if (!hasAppleId) {
             console.log('Migrating: Adding apple_id column to users table...');
             db.prepare('ALTER TABLE users ADD COLUMN apple_id TEXT').run();
@@ -36,12 +37,12 @@ function initializeDatabase() {
     } catch (error) {
         console.error('Migration error (apple_id):', error);
     }
-    
+
     // Migration: Add premium_expires_at to households if it doesn't exist
     try {
         const tableInfo = db.prepare("PRAGMA table_info(households)").all();
         const hasPremiumExpires = tableInfo.some(col => col.name === 'premium_expires_at');
-        
+
         if (!hasPremiumExpires) {
             console.log('Migrating: Adding premium_expires_at column to households table...');
             db.prepare('ALTER TABLE households ADD COLUMN premium_expires_at DATETIME').run();
@@ -50,19 +51,19 @@ function initializeDatabase() {
     } catch (error) {
         console.error('Migration error (premium_expires_at):', error);
     }
-    
+
     // Migration: Add brand and upc to grocery_items if they don't exist
     try {
         const tableInfo = db.prepare("PRAGMA table_info(grocery_items)").all();
         const hasBrand = tableInfo.some(col => col.name === 'brand');
         const hasUpc = tableInfo.some(col => col.name === 'upc');
-        
+
         if (!hasBrand) {
             console.log('Migrating: Adding brand column to grocery_items table...');
             db.prepare('ALTER TABLE grocery_items ADD COLUMN brand TEXT').run();
             console.log('Migration successful: brand added');
         }
-        
+
         if (!hasUpc) {
             console.log('Migrating: Adding upc column to grocery_items table...');
             db.prepare('ALTER TABLE grocery_items ADD COLUMN upc TEXT').run();
@@ -72,19 +73,19 @@ function initializeDatabase() {
     } catch (error) {
         console.error('Migration error (grocery_items brand/upc):', error);
     }
-    
+
     // Migration: Add first_name and last_name to users if they don't exist
     try {
         const tableInfo = db.prepare("PRAGMA table_info(users)").all();
         const hasFirstName = tableInfo.some(col => col.name === 'first_name');
         const hasLastName = tableInfo.some(col => col.name === 'last_name');
-        
+
         if (!hasFirstName) {
             console.log('Migrating: Adding first_name column to users table...');
             db.prepare('ALTER TABLE users ADD COLUMN first_name TEXT').run();
             console.log('Migration successful: first_name added');
         }
-        
+
         if (!hasLastName) {
             console.log('Migrating: Adding last_name column to users table...');
             db.prepare('ALTER TABLE users ADD COLUMN last_name TEXT').run();

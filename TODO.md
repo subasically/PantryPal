@@ -213,6 +213,17 @@
 - [ ] Member contribution stats
 - [ ] Shared shopping lists with assignments
 
+### Marketing & Branding
+- [ ] **Branding Website**
+  - [ ] Landing page with app features
+  - [ ] Screenshots & demo video
+  - [ ] Pricing information (Free vs Premium)
+  - [ ] Download links (App Store)
+  - [ ] Privacy policy & terms of service
+  - [ ] Contact/support page
+  - [ ] SEO optimization
+  - [ ] Domain: pantrypal.app or similar
+
 ---
 
 ## ⚠️ Ruthless MVP Rule
