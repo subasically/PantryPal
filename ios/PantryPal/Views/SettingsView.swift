@@ -37,46 +37,56 @@ struct SettingsView: View {
                 // User Info Section
                 if let user = authViewModel.currentUser {
                     Section("Account") {
-                        accountInfoRow(user: user)
+                        HStack {
+                            Image(systemName: "person.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.ppPurple)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 8) {
+                                    Text(user.displayName)
+                                        .font(.headline)
+                                    
+                                    // Premium/Free Badge
+                                    if authViewModel.currentHousehold?.isPremiumActive == true {
+                                        Text("Premium")
+                                            .font(.caption2)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(
+                                                LinearGradient(
+                                                    colors: [.ppPurple, .ppBlue],
+                                                    startPoint: .leading,
+                                                    endPoint: .trailing
+                                                )
+                                            )
+                                            .cornerRadius(6)
+                                    } else {
+                                        Text("Free")
+                                            .font(.caption2)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.secondary)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(Color(.systemGray5))
+                                            .cornerRadius(6)
+                                    }
+                                }
+                                
+                                Text(user.email)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.vertical, 4)
                     }
                 }
                 
                 // Premium Section (for Free users)
                 if authViewModel.currentHousehold?.isPremiumActive != true {
-                    Section {
-                        Button {
-                            showingPaywall = true
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "crown.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(
-                                        LinearGradient(
-                                            colors: [.ppPurple, .ppBlue],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .frame(width: 24)
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Upgrade to Premium")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    Text("Unlimited items & household sharing")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
+                    premiumUpgradeSection
                 }
                 
                 // Household Section
@@ -371,58 +381,41 @@ struct SettingsView: View {
     
     // MARK: - Helper Views
     
-    private func accountInfoRow(user: User) -> some View {
-        HStack {
-            Image(systemName: "person.circle.fill")
-                .font(.system(size: 40))
-                .foregroundColor(.ppPurple)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    Text(user.displayName)
-                        .font(.headline)
+    private var premiumUpgradeSection: some View {
+        Section {
+            Button {
+                showingPaywall = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "crown.fill")
+                        .font(.title3)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.ppPurple, .ppBlue],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 24)
                     
-                    premiumBadge
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Upgrade to Premium")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text("Unlimited items & household sharing")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-                
-                Text(user.email)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                .padding(.vertical, 4)
             }
         }
-        .padding(.vertical, 4)
-    }
-    
-    private var premiumBadge: some View {
-        Group {
-            if authViewModel.currentHousehold?.isPremiumActive == true {
-                Text("Premium")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(premiumGradient)
-                    .cornerRadius(6)
-            } else {
-                Text("Free")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color(.systemGray5))
-                    .cornerRadius(6)
-            }
-        }
-    }
-    
-    private var premiumGradient: LinearGradient {
-        LinearGradient(
-            colors: [.ppPurple, .ppBlue],
-            startPoint: .leading,
-            endPoint: .trailing
-        )
     }
 }
 
