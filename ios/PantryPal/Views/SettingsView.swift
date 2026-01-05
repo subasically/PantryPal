@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var resetVerificationText = ""
     @State private var isResetting = false
     @State private var resetError: String?
+    @State private var showingPaywall = false
     
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -80,6 +81,44 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.vertical, 4)
+                    }
+                }
+                
+                // Premium Section (for Free users)
+                if authViewModel.currentHousehold?.isPremiumActive != true {
+                    Section {
+                        Button {
+                            showingPaywall = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "crown.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [.ppPurple, .ppBlue],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .frame(width: 24)
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Upgrade to Premium")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                    Text("Unlimited items & household sharing")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 4)
+                        }
                     }
                 }
                 
@@ -317,6 +356,11 @@ struct SettingsView: View {
                 Button("OK") { resetError = nil }
             } message: {
                 Text(resetError ?? "Unknown error")
+            }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView()
+                    .environment(authViewModel)
+                    .environmentObject(ConfettiCenter.shared)
             }
         }
     }
