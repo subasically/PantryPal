@@ -228,7 +228,7 @@ struct PaywallView: View {
                 // Show success with confetti
                 confettiCenter.celebrate()
                 ToastCenter.shared.show(
-                    message: "Welcome to Premium! 🎉",
+                    "Welcome to Premium! 🎉",
                     type: .success
                 )
                 
@@ -259,13 +259,13 @@ struct PaywallView: View {
             // Check if user is now premium
             if authViewModel.currentHousehold?.isPremiumActive == true {
                 ToastCenter.shared.show(
-                    message: "Purchases restored successfully!",
+                    "Purchases restored successfully!",
                     type: .success
                 )
                 dismiss()
             } else {
                 ToastCenter.shared.show(
-                    message: "No active subscriptions found",
+                    "No active subscriptions found",
                     type: .info
                 )
             }
