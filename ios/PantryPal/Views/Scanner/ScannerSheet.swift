@@ -210,19 +210,19 @@ struct ScannerSheet: View {
                     
                     // Quantity Stepper
                     HStack(spacing: 8) {
-                        Text("Qty")
+                        Text("Qty:")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-                        
-                        Stepper(value: $quantity, in: 1...99) {
-                            EmptyView()
-                        }
-                        .labelsHidden()
                         
                         Text("\(quantity)")
                             .font(.headline)
                             .monospacedDigit()
                             .frame(minWidth: 20)
+                        
+                        Stepper(value: $quantity, in: 1...99) {
+                            EmptyView()
+                        }
+                        .labelsHidden()
                     }
                 }
                 .padding()

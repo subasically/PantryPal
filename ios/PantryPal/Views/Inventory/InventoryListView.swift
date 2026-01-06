@@ -177,6 +177,9 @@ struct InventoryListView: View {
                                 ToastCenter.shared.show("Added \(name) to pantry!", type: .success)
                                 // Auto-remove from grocery if item was restocked
                                 await tryAutoRemoveFromGrocery(name: name, upc: upc)
+                                
+                                // Check if we've reached the limit (Free tier only)
+                                await checkAndShowPaywallIfAtLimit()
                             } else {
                                 // Error is handled in viewModel.errorMessage
                             }
@@ -190,6 +193,9 @@ struct InventoryListView: View {
                             ToastCenter.shared.show(message.contains("Added") || message.contains("Updated") ? message : "Added \(message) to pantry!", type: .success)
                             // Trigger auto-remove check after scanner success
                             await checkRecentlyAddedForGroceryRemoval()
+                            
+                            // Check if we've reached the limit (Free tier only)
+                            await checkAndShowPaywallIfAtLimit()
                         }
                     })
                     .environment(authViewModel)
@@ -202,6 +208,9 @@ struct InventoryListView: View {
                         ToastCenter.shared.show("Added \(name) to pantry!", type: .success)
                         // Auto-remove from grocery if item was restocked
                         await tryAutoRemoveFromGrocery(name: name, upc: nil)
+                        
+                        // Check if we've reached the limit (Free tier only)
+                        await checkAndShowPaywallIfAtLimit()
                     }
                 })
                 .environment(authViewModel)
@@ -230,6 +239,7 @@ struct InventoryListView: View {
             .task {
                 print("🚀 [InventoryListView] View loaded, starting initial sync sequence")
                 viewModel.setContext(modelContext)
+                viewModel.currentHousehold = authViewModel.currentHousehold
                 groceryViewModel.setModelContext(modelContext)
                 await viewModel.loadInventory()
                 await viewModel.loadLocations()
@@ -261,9 +271,28 @@ struct InventoryListView: View {
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .showPaywall)) { _ in
+                print("💰 [InventoryListView] Received showPaywall notification")
+                print("   - showingSettings: \(showingSettings)")
+                print("   - showingScanner: \(showingScanner)")
+                print("   - showingAddCustom: \(showingAddCustom)")
+                
+                // Dismiss any open sheets first (scanner or add custom)
+                if showingScanner {
+                    print("📷 [InventoryListView] Dismissing scanner before showing paywall")
+                    showingScanner = false
+                }
+                if showingAddCustom {
+                    print("✏️ [InventoryListView] Dismissing add custom before showing paywall")
+                    showingAddCustom = false
+                }
+                
                 // Only show paywall if we're not already showing settings (which handles its own paywall)
                 if !showingSettings {
-                    showingPaywall = true
+                    // Small delay to let sheet dismissal complete
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        print("💰 [InventoryListView] Showing paywall")
+                        showingPaywall = true
+                    }
                     // Refresh inventory to revert local optimistic changes
                     Task { await viewModel.loadInventory() }
                 }
@@ -296,7 +325,7 @@ struct InventoryListView: View {
     }
     
     private func checkLimit() -> Bool {
-        let isPremium = authViewModel.currentHousehold?.isPremium ?? false
+        let isPremium = authViewModel.currentHousehold?.isPremiumActive ?? false
         let count = viewModel.items.count
         
         if !isPremium && count >= authViewModel.freeLimit {
@@ -436,6 +465,39 @@ struct InventoryListView: View {
         // This is a fallback since scanner doesn't give us item details
         guard let recentItem = viewModel.items.first else { return }
         await attemptGroceryAutoRemove(forItem: recentItem)
+    }
+    
+    /// Check if user has reached the free tier limit and show paywall proactively
+    @MainActor
+    private func checkAndShowPaywallIfAtLimit() async {
+        // Only check for non-Premium users
+        let isPremium = authViewModel.currentHousehold?.isPremiumActive ?? false
+        guard !isPremium else {
+            print("💎 [LimitCheck] User is Premium, skipping limit check")
+            return
+        }
+        
+        let itemCount = viewModel.items.count
+        print("📊 [LimitCheck] Current item count: \(itemCount)")
+        
+        if itemCount >= 25 {
+            print("🚨 [LimitCheck] User has reached the 25 item limit!")
+            print("   - Dismissing scanner/add-custom sheet")
+            print("   - Will show paywall after brief delay")
+            
+            // Dismiss any open sheets
+            showingScanner = false
+            showingAddCustom = false
+            
+            // Show success message with limit notification
+            ToastCenter.shared.show("You've reached your 25 item limit. Upgrade to add unlimited items!", type: .info)
+            
+            // Small delay to let sheet dismissal complete, then show paywall
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                print("💰 [LimitCheck] Showing paywall")
+                showingPaywall = true
+            }
+        }
     }
     
     private var emptyStateContent: some View {

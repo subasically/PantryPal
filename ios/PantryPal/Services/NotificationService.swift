@@ -8,6 +8,7 @@ final class NotificationService: ObservableObject {
     
     @Published var isAuthorized = false
     @Published var deviceToken: String?
+    var currentHousehold: Household?
     
     private nonisolated init() {
         Task { @MainActor in
@@ -101,7 +102,13 @@ final class NotificationService: ObservableObject {
     // MARK: - Expiration Notifications
     
     func scheduleExpirationNotifications(for items: [InventoryItem]) async {
-        guard isAuthorized else { return }
+        // Premium-only feature
+        guard isAuthorized,
+              let household = currentHousehold,
+              household.isPremiumActive else {
+            print("⚠️ [NotificationService] Expiration notifications require Premium")
+            return
+        }
         
         // Remove all existing expiration notifications
         let center = UNUserNotificationCenter.current()
@@ -122,7 +129,17 @@ final class NotificationService: ObservableObject {
             // Skip if already expired
             if expDate < now { continue }
             
-            // Schedule notification for 3 days before expiration
+            // Schedule notification for 7 days before expiration (Premium)
+            if let notifyDate = calendar.date(byAdding: .day, value: -7, to: expDate), notifyDate > now {
+                await scheduleNotification(
+                    id: "expiration_7d_\(item.id)",
+                    title: "Item Expiring Soon",
+                    body: "\(item.displayName) will expire in 7 days",
+                    date: notifyDate
+                )
+            }
+            
+            // Schedule notification for 3 days before expiration (Premium)
             if let notifyDate = calendar.date(byAdding: .day, value: -3, to: expDate), notifyDate > now {
                 await scheduleNotification(
                     id: "expiration_3d_\(item.id)",
@@ -132,7 +149,7 @@ final class NotificationService: ObservableObject {
                 )
             }
             
-            // Schedule notification for 1 day before expiration
+            // Schedule notification for 1 day before expiration (Premium)
             if let notifyDate = calendar.date(byAdding: .day, value: -1, to: expDate), notifyDate > now {
                 await scheduleNotification(
                     id: "expiration_1d_\(item.id)",

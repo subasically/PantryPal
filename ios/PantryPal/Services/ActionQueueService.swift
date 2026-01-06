@@ -46,18 +46,28 @@ final class ActionQueueService: Sendable {
                 } catch {
                     print("Failed to process action \(actionType): \(error)")
                     
-                    // Handle permanent errors (403 Forbidden - Limit Reached)
-                    if let apiError = error as? APIError, 
-                       case .serverError(let msg) = apiError, 
-                       msg.contains("limit reached") || msg.contains("Status 403") {
-                        print("Action rejected by server (Limit Reached). Removing from queue.")
-                        modelContext.delete(action)
-                        try? modelContext.save()
+                    // Handle permanent errors that should remove action from queue
+                    if let apiError = error as? APIError, case .serverError(let msg) = apiError {
+                        // 403 Forbidden - Limit Reached
+                        if msg.contains("limit reached") || msg.contains("Status 403") {
+                            print("Action rejected by server (Limit Reached). Removing from queue.")
+                            modelContext.delete(action)
+                            try? modelContext.save()
+                            
+                            // Trigger Paywall
+                            NotificationCenter.default.post(name: .showPaywall, object: nil)
+                            continue
+                        }
                         
-                        // Trigger Paywall
-                        NotificationCenter.default.post(name: .showPaywall, object: nil)
-                        
-                        continue
+                        // 404 Not Found - Item no longer exists (skip for DELETE since those are already handled)
+                        if msg.contains("not found") || msg.contains("Status 404") {
+                            if action.method != "DELETE" {
+                                print("Action rejected by server (Not Found). Removing stale action from queue.")
+                                modelContext.delete(action)
+                                try? modelContext.save()
+                                continue
+                            }
+                        }
                     }
                     
                     action.retryCount += 1

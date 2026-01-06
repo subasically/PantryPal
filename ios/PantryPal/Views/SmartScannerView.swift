@@ -67,21 +67,36 @@ struct SmartScannerView: View {
     private var barcodeStep: some View {
         BarcodeScannerView(scannedCode: $scannedUPC, isPresented: .constant(true), isScanning: $isScanning) { code in
             scannedUPC = code
+            print("📦 [SmartScanner] Scanned UPC: \(code)")
+            
             // Try to lookup product first
             Task {
                 isProcessing = true
+                print("🔍 [SmartScanner] Starting UPC lookup for: \(code)")
+                
                 do {
                     let result = try await APIService.shared.lookupUPC(code)
+                    print("✅ [SmartScanner] UPC lookup succeeded for \(code)")
+                    print("   - Response: \(result)")
+                    
                     if let product = result.product {
+                        print("✅ [SmartScanner] Product found: \(product.name) (brand: \(product.brand ?? "nil"))")
                         productName = product.name
                         // If found, jump to review or expiration?
                         // Let's go to expiration to be thorough
                         currentStep = .expirationPhoto
                     } else {
+                        print("⚠️ [SmartScanner] UPC lookup returned nil product for \(code)")
                         // Not found, need photo for name
                         currentStep = .productPhoto
                     }
                 } catch {
+                    print("❌ [SmartScanner] UPC lookup failed for \(code)")
+                    print("   - Error: \(error)")
+                    print("   - Error type: \(type(of: error))")
+                    if let apiError = error as? APIError {
+                        print("   - APIError case: \(apiError)")
+                    }
                     currentStep = .productPhoto
                 }
                 isProcessing = false

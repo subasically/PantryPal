@@ -85,6 +85,58 @@
 
 ## Post-MVP Features (After Revenue Validation)
 
+### 🔥 High-Priority Competitive Differentiators
+Based on market research of 46k+ monthly searches and competitor analysis:
+
+- [ ] **Grocery Store API Integration** (Cooklist's standout feature)
+  - [ ] Research grocery APIs: Instacart, Kroger, Target, Walmart
+  - [ ] Auto-import purchase history to inventory
+  - [ ] Parse receipts via email integration
+  - [ ] Reduce manual entry friction (biggest user complaint)
+  - [ ] Privacy controls: opt-in only, clear data usage
+  - Priority: HIGH - Users cite "tedious updates" as #1 abandonment reason
+
+- [ ] **Web Interface** (Competitive gap)
+  - [ ] Read-only web view for inventory/grocery lists
+  - [ ] Bulk data entry interface (easier than mobile)
+  - [ ] Family members can access from desktop
+  - [ ] Export/print functionality
+  - Priority: HIGH - Multi-platform is table stakes per research
+
+- [ ] **Voice Input for Adding Items** (Requested feature)
+  - [ ] "Hey Siri, add 2 cans of tomatoes to PantryPal"
+  - [ ] iOS Speech Recognition for hands-free entry
+  - [ ] Reduce friction while cooking/unpacking groceries
+  - Priority: MEDIUM - Nice-to-have, reduces manual typing
+
+- [ ] **Audit Log / Activity Timeline** (Pantry Check's popular feature)
+  - [ ] Log all inventory changes (who, what, when)
+  - [ ] Household activity feed
+  - [ ] "Who used the last milk?" visibility
+  - [ ] Rollback capability for mistakes
+  - Priority: MEDIUM - Power user feature, not critical for conversion
+
+- [ ] **Budget & Price Tracking** (NoWaste has this)
+  - [ ] Optional price per item
+  - [ ] Monthly spending reports
+  - [ ] Waste cost calculation (expired items)
+  - [ ] Category-based budget alerts
+  - Priority: MEDIUM - Appeals to cost-conscious segment
+
+- [ ] **Export Data (CSV/PDF)** (Trust-builder)
+  - [ ] Download inventory as CSV
+  - [ ] PDF reports for insurance/moving
+  - [ ] User data ownership & portability
+  - [ ] GDPR compliance for EU market
+  - Priority: MEDIUM - Privacy/trust signal, not used often
+
+- [ ] **Offline Mode with Optional Cloud Sync** (Privacy-focused)
+  - [ ] Local-first data storage
+  - [ ] Optional cloud sync (user choice)
+  - [ ] Works without account sign-in
+  - [ ] Addresses privacy concerns (no data mining)
+  - Priority: LOW - Niche audience, complex to implement
+
 ### Real-Time Sync (Multi-User) ✅ IMPLEMENTED
 - [x] **Polling Implemented** (60-second interval)
   - ✅ Timer-based background sync every 60s

@@ -11,10 +11,23 @@ router.use(authenticateToken);
 router.get('/lookup/:upc', async (req, res) => {
     try {
         const { upc } = req.params;
+        console.log(`🔍 [Products] UPC lookup request: ${upc}`);
+        console.log(`   - User ID: ${req.user.id}`);
+        console.log(`   - Household ID: ${req.user.householdId}`);
+
         const result = await productService.lookupProductByUPC(upc);
+
+        console.log(`✅ [Products] UPC lookup result for ${upc}:`);
+        console.log(`   - Product found: ${result.product !== null}`);
+        if (result.product) {
+            console.log(`   - Product ID: ${result.product.id}`);
+            console.log(`   - Product name: ${result.product.name}`);
+            console.log(`   - Product brand: ${result.product.brand || 'null'}`);
+        }
+
         res.json(result);
     } catch (error) {
-        console.error('UPC lookup error:', error);
+        console.error('❌ [Products] UPC lookup error:', error);
         res.status(500).json({ error: 'UPC lookup failed' });
     }
 });

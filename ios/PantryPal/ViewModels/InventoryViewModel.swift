@@ -13,6 +13,7 @@ final class InventoryViewModel {
     var successMessage: String?
     
     private var modelContext: ModelContext?
+    var currentHousehold: Household?
     
     func setContext(_ context: ModelContext) {
         self.modelContext = context
@@ -31,7 +32,8 @@ final class InventoryViewModel {
             // Convert to domain model
             self.items = sdItems.map { $0.toDomain() }
             
-            // Schedule notifications
+            // Schedule notifications (Premium only, handled in NotificationService)
+            NotificationService.shared.currentHousehold = currentHousehold
             await NotificationService.shared.scheduleExpirationNotifications(for: items)
         } catch {
             errorMessage = "Failed to load local inventory: \(error.userFriendlyMessage)"
@@ -140,28 +142,70 @@ final class InventoryViewModel {
     }
     
     func updateItem(id: String, quantity: Int?, expirationDate: Date?, notes: String?, locationId: String? = nil) async {
-        guard let context = modelContext else { return }
+        print("📝 [InventoryViewModel] updateItem called for ID: \(id)")
+        print("   - Quantity: \(quantity?.description ?? "nil")")
+        print("   - Expiration date: \(expirationDate?.description ?? "nil (clearing expiration)")")
+        print("   - Notes: \(notes ?? "nil")")
+        print("   - Location ID: \(locationId ?? "nil")")
+        
+        guard let context = modelContext else {
+            print("❌ [InventoryViewModel] modelContext is nil")
+            return
+        }
         errorMessage = nil
         
         // 1. Update local item
         let descriptor = FetchDescriptor<SDInventoryItem>(predicate: #Predicate { $0.id == id })
-        guard let item = try? context.fetch(descriptor).first else { return }
+        guard let item = try? context.fetch(descriptor).first else {
+            print("❌ [InventoryViewModel] Item not found in SwiftData: \(id)")
+            return
+        }
         
-        if let q = quantity { item.quantity = q }
-        if let e = expirationDate { item.expirationDate = e } // Handle nil clearing?
-        if let n = notes { item.notes = n }
+        print("📦 [InventoryViewModel] Current item state:")
+        print("   - Current quantity: \(item.quantity)")
+        print("   - Current expiration: \(item.expirationDate?.description ?? "nil")")
+        print("   - Current notes: \(item.notes ?? "nil")")
+        print("   - Current location: \(item.locationId)")
+        
+        if let q = quantity { 
+            print("   ✏️ Updating quantity: \(item.quantity) → \(q)")
+            item.quantity = q 
+        }
+        
+        // CRITICAL: Handle explicit nil to clear expiration
+        if expirationDate == nil {
+            print("   🗑️ Clearing expiration date (was: \(item.expirationDate?.description ?? "nil"))")
+            item.expirationDate = nil
+        } else if let e = expirationDate {
+            print("   📅 Setting expiration date: \(e)")
+            item.expirationDate = e
+        }
+        
+        if let n = notes { 
+            print("   📝 Updating notes: \(item.notes ?? "nil") → \(n)")
+            item.notes = n 
+        }
         if let l = locationId { 
+            print("   📍 Updating location: \(item.locationId) → \(l)")
             item.locationId = l
             let locDesc = FetchDescriptor<SDLocation>(predicate: #Predicate { $0.id == l })
             item.location = try? context.fetch(locDesc).first
         }
         
-        try? context.save()
+        do {
+            try context.save()
+            print("✅ [InventoryViewModel] SwiftData saved successfully")
+        } catch {
+            print("❌ [InventoryViewModel] Failed to save SwiftData: \(error)")
+        }
         
         // 2. Enqueue action
         let dateString: String? = expirationDate.map { 
             let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; return f.string(from: $0) 
         }
+        
+        print("📤 [InventoryViewModel] Preparing API request:")
+        print("   - Expiration date string: \(dateString ?? "nil")")
         
         struct UpdateRequest: Codable {
             let quantity: Int?
@@ -172,6 +216,8 @@ final class InventoryViewModel {
         
         let body = UpdateRequest(quantity: quantity, expirationDate: dateString, notes: notes, locationId: locationId)
         
+        print("📋 [InventoryViewModel] Request body: quantity=\(quantity?.description ?? "nil"), expiration=\(dateString ?? "nil"), notes=\(notes ?? "nil"), location=\(locationId ?? "nil")")
+        
         ActionQueueService.shared.enqueue(
             context: context,
             type: .update,
@@ -180,10 +226,14 @@ final class InventoryViewModel {
             body: body
         )
         
+        print("✅ [InventoryViewModel] Action enqueued, processing queue...")
+        
         // 3. Process queue immediately
         await ActionQueueService.shared.processQueue(modelContext: context)
         
+        print("✅ [InventoryViewModel] Queue processed, reloading inventory...")
         await loadInventory()
+        print("✅ [InventoryViewModel] updateItem completed")
     }
     
     func deleteItem(id: String) async {

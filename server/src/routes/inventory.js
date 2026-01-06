@@ -127,15 +127,26 @@ router.post('/quick-add', async (req, res) => {
 router.put('/:id', (req, res) => {
     try {
         const { quantity, expirationDate, notes, locationId } = req.body;
+        
+        console.log(`📝 [Inventory] Update request for item: ${req.params.id}`);
+        console.log(`   - User ID: ${req.user.id}`);
+        console.log(`   - Household ID: ${req.user.householdId}`);
+        console.log(`   - Request body:`, JSON.stringify(req.body));
+        console.log(`   - Expiration date: ${expirationDate === null ? 'NULL (clearing)' : expirationDate === undefined ? 'UNDEFINED (not provided)' : expirationDate}`);
+        
         const updated = inventoryService.updateInventoryItem(req.user.householdId, req.params.id, {
             quantity,
             expirationDate,
             notes,
             locationId
         });
+        
+        console.log(`✅ [Inventory] Item updated successfully: ${req.params.id}`);
+        console.log(`   - Updated expiration: ${updated.expiration_date || 'null'}`);
+        
         res.json(updated);
     } catch (error) {
-        console.error('Update inventory error:', error);
+        console.error('❌ [Inventory] Update inventory error:', error);
         if (error.code === 'PREMIUM_REQUIRED') {
             return res.status(403).json({ 
                 error: error.message,

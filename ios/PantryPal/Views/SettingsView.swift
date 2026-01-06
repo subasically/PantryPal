@@ -66,8 +66,10 @@ struct SettingsView: View {
     }
     
     private var notificationsSection: some View {
-        Section("Notifications") {
-            if notificationService.isAuthorized {
+        Section {
+            if let household = authViewModel.currentHousehold, household.isPremiumActive {
+                // Premium users see notification toggle
+                if notificationService.isAuthorized {
                 HStack {
                     Image(systemName: "bell.badge.fill")
                         .foregroundColor(.ppGreen)
@@ -113,6 +115,22 @@ struct SettingsView: View {
                     }
                 }
             }
+            } else {
+                // Free users see Premium upsell
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "bell.badge.fill")
+                            .foregroundColor(.ppPurple)
+                            .frame(width: 24)
+                        Text("Smart Notifications")
+                    }
+                    Text("Get alerts 7, 3, and 1 day before items expire. Upgrade to Premium to unlock.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        } header: {
+            Text("Notifications")
         }
     }
     

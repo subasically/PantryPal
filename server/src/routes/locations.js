@@ -22,7 +22,10 @@ router.post('/seed-defaults', (req, res) => {
             { name: 'Pantry', sortOrder: 0 },
             { name: 'Fridge', sortOrder: 1 },
             { name: 'Freezer', sortOrder: 2 },
-            { name: 'Other', sortOrder: 3 }
+            { name: 'Cabinet', sortOrder: 3 },
+            { name: 'Garage', sortOrder: 4 },
+            { name: 'Basement', sortOrder: 5 },
+            { name: 'Other', sortOrder: 6 }
         ];
 
         for (const loc of defaultLocations) {

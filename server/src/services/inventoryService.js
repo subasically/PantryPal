@@ -266,8 +266,15 @@ function addInventoryItem(householdId, itemData) {
 function updateInventoryItem(householdId, itemId, updates) {
     const { quantity, expirationDate, notes, locationId } = updates;
 
+    console.log(`📝 [InventoryService] updateInventoryItem called`);
+    console.log(`   - Item ID: ${itemId}`);
+    console.log(`   - Household ID: ${householdId}`);
+    console.log(`   - Updates:`, JSON.stringify(updates));
+    console.log(`   - Expiration date in updates: ${expirationDate === null ? 'NULL (explicit clear)' : expirationDate === undefined ? 'UNDEFINED (not provided)' : expirationDate}`);
+
     // Check write permission
     if (!checkWritePermission(householdId)) {
+        console.log(`❌ [InventoryService] Write permission denied for household: ${householdId}`);
         const error = new Error('Household sharing is a Premium feature. Upgrade to edit items.');
         error.code = 'PREMIUM_REQUIRED';
         throw error;
@@ -276,12 +283,20 @@ function updateInventoryItem(householdId, itemId, updates) {
     const item = db.prepare('SELECT * FROM inventory WHERE id = ? AND household_id = ?').get(itemId, householdId);
     
     if (!item) {
+        console.log(`❌ [InventoryService] Item not found: ${itemId}`);
         throw new Error('Inventory item not found');
     }
+
+    console.log(`📦 [InventoryService] Current item state:`);
+    console.log(`   - Current quantity: ${item.quantity}`);
+    console.log(`   - Current expiration: ${item.expiration_date || 'null'}`);
+    console.log(`   - Current notes: ${item.notes || 'null'}`);
+    console.log(`   - Current location: ${item.location_id}`);
 
     // Location is REQUIRED for all inventory items
     const finalLocationId = locationId !== undefined ? locationId : item.location_id;
     if (!finalLocationId) {
+        console.log(`❌ [InventoryService] Location required but not provided`);
         const error = new Error('Location is required for inventory items');
         error.code = 'LOCATION_REQUIRED';
         throw error;
@@ -291,29 +306,45 @@ function updateInventoryItem(householdId, itemId, updates) {
     const location = db.prepare('SELECT id FROM locations WHERE id = ? AND household_id = ?')
         .get(finalLocationId, householdId);
     if (!location) {
+        console.log(`❌ [InventoryService] Invalid location: ${finalLocationId}`);
         const error = new Error('Invalid location or location does not belong to this household');
         error.code = 'INVALID_LOCATION';
         throw error;
     }
+
+    const finalQuantity = quantity !== undefined ? quantity : item.quantity;
+    const finalExpiration = expirationDate !== undefined ? expirationDate : item.expiration_date;
+    const finalNotes = notes !== undefined ? notes : item.notes;
+    const finalLocation = locationId !== undefined ? locationId : item.location_id;
+
+    console.log(`💾 [InventoryService] Updating database with:`);
+    console.log(`   - Quantity: ${finalQuantity}`);
+    console.log(`   - Expiration: ${finalExpiration === null ? 'NULL (clearing)' : finalExpiration || 'null'}`);
+    console.log(`   - Notes: ${finalNotes || 'null'}`);
+    console.log(`   - Location: ${finalLocation}`);
 
     db.prepare(`
         UPDATE inventory 
         SET quantity = ?, expiration_date = ?, notes = ?, location_id = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
     `).run(
-        quantity !== undefined ? quantity : item.quantity,
-        expirationDate !== undefined ? expirationDate : item.expiration_date,
-        notes !== undefined ? notes : item.notes,
-        locationId !== undefined ? locationId : item.location_id,
+        finalQuantity,
+        finalExpiration,
+        finalNotes,
+        finalLocation,
         itemId
     );
 
+    console.log(`✅ [InventoryService] Database updated successfully`);
+
     logSync(householdId, 'inventory', itemId, 'update', { 
-        quantity: quantity !== undefined ? quantity : item.quantity,
-        expirationDate: expirationDate !== undefined ? expirationDate : item.expiration_date,
-        notes: notes !== undefined ? notes : item.notes,
-        locationId: locationId !== undefined ? locationId : item.location_id
+        quantity: finalQuantity,
+        expirationDate: finalExpiration,
+        notes: finalNotes,
+        locationId: finalLocation
     });
+
+    console.log(`✅ [InventoryService] Sync logged`);
 
     const updated = db.prepare(`
         SELECT i.*, p.name as product_name, p.brand as product_brand, 

@@ -170,30 +170,45 @@ struct EditItemView: View {
     }
     
     private func saveChanges() {
+        print("💾 [EditItemView] Save button tapped for item: \(item.id)")
+        print("   - Original expiration: \(item.expirationDate ?? "nil")")
+        print("   - Has expiration toggle: \(hasExpiration)")
+        print("   - New expiration date: \(hasExpiration ? expirationDate.description : "nil (toggled off)")")
+        print("   - Quantity: \(quantity)")
+        print("   - Location ID: \(selectedLocationId)")
+        print("   - Notes: \(notes.isEmpty ? "empty" : notes)")
+        
         // Validate location before saving
         guard !selectedLocationId.isEmpty else {
+            print("❌ [EditItemView] Validation failed: Location is empty")
             validationError = "Location required"
             HapticService.shared.error()
             return
         }
         
         guard viewModel.locations.contains(where: { $0.id == selectedLocationId }) else {
+            print("❌ [EditItemView] Validation failed: Invalid location ID")
             validationError = "Invalid location"
             HapticService.shared.error()
             return
         }
         
+        print("✅ [EditItemView] Validation passed, calling updateItem...")
         isLoading = true
         validationError = nil
         
         Task {
+            let finalExpiration = hasExpiration ? expirationDate : nil
+            print("📤 [EditItemView] Calling updateItem with expiration: \(finalExpiration?.description ?? "nil")")
+            
             await viewModel.updateItem(
                 id: item.id,
                 quantity: quantity,
-                expirationDate: hasExpiration ? expirationDate : nil,
+                expirationDate: finalExpiration,
                 notes: notes.isEmpty ? nil : notes,
                 locationId: selectedLocationId
             )
+            print("✅ [EditItemView] updateItem completed, dismissing sheet")
             editingItem = nil
             isLoading = false
         }

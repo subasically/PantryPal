@@ -63,6 +63,8 @@ struct PaywallView: View {
                         FeatureRow(icon: "infinity", title: "Unlimited Items", description: "Store as many items as you need")
                         FeatureRow(icon: "person.2.fill", title: "Household Sharing", description: "Sync with your family in real-time")
                         FeatureRow(icon: "icloud.fill", title: "Cloud Sync Across Devices", description: "Reliable backup for all your devices")
+                        FeatureRow(icon: "cart.fill.badge.plus", title: "Auto-add to Grocery", description: "Never forget what you need to buy")
+                        FeatureRow(icon: "bell.badge.fill", title: "Smart Notifications", description: "Get alerts before items expire")
                     }
                     .padding(.vertical, 20)
                     .padding(.horizontal)
@@ -150,29 +152,6 @@ struct PaywallView: View {
                     }
                     .disabled(isLoading)
                 }
-                
-                #if DEBUG
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        Task {
-                            await simulatePremiumUpgrade()
-                        }
-                    } label: {
-                        Label("Simulate Premium", systemImage: "ladybug.fill")
-                            .foregroundColor(.orange)
-                    }
-                    .disabled(isLoading)
-                }
-                
-                ToolbarItem(placement: .secondaryAction) {
-                    Button {
-                        confettiCenter.celebrate()
-                    } label: {
-                        Label("Test Confetti", systemImage: "party.popper.fill")
-                            .foregroundColor(.purple)
-                    }
-                }
-                #endif
             }
             .alert("Error", isPresented: .constant(errorMessage != nil)) {
                 Button("OK") {
@@ -243,6 +222,9 @@ struct PaywallView: View {
                     authViewModel.currentHousehold = household
                     print("✅ [PaywallView] Updated authViewModel.currentHousehold")
                     print("🔍 [PaywallView] Verifying update - authViewModel.currentHousehold.isPremiumActive: \(authViewModel.currentHousehold?.isPremiumActive ?? false)")
+                    
+                    // Update NotificationService so it can schedule notifications
+                    NotificationService.shared.currentHousehold = household
                 } else {
                     // Fallback to refresh if household wasn't in response
                     print("⚠️ [PaywallView] No household in response, refreshing from server...")

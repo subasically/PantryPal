@@ -220,7 +220,25 @@ final class APIService: Sendable {
     // MARK: - Products
     
     func lookupUPC(_ upc: String) async throws -> UPCLookupResponse {
-        try await request(endpoint: "/products/lookup/\(upc)")
+        print("🔍 [APIService] lookupUPC called with UPC: \(upc)")
+        print("   - Endpoint: /products/lookup/\(upc)")
+        print("   - Base URL: \(baseURL)")
+        
+        do {
+            let response: UPCLookupResponse = try await request(endpoint: "/products/lookup/\(upc)")
+            print("✅ [APIService] lookupUPC response received for \(upc)")
+            print("   - Product found: \(response.product != nil)")
+            if let product = response.product {
+                print("   - Product ID: \(product.id)")
+                print("   - Product name: \(product.name)")
+                print("   - Product brand: \(product.brand ?? "nil")")
+            }
+            return response
+        } catch {
+            print("❌ [APIService] lookupUPC failed for \(upc)")
+            print("   - Error: \(error)")
+            throw error
+        }
     }
     
     func createProduct(upc: String?, name: String, brand: String?, description: String?, category: String?) async throws -> Product {
