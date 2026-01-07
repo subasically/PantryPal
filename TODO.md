@@ -283,6 +283,31 @@ Based on market research of 46k+ monthly searches and competitor analysis:
 - [ ] Member contribution stats
 - [ ] Shared shopping lists with assignments
 
+### Data Management
+- [ ] **Household Joining UX with Existing Data:**
+  - [ ] Scenario: User has their own household with inventory + grocery items, then joins another household
+  - [ ] Current behavior: User's old household is abandoned (orphaned data)
+  - [ ] Questions to resolve:
+    - [ ] What happens to the user's old household? (Soft delete? Mark as archived?)
+    - [ ] What happens to their inventory items? (Lost? Moved? Merged?)
+    - [ ] What happens to their grocery items? (Lost? Moved? Merged?)
+  - [ ] Potential solutions:
+    - [ ] **Option A: Silent Loss** - User loses all data (current behavior, needs warning UX)
+    - [ ] **Option B: Data Migration** - Automatically move their items to new household
+    - [ ] **Option C: Merge UI** - Let user choose which items to bring/leave behind
+    - [ ] **Option D: Multi-Household Support** - Let user switch between households
+  - [ ] Implementation considerations:
+    - [ ] Add confirmation dialog: "You'll lose access to X items in your current pantry"
+    - [ ] Provide export option before joining (CSV/JSON download)
+    - [ ] Allow user to preview new household before committing
+    - [ ] Support "trial period" where they can return to old household
+  - [ ] Testing scenarios:
+    - [ ] User A creates household, adds 50 items
+    - [ ] User B invites User A to join their household (100 items)
+    - [ ] What does User A see? What choices do they get?
+    - [ ] Can User A go back if they made a mistake?
+  - [ ] Priority: Post-MVP (add warning dialog in MVP, full UX later)
+
 ### Marketing & Branding
 - [ ] **Branding Website**
   - [ ] Landing page with app features

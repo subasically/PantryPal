@@ -6,9 +6,10 @@ const { logSync } = require('./syncLogger');
 /**
  * Lookup product by UPC (local database first, then external API)
  * @param {string} upc - Product UPC
+ * @param {string} householdId - Household ID for sync logging
  * @returns {Object} { found, product, source }
  */
-async function lookupProductByUPC(upc) {
+async function lookupProductByUPC(upc, householdId) {
     console.log(`🔍 [ProductService] lookupProductByUPC called with UPC: ${upc}`);
 
     // Check local database first
@@ -57,6 +58,19 @@ async function lookupProductByUPC(upc) {
                 lookupResult.image_url,
                 lookupResult.category
             );
+            
+            // Log for sync - products are global (household_id = householdId from caller)
+            if (householdId) {
+                logSync(householdId, 'product', productId, 'create', {
+                    upc: lookupResult.upc,
+                    name: lookupResult.name,
+                    brand: lookupResult.brand,
+                    description: lookupResult.description,
+                    image_url: lookupResult.image_url,
+                    category: lookupResult.category,
+                    is_custom: false
+                });
+            }
 
             product = db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
             console.log(`✅ [ProductService] Product cached with ID: ${productId}`);
@@ -189,7 +203,7 @@ function updateProduct(householdId, productId, updates) {
     const updatedProduct = db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
 
     // Log sync event
-    logSync(householdId, 'product', 'update', productId, {
+    logSync(householdId, 'product', productId, 'update', {
         name,
         brand,
         description,
@@ -221,7 +235,7 @@ function deleteProduct(householdId, productId) {
     db.prepare('DELETE FROM products WHERE id = ?').run(productId);
 
     // Log sync event
-    logSync(householdId, 'product', 'delete', productId, {});
+    logSync(householdId, 'product', productId, 'delete', {});
 }
 
 module.exports = {

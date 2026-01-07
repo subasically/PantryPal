@@ -15,7 +15,7 @@ router.get('/lookup/:upc', async (req, res) => {
         console.log(`   - User ID: ${req.user.id}`);
         console.log(`   - Household ID: ${req.user.householdId}`);
 
-        const result = await productService.lookupProductByUPC(upc);
+        const result = await productService.lookupProductByUPC(upc, req.user.householdId);
 
         console.log(`✅ [Products] UPC lookup result for ${upc}:`);
         console.log(`   - Product found: ${result.product !== null}`);

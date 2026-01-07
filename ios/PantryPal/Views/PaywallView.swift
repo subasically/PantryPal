@@ -82,17 +82,24 @@ struct PaywallView: View {
                             await purchaseProduct(storeKit.annualProduct)
                         }
                     }) {
-                        VStack(spacing: 4) {
-                            if let annual = storeKit.annualProduct {
-                                Text("Subscribe for \(annual.displayPrice)/year")
-                                    .font(.headline)
-                                Text("Save 17% • Best Value")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .opacity(0.9)
-                            } else {
-                                Text("Loading...")
-                                    .font(.headline)
+                        HStack {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            }
+                            
+                            VStack(spacing: 4) {
+                                if let annual = storeKit.annualProduct {
+                                    Text("Subscribe for \(annual.displayPrice)/year")
+                                        .font(.headline)
+                                    Text("Save 17% • Best Value")
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                        .opacity(0.9)
+                                } else {
+                                    Text("Loading...")
+                                        .font(.headline)
+                                }
                             }
                         }
                         .frame(maxWidth: .infinity)
@@ -100,6 +107,7 @@ struct PaywallView: View {
                         .background(Color.ppPurple)
                         .foregroundColor(.white)
                         .cornerRadius(12)
+                        .opacity(isLoading || storeKit.annualProduct == nil ? 0.6 : 1.0)
                     }
                     .disabled(isLoading || storeKit.annualProduct == nil)
                     
@@ -109,21 +117,29 @@ struct PaywallView: View {
                             await purchaseProduct(storeKit.monthlyProduct)
                         }
                     }) {
-                        VStack(spacing: 4) {
-                            if let monthly = storeKit.monthlyProduct {
-                                Text("Subscribe for \(monthly.displayPrice)/month")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                            } else {
-                                Text("Loading...")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
+                        HStack {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .primary))
+                            }
+                            
+                            VStack(spacing: 4) {
+                                if let monthly = storeKit.monthlyProduct {
+                                    Text("Subscribe for \(monthly.displayPrice)/month")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                } else {
+                                    Text("Loading...")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                }
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.gray.opacity(0.15))
                         .cornerRadius(12)
+                        .opacity(isLoading || storeKit.monthlyProduct == nil ? 0.6 : 1.0)
                     }
                     .disabled(isLoading || storeKit.monthlyProduct == nil)
                     
@@ -205,7 +221,6 @@ struct PaywallView: View {
         
         errorMessage = nil // Clear any previous errors
         isLoading = true
-        defer { isLoading = false }
         
         do {
             let (transaction, updatedHousehold) = try await storeKit.purchase(product)
@@ -231,14 +246,21 @@ struct PaywallView: View {
                     await authViewModel.refreshCurrentUser()
                 }
                 
+                // Keep loading state active until Thank You view appears
                 // Show Thank You view
                 showThankYou = true
+                
+                // Stop loading after a brief delay (Thank You view takes over)
+                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+                isLoading = false
             } else {
                 // Transaction is nil - user cancelled or interrupted
                 print("ℹ️ [PaywallView] Purchase cancelled or interrupted, no error shown")
+                isLoading = false
             }
         } catch {
             print("❌ [PaywallView] Purchase error: \(error)")
+            isLoading = false
             if let storeError = error as? StoreError {
                 errorMessage = storeError.errorDescription
             } else {

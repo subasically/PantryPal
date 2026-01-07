@@ -200,7 +200,7 @@ final class SyncService: Sendable {
         
         // Check if user has a household
         guard let (user, _, _) = try? await APIService.shared.getCurrentUser(),
-              user.householdId != nil else {
+              let householdId = user.householdId else {
             print("⏭️ [SyncService] User has no household, skipping sync")
             throw AppError.validation(message: "No household found")
         }
@@ -218,7 +218,7 @@ final class SyncService: Sendable {
         
         // Apply changes
         for change in changesResponse.changes {
-            try applyChange(change, modelContext: modelContext)
+            try applyChange(change, modelContext: modelContext, householdId: householdId)
         }
         
         try? modelContext.save()
@@ -227,10 +227,10 @@ final class SyncService: Sendable {
         return changesResponse.serverTime
     }
     
-    private func applyChange(_ change: SyncChange, modelContext: ModelContext) throws {
+    private func applyChange(_ change: SyncChange, modelContext: ModelContext, householdId: String) throws {
         switch change.entityType {
         case "inventory":
-            try applyInventoryChange(change, modelContext: modelContext)
+            try applyInventoryChange(change, modelContext: modelContext, householdId: householdId)
         case "product":
             try applyProductChange(change, modelContext: modelContext)
         case "grocery":
@@ -240,7 +240,7 @@ final class SyncService: Sendable {
         }
     }
     
-    private func applyInventoryChange(_ change: SyncChange, modelContext: ModelContext) throws {
+    private func applyInventoryChange(_ change: SyncChange, modelContext: ModelContext, householdId: String) throws {
         let itemId = change.entityId
         
         if change.action == "delete" {
@@ -274,8 +274,10 @@ final class SyncService: Sendable {
                 print("✏️ [SyncService] Updated inventory item: \(itemId)")
             } else {
                 // Create
-                guard let productId = payload["productId"] as? String,
-                      let householdId = payload["householdId"] as? String else { return }
+                guard let productId = payload["productId"] as? String else {
+                    print("⚠️ [SyncService] Missing productId for create, skipping")
+                    return
+                }
                 
                 let newItem = SDInventoryItem(
                     id: itemId,
@@ -298,8 +300,62 @@ final class SyncService: Sendable {
     }
     
     private func applyProductChange(_ change: SyncChange, modelContext: ModelContext) throws {
-        // Similar pattern for products
-        print("📦 [SyncService] Product change: \(change.action) \(change.entityId)")
+        let productId = change.entityId
+        
+        if change.action == "delete" {
+            // Delete product
+            let descriptor = FetchDescriptor<SDProduct>(predicate: #Predicate { $0.id == productId })
+            if let existing = try? modelContext.fetch(descriptor).first {
+                print("🗑️ [SyncService] Deleting product: \(productId)")
+                modelContext.delete(existing)
+            }
+        } else {
+            // Create or update
+            guard let payload = change.payload else {
+                print("⚠️ [SyncService] Missing payload for product change, skipping")
+                return
+            }
+            
+            let descriptor = FetchDescriptor<SDProduct>(predicate: #Predicate { $0.id == productId })
+            let existing = try? modelContext.fetch(descriptor).first
+            
+            let name = payload["name"] as? String ?? "Unknown"
+            let upc = payload["upc"] as? String
+            let brand = payload["brand"] as? String
+            let description = payload["description"] as? String
+            let imageUrl = payload["image_url"] as? String
+            let category = payload["category"] as? String
+            let isCustom = payload["is_custom"] as? Bool ?? false
+            let householdId = payload["household_id"] as? String
+            
+            if let existing = existing {
+                // Update
+                existing.name = name
+                existing.upc = upc
+                existing.brand = brand
+                existing.details = description
+                existing.imageUrl = imageUrl
+                existing.category = category
+                existing.isCustom = isCustom
+                existing.householdId = householdId
+                print("✏️ [SyncService] Updated product: \(productId) (\(name))")
+            } else {
+                // Create
+                let newProduct = SDProduct(
+                    id: productId,
+                    upc: upc,
+                    name: name,
+                    brand: brand,
+                    details: description,
+                    imageUrl: imageUrl,
+                    category: category,
+                    isCustom: isCustom,
+                    householdId: householdId
+                )
+                modelContext.insert(newProduct)
+                print("➕ [SyncService] Created product: \(productId) (\(name))")
+            }
+        }
     }
     
     private func applyGroceryChange(_ change: SyncChange, modelContext: ModelContext) throws {

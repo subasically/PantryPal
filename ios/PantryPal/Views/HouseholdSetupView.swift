@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct HouseholdSetupView: View {
     @Environment(AuthViewModel.self) private var authViewModel
@@ -131,6 +132,7 @@ struct HouseholdSetupView: View {
 struct JoinHouseholdOnboardingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = JoinHouseholdViewModel()
     @State private var showScanner = false
     var onJoinSuccess: (() -> Void)?
@@ -199,7 +201,12 @@ struct JoinHouseholdOnboardingView: View {
                                 print("🔘 [Onboarding] joinHousehold completed, showSuccess: \(viewModel.showSuccess)")
                                 
                                 if viewModel.showSuccess {
-                                    print("✅ [Onboarding] Join successful, syncing and refreshing user...")
+                                    print("✅ [Onboarding] Join successful, clearing local cache...")
+                                    
+                                    // Clear local SwiftData cache from old household
+                                    await clearLocalCache()
+                                    
+                                    print("✅ [Onboarding] Local cache cleared, syncing new household data...")
                                     onJoinSuccess?()
                                     
                                     print("🔘 [Onboarding] Calling completeHouseholdSetup...")
@@ -260,6 +267,43 @@ struct JoinHouseholdOnboardingView: View {
             } message: {
                 Text(viewModel.errorMessage)
             }
+        }
+    }
+    
+    private func clearLocalCache() async {
+        do {
+            print("🗑️ [JoinHousehold] Clearing local SwiftData cache...")
+            
+            // Delete all local data from old household
+            let items = try modelContext.fetch(FetchDescriptor<SDInventoryItem>())
+            for item in items { modelContext.delete(item) }
+            print("🗑️ [JoinHousehold] Deleted \(items.count) inventory items")
+            
+            let groceryItems = try modelContext.fetch(FetchDescriptor<SDGroceryItem>())
+            for groceryItem in groceryItems { modelContext.delete(groceryItem) }
+            print("🗑️ [JoinHousehold] Deleted \(groceryItems.count) grocery items")
+            
+            let products = try modelContext.fetch(FetchDescriptor<SDProduct>())
+            for product in products { modelContext.delete(product) }
+            print("🗑️ [JoinHousehold] Deleted \(products.count) products")
+            
+            let locations = try modelContext.fetch(FetchDescriptor<SDLocation>())
+            for location in locations { modelContext.delete(location) }
+            print("🗑️ [JoinHousehold] Deleted \(locations.count) locations")
+            
+            let actions = try modelContext.fetch(FetchDescriptor<SDPendingAction>())
+            for action in actions { modelContext.delete(action) }
+            print("🗑️ [JoinHousehold] Deleted \(actions.count) pending actions")
+            
+            try modelContext.save()
+            print("✅ [JoinHousehold] Local cache cleared successfully")
+            
+            // Clear sync cursor so next sync starts fresh
+            SyncCoordinator.shared.clearAllSyncState()
+            print("✅ [JoinHousehold] Sync cursor reset")
+            
+        } catch {
+            print("❌ [JoinHousehold] Error clearing local cache: \(error)")
         }
     }
 }

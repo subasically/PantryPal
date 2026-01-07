@@ -1,0 +1,1028 @@
+  🔒 [Test DB] Closing database...
+
+      at log (src/test-utils/testDb.js:102:17)
+
+  console.log
+    🗑️  [Test DB] Deleting test database: /Users/subasically/Desktop/github/PantryPal/server/tmp/test-db-5818-1767821557527.sqlite
+
+      at log (src/test-utils/testDb.js:108:17)
+
+ PASS  tests/e2e/sync-baseline.test.js
+  E2E: Sync Baseline
+    GET /api/sync/changes
+      ✓ should return empty changes array when no cursor provided (bootstrap sync) (120 ms)
+      ✓ should return changes after cursor (120 ms)
+      ✓ should return empty changes when cursor is up to date (107 ms)
+      ✓ should include payload data in sync changes (87 ms)
+      ✓ should reject sync request without authentication (82 ms)
+      ✓ should handle multiple entity types in sync changes (85 ms)
+    Sync change ordering
+      ✓ should return changes in chronological order (106 ms)
+    Sync cursor behavior
+      ✓ should use cursor to track incremental syncs (103 ms)
+
+  console.log
+    📂 [Test DB] Creating test database: /Users/subasically/Desktop/github/PantryPal/server/tmp/test-db-5818-1767821558495.sqlite
+
+      at log (src/test-utils/testDb.js:35:13)
+
+  console.log
+    ✅ [Test DB] Schema loaded successfully
+
+      at log (src/test-utils/testDb.js:62:13)
+
+  console.log
+    📂 [Database] Using test database from testDb.js
+
+      at Object.log (src/models/database.js:12:13)
+
+  console.log
+    📂 [Database] Skipping initialization in test mode (handled by testDb.js)
+
+      at log (src/models/database.js:35:17)
+
+  console.log
+    🔵 [Grocery Routes] Module loaded - VERSION 2025-12-30-19:30
+
+      at Object.log (src/routes/grocery.js:6:9)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.error
+    Add inventory error: Error: Product ID is required
+        at Object.addInventoryItem (/Users/subasically/Desktop/github/PantryPal/server/src/services/inventoryService.js:167:15)
+        at addInventoryItem (/Users/subasically/Desktop/github/PantryPal/server/src/routes/inventory.js:48:39)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:157:13)
+        at Route.dispatch (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:117:3)
+        at handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:435:11)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:295:15
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/src/middleware/auth.js:53:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:261:12
+        at getSecret (/Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:97:14)
+        at Object.module.exports [as verify] (/Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:101:10)
+        at verify (/Users/subasically/Desktop/github/PantryPal/server/src/middleware/auth.js:18:9)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at Function.handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:186:3)
+        at router (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:60:12)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:840:9
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:825:5
+
+      58 |         res.status(status).json(item);
+      59 |     } catch (error) {
+    > 60 |         console.error('Add inventory error:', error);
+         |                 ^
+      61 |         if (error.code === 'PREMIUM_REQUIRED' || error.code === 'LIMIT_REACHED') {
+      62 |             return res.status(403).json({
+      63 |                 error: error.message,
+
+      at error (src/routes/inventory.js:60:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (src/middleware/auth.js:53:13)
+      at node_modules/jsonwebtoken/verify.js:261:12
+      at getSecret (node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.module.exports [as verify] (node_modules/jsonwebtoken/verify.js:101:10)
+      at verify (src/middleware/auth.js:18:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Function.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/express-rate-limit/dist/index.cjs:840:9
+      at node_modules/express-rate-limit/dist/index.cjs:825:5
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    📝 [Inventory] Update request for item: 18582859-c10a-419a-bff9-f18e8a006c2b
+
+      at log (src/routes/inventory.js:131:17)
+
+  console.log
+       - User ID: d2f77639-805b-4585-b3be-9858f5aa5377
+
+      at log (src/routes/inventory.js:132:17)
+
+  console.log
+       - Household ID: 0874e9d5-32f3-4f30-99fb-531dc2f5dc5d
+
+      at log (src/routes/inventory.js:133:17)
+
+  console.log
+       - Request body: {"quantity":10}
+
+      at log (src/routes/inventory.js:134:17)
+
+  console.log
+       - Expiration date: UNDEFINED (not provided)
+
+      at log (src/routes/inventory.js:135:17)
+
+  console.log
+    📝 [InventoryService] updateInventoryItem called
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:269:13)
+
+  console.log
+       - Item ID: 18582859-c10a-419a-bff9-f18e8a006c2b
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:270:13)
+
+  console.log
+       - Household ID: 0874e9d5-32f3-4f30-99fb-531dc2f5dc5d
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:271:13)
+
+  console.log
+       - Updates: {"quantity":10}
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:272:13)
+
+  console.log
+       - Expiration date in updates: UNDEFINED (not provided)
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:273:13)
+
+  console.log
+    📦 [InventoryService] Current item state:
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:290:13)
+
+  console.log
+       - Current quantity: 5
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:291:13)
+
+  console.log
+       - Current expiration: null
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:292:13)
+
+  console.log
+       - Current notes: null
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:293:13)
+
+  console.log
+       - Current location: a01f3576-074a-451b-ace5-0c10df66a152
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:294:13)
+
+  console.log
+    💾 [InventoryService] Updating database with:
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:320:13)
+
+  console.log
+       - Quantity: 10
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:321:13)
+
+  console.log
+       - Expiration: NULL (clearing)
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:322:13)
+
+  console.log
+       - Notes: null
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:323:13)
+
+  console.log
+       - Location: a01f3576-074a-451b-ace5-0c10df66a152
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:324:13)
+
+  console.log
+    ✅ [InventoryService] Database updated successfully
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:338:13)
+
+  console.log
+    ✅ [InventoryService] Sync logged
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:347:13)
+
+  console.log
+    ✅ [Inventory] Item updated successfully: 18582859-c10a-419a-bff9-f18e8a006c2b
+
+      at log (src/routes/inventory.js:144:17)
+
+  console.log
+       - Updated expiration: null
+
+      at log (src/routes/inventory.js:145:17)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    📝 [Inventory] Update request for item: 00572b2f-fb80-4fb3-9cb7-e8045fbaddb5
+
+      at log (src/routes/inventory.js:131:17)
+
+  console.log
+       - User ID: 36ee8ce3-2317-4df5-8532-44ea765c4935
+
+      at log (src/routes/inventory.js:132:17)
+
+  console.log
+       - Household ID: 286b4cd6-cd56-4659-8b81-47f73529a8fd
+
+      at log (src/routes/inventory.js:133:17)
+
+  console.log
+       - Request body: {"expiration_date":"2025-12-31T00:00:00.000Z"}
+
+      at log (src/routes/inventory.js:134:17)
+
+  console.log
+       - Expiration date: UNDEFINED (not provided)
+
+      at log (src/routes/inventory.js:135:17)
+
+  console.log
+    📝 [InventoryService] updateInventoryItem called
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:269:13)
+
+  console.log
+       - Item ID: 00572b2f-fb80-4fb3-9cb7-e8045fbaddb5
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:270:13)
+
+  console.log
+       - Household ID: 286b4cd6-cd56-4659-8b81-47f73529a8fd
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:271:13)
+
+  console.log
+       - Updates: {}
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:272:13)
+
+  console.log
+       - Expiration date in updates: UNDEFINED (not provided)
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:273:13)
+
+  console.log
+    📦 [InventoryService] Current item state:
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:290:13)
+
+  console.log
+       - Current quantity: 5
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:291:13)
+
+  console.log
+       - Current expiration: null
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:292:13)
+
+  console.log
+       - Current notes: null
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:293:13)
+
+  console.log
+       - Current location: 35d75065-04ee-469a-aa43-39193065ddb4
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:294:13)
+
+  console.log
+    💾 [InventoryService] Updating database with:
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:320:13)
+
+  console.log
+       - Quantity: 5
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:321:13)
+
+  console.log
+       - Expiration: NULL (clearing)
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:322:13)
+
+  console.log
+       - Notes: null
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:323:13)
+
+  console.log
+       - Location: 35d75065-04ee-469a-aa43-39193065ddb4
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:324:13)
+
+  console.log
+    ✅ [InventoryService] Database updated successfully
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:338:13)
+
+  console.log
+    ✅ [InventoryService] Sync logged
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:347:13)
+
+  console.log
+    ✅ [Inventory] Item updated successfully: 00572b2f-fb80-4fb3-9cb7-e8045fbaddb5
+
+      at log (src/routes/inventory.js:144:17)
+
+  console.log
+       - Updated expiration: null
+
+      at log (src/routes/inventory.js:145:17)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    📝 [Inventory] Update request for item: nonexistent-id
+
+      at log (src/routes/inventory.js:131:17)
+
+  console.log
+       - User ID: 016e770b-e04f-49b4-befd-f3ebda68678a
+
+      at log (src/routes/inventory.js:132:17)
+
+  console.log
+       - Household ID: 465efcbb-bf61-459b-9e83-3041c376e6af
+
+      at log (src/routes/inventory.js:133:17)
+
+  console.log
+       - Request body: {"quantity":10}
+
+      at log (src/routes/inventory.js:134:17)
+
+  console.log
+       - Expiration date: UNDEFINED (not provided)
+
+      at log (src/routes/inventory.js:135:17)
+
+  console.log
+    📝 [InventoryService] updateInventoryItem called
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:269:13)
+
+  console.log
+       - Item ID: nonexistent-id
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:270:13)
+
+  console.log
+       - Household ID: 465efcbb-bf61-459b-9e83-3041c376e6af
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:271:13)
+
+  console.log
+       - Updates: {"quantity":10}
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:272:13)
+
+  console.log
+       - Expiration date in updates: UNDEFINED (not provided)
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:273:13)
+
+  console.log
+    ❌ [InventoryService] Item not found: nonexistent-id
+
+      at Object.log [as updateInventoryItem] (src/services/inventoryService.js:286:17)
+
+  console.error
+    ❌ [Inventory] Update inventory error: Error: Inventory item not found
+        at Object.updateInventoryItem (/Users/subasically/Desktop/github/PantryPal/server/src/services/inventoryService.js:287:15)
+        at updateInventoryItem (/Users/subasically/Desktop/github/PantryPal/server/src/routes/inventory.js:137:42)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:157:13)
+        at Route.dispatch (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:117:3)
+        at handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:435:11)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:295:15
+        at param (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:600:14)
+        at param (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:610:14)
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:664:3)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/src/middleware/auth.js:53:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:261:12
+        at getSecret (/Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:97:14)
+        at Object.module.exports [as verify] (/Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:101:10)
+        at verify (/Users/subasically/Desktop/github/PantryPal/server/src/middleware/auth.js:18:9)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at Function.handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:186:3)
+        at router (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:60:12)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:840:9
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:825:5
+
+      147 |         res.json(updated);
+      148 |     } catch (error) {
+    > 149 |         console.error('❌ [Inventory] Update inventory error:', error);
+          |                 ^
+      150 |         if (error.code === 'PREMIUM_REQUIRED') {
+      151 |             return res.status(403).json({
+      152 |                 error: error.message,
+
+      at error (src/routes/inventory.js:149:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (src/middleware/auth.js:53:13)
+      at node_modules/jsonwebtoken/verify.js:261:12
+      at getSecret (node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.module.exports [as verify] (node_modules/jsonwebtoken/verify.js:101:10)
+      at verify (src/middleware/auth.js:18:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Function.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/express-rate-limit/dist/index.cjs:840:9
+      at node_modules/express-rate-limit/dist/index.cjs:825:5
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.error
+    Delete inventory error: Error: Inventory item not found
+        at Object.deleteInventoryItem (/Users/subasically/Desktop/github/PantryPal/server/src/services/inventoryService.js:452:15)
+        at deleteInventoryItem (/Users/subasically/Desktop/github/PantryPal/server/src/routes/inventory.js:200:26)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:157:13)
+        at Route.dispatch (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:117:3)
+        at handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:435:11)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:295:15
+        at param (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:600:14)
+        at param (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:610:14)
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:664:3)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/src/middleware/auth.js:53:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:261:12
+        at getSecret (/Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:97:14)
+        at Object.module.exports [as verify] (/Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:101:10)
+        at verify (/Users/subasically/Desktop/github/PantryPal/server/src/middleware/auth.js:18:9)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at Function.handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:186:3)
+        at router (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:60:12)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:840:9
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:825:5
+
+      201 |         res.json({ success: true });
+      202 |     } catch (error) {
+    > 203 |         console.error('Delete inventory error:', error);
+          |                 ^
+      204 |         if (error.code === 'PREMIUM_REQUIRED') {
+      205 |             return res.status(403).json({
+      206 |                 error: error.message,
+
+      at error (src/routes/inventory.js:203:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (src/middleware/auth.js:53:13)
+      at node_modules/jsonwebtoken/verify.js:261:12
+      at getSecret (node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.module.exports [as verify] (node_modules/jsonwebtoken/verify.js:101:10)
+      at verify (src/middleware/auth.js:18:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Function.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/express-rate-limit/dist/index.cjs:840:9
+      at node_modules/express-rate-limit/dist/index.cjs:825:5
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.error
+    Add inventory error: Error: Inventory limit reached
+        at Object.addInventoryItem (/Users/subasically/Desktop/github/PantryPal/server/src/services/inventoryService.js:160:23)
+        at addInventoryItem (/Users/subasically/Desktop/github/PantryPal/server/src/routes/inventory.js:48:39)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:157:13)
+        at Route.dispatch (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:117:3)
+        at handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:435:11)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:295:15
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/src/middleware/auth.js:53:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:261:12
+        at getSecret (/Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:97:14)
+        at Object.module.exports [as verify] (/Users/subasically/Desktop/github/PantryPal/server/node_modules/jsonwebtoken/verify.js:101:10)
+        at verify (/Users/subasically/Desktop/github/PantryPal/server/src/middleware/auth.js:18:9)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at Function.handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:186:3)
+        at router (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:60:12)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:840:9
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:825:5 {
+      code: 'LIMIT_REACHED',
+      limit: 25
+    }
+
+      58 |         res.status(status).json(item);
+      59 |     } catch (error) {
+    > 60 |         console.error('Add inventory error:', error);
+         |                 ^
+      61 |         if (error.code === 'PREMIUM_REQUIRED' || error.code === 'LIMIT_REACHED') {
+      62 |             return res.status(403).json({
+      63 |                 error: error.message,
+
+      at error (src/routes/inventory.js:60:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (src/middleware/auth.js:53:13)
+      at node_modules/jsonwebtoken/verify.js:261:12
+      at getSecret (node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.module.exports [as verify] (node_modules/jsonwebtoken/verify.js:101:10)
+      at verify (src/middleware/auth.js:18:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Function.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/express-rate-limit/dist/index.cjs:840:9
+      at node_modules/express-rate-limit/dist/index.cjs:825:5
+
+  console.log
+    🔒 [Test DB] Closing database...
+
+      at log (src/test-utils/testDb.js:102:17)
+
+  console.log
+    🗑️  [Test DB] Deleting test database: /Users/subasically/Desktop/github/PantryPal/server/tmp/test-db-5818-1767821558495.sqlite
+
+      at log (src/test-utils/testDb.js:108:17)
+
+ PASS  tests/e2e/inventory-crud.test.js
+  E2E: Inventory CRUD
+    POST /api/inventory
+      ✓ should create a new inventory item (110 ms)
+      ✓ should reject inventory item without product_id (95 ms)
+      ✓ should reject inventory item without authentication (80 ms)
+    GET /api/inventory
+      ✓ should return all inventory items for household (82 ms)
+      ✓ should filter inventory by location (86 ms)
+    PUT /api/inventory/:id
+      ✓ should update inventory item quantity (100 ms)
+      ✓ should update inventory item expiration date (97 ms)
+      ✓ should reject update to non-existent item (94 ms)
+    DELETE /api/inventory/:id
+      ✓ should delete an inventory item (89 ms)
+      ✓ should return 404 for non-existent item (89 ms)
+    Inventory with Product and Location details
+      ✓ should return inventory with joined product details (81 ms)
+    Free tier limits
+      ✓ should reject creating 26th inventory item (exceeds free limit) (161 ms)
+
+  console.log
+    📂 [Test DB] Creating test database: /Users/subasically/Desktop/github/PantryPal/server/tmp/test-db-5818-1767821559740.sqlite
+
+      at log (src/test-utils/testDb.js:35:13)
+
+  console.log
+    ✅ [Test DB] Schema loaded successfully
+
+      at log (src/test-utils/testDb.js:62:13)
+
+  console.log
+    📂 [Database] Using test database from testDb.js
+
+      at Object.log (src/models/database.js:12:13)
+
+  console.log
+    📂 [Database] Skipping initialization in test mode (handled by testDb.js)
+
+      at log (src/models/database.js:35:17)
+
+  console.log
+    🔵 [Grocery Routes] Module loaded - VERSION 2025-12-30-19:30
+
+      at Object.log (src/routes/grocery.js:6:9)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.error
+    Registration error: Error: User already exists
+        at Object.registerUser (/Users/subasically/Desktop/github/PantryPal/server/src/services/authService.js:43:15)
+        at registerUser (/Users/subasically/Desktop/github/PantryPal/server/src/routes/auth.js:38:42)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:157:13)
+        at Route.dispatch (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:117:3)
+        at handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:435:11)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:295:15
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at Function.handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:186:3)
+        at router (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:60:12)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:840:9
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:825:5
+
+      39 |         res.status(201).json({ ...result, householdId: null });
+      40 |     } catch (error) {
+    > 41 |         console.error('Registration error:', error);
+         |                 ^
+      42 |         const status = error.message === 'User already exists' ? 400 : 500;
+      43 |         res.status(status).json({ error: error.message || 'Registration failed' });
+      44 |     }
+
+      at error (src/routes/auth.js:41:17)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.error
+    Login error: Error: Invalid credentials
+        at Object.loginUser (/Users/subasically/Desktop/github/PantryPal/server/src/services/authService.js:98:15)
+        at /Users/subasically/Desktop/github/PantryPal/server/src/routes/auth.js:57:24
+
+      58 |         res.json(result);
+      59 |     } catch (error) {
+    > 60 |         console.error('Login error:', error);
+         |                 ^
+      61 |         const status = error.message === 'Invalid credentials' ? 401 : 500;
+      62 |         res.status(status).json({ error: error.message || 'Login failed' });
+      63 |     }
+
+      at error (src/routes/auth.js:60:17)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.error
+    Login error: Error: Invalid credentials
+        at Object.loginUser (/Users/subasically/Desktop/github/PantryPal/server/src/services/authService.js:88:15)
+        at loginUser (/Users/subasically/Desktop/github/PantryPal/server/src/routes/auth.js:57:42)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:157:13)
+        at Route.dispatch (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/route.js:117:3)
+        at handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:435:11)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:295:15
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at Function.handle (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:186:3)
+        at router (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:60:12)
+        at Layer.handleRequest (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/lib/layer.js:152:17)
+        at trimPrefix (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:342:13)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:297:9
+        at processParams (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:582:12)
+        at next (/Users/subasically/Desktop/github/PantryPal/server/node_modules/router/index.js:291:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:840:9
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at /Users/subasically/Desktop/github/PantryPal/server/node_modules/express-rate-limit/dist/index.cjs:825:5
+
+      58 |         res.json(result);
+      59 |     } catch (error) {
+    > 60 |         console.error('Login error:', error);
+         |                 ^
+      61 |         const status = error.message === 'Invalid credentials' ? 401 : 500;
+      62 |         res.status(status).json({ error: error.message || 'Login failed' });
+      63 |     }
+
+      at error (src/routes/auth.js:60:17)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🗑️  [Test DB] Resetting database...
+
+      at log (src/test-utils/testDb.js:75:13)
+
+  console.log
+    ✅ [Test DB] Reset complete (11 tables cleared)
+
+      at log (src/test-utils/testDb.js:94:13)
+
+  console.log
+    🔒 [Test DB] Closing database...
+
+      at log (src/test-utils/testDb.js:102:17)
+
+  console.log
+    🗑️  [Test DB] Deleting test database: /Users/subasically/Desktop/github/PantryPal/server/tmp/test-db-5818-1767821559740.sqlite
+
+      at log (src/test-utils/testDb.js:108:17)
+
+ PASS  tests/e2e/health-auth.test.js
+  E2E: Health & Auth
+    GET /health
+      ✓ should return 200 with status ok (13 ms)
+    POST /api/auth/register
+      ✓ should register a new user with email/password (93 ms)
+      ✓ should reject registration with missing email (6 ms)
+      ✓ should reject registration with duplicate email (88 ms)
+    POST /api/auth/login
+      ✓ should login with valid credentials (156 ms)
+      ✓ should reject login with invalid password (157 ms)
+      ✓ should reject login with non-existent email (82 ms)
+    GET /api/auth/me
+      ✓ should return user data with valid token (83 ms)
+      ✓ should reject request without token (79 ms)
+      ✓ should reject request with invalid token (79 ms)
+
+Test Suites: 3 passed, 3 total
+Tests:       30 passed, 30 total
+Snapshots:   0 total
+Time:        3.452 s, estimated 4 s
+Ran all test suites matching tests/e2e.
+
+🧹 Cleaning up test artifacts...
+
+✅ Cleaned up 0 temporary files
+✨ Test suite complete!

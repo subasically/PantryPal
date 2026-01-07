@@ -31,6 +31,10 @@ We are currently in the **Revenue Validation** phase.
 ### General
 - **Minimal Changes:** When fixing bugs, change the minimum amount of code necessary. Don't rewrite working logic.
 - **Error Handling:** Always handle errors gracefully. On iOS, show user-facing error messages. On Server, log to console and return JSON error.
+- **Bug Pattern Detection:** When you find a bug (especially parameter order, missing validation, or logic errors), **ALWAYS search the entire codebase** for the same pattern. Fix all occurrences at once to prevent recurring issues.
+  - Example: If `logSync(household, type, action, id)` is wrong, grep for all `logSync(` calls and verify parameter order.
+  - Use `grep_search` or `semantic_search` to find similar code patterns.
+  - Check both the file where the bug was found AND related files (e.g., all service files, all route handlers).
 
 ### Server
 - **Database:** Use `better-sqlite3` synchronously. It's fast enough.
@@ -71,9 +75,13 @@ We are currently in the **Revenue Validation** phase.
 6. **iOS Properties:** AuthViewModel uses `currentUser` and `currentHousehold` (NOT `user` or `householdInfo`).
 7. **SwiftData Models:** Grocery items use `SDGroceryItem`. Inventory uses `SDInventoryItem`. Both are cached locally for offline support.
 8. **SwiftData Import Required:** Files using `@Query`, `FetchDescriptor`, or `modelContext` MUST import SwiftData. Missing this import causes "Cannot find type" errors.
-9. **APIError is File-Level:** `APIError` enum is NOT nested in `APIService` class. Use `APIError.unauthorized`, not `APIService.APIError.unauthorized`.11. **Sync Debug Pattern:** If items aren't syncing, check: (1) syncLogger parameter order matches call sites, (2) sync_log entries have correct entity_id/action values, (3) sync cursor isn't stuck (use Force Full Sync in Settings → Debug).
+9. **APIError is File-Level:** `APIError` enum is NOT nested in `APIService` class. Use `APIError.unauthorized`, not `APIService.APIError.unauthorized`.
+10. **syncLogger Parameter Order:** `logSync(householdId, entityType, entityId, action, payload)` - entity_id comes BEFORE action. Check all calls when modifying.
+11. **Sync Debug Pattern:** If items aren't syncing, check: (1) syncLogger parameter order matches call sites, (2) sync_log entries have correct entity_id/action values, (3) sync cursor isn't stuck (use Force Full Sync in Settings → Debug).
 12. **Household Setup Flow:** New users MUST have household created before dismissing HouseholdSetupView. "Create" button should call `await authViewModel.completeHouseholdSetup()` then dismiss. Never dismiss without household_id.
 13. **Database Reset:** Use `./server/scripts/reset-database.sh` for clean testing iterations. Removes Docker volume and recreates database. Always confirm before running.
+14. **Household Member Limit:** Maximum 8 members per household. Check enforced in `joinHousehold()`.
+
 ## 📝 Current Task Context
 - ✅ New User Onboarding Flow complete
 - ✅ Freemium Model (25 item limits) complete

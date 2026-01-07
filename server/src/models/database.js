@@ -2,24 +2,40 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../../db/pantrypal.db');
+// In test mode, use the test database created by testDb.js
+// This ensures tests use isolated database instances
+let db;
+
+if (process.env.NODE_ENV === 'test') {
+    const { getTestDb } = require('../test-utils/testDb');
+    db = getTestDb();
+    console.log('📂 [Database] Using test database from testDb.js');
+} else {
+    const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../../db/pantrypal.db');
+    console.log('📂 [Database] Opening database at:', dbPath);
+    db = new Database(dbPath);
+
+    // Enable foreign keys
+    db.pragma('foreign_keys = ON');
+
+    // Enable WAL mode for better concurrency
+    db.pragma('journal_mode = WAL');
+    db.pragma('busy_timeout = 5000'); // 5 second timeout for lock acquisition
+    db.pragma('synchronous = NORMAL'); // Balance between safety and performance
+
+    console.log('✅ SQLite configured: WAL mode enabled, busy_timeout = 5000ms');
+}
+
 const schemaPath = path.join(__dirname, '../../db/schema.sql');
-
-console.log('📂 [Database] Opening database at:', dbPath);
-const db = new Database(dbPath);
-
-// Enable foreign keys
-db.pragma('foreign_keys = ON');
-
-// Enable WAL mode for better concurrency
-db.pragma('journal_mode = WAL');
-db.pragma('busy_timeout = 5000'); // 5 second timeout for lock acquisition
-db.pragma('synchronous = NORMAL'); // Balance between safety and performance
-
-console.log('✅ SQLite configured: WAL mode enabled, busy_timeout = 5000ms');
 
 // Initialize database with schema
 function initializeDatabase() {
+    // Skip initialization in test mode - testDb.js handles schema loading
+    if (process.env.NODE_ENV === 'test') {
+        console.log('📂 [Database] Skipping initialization in test mode (handled by testDb.js)');
+        return;
+    }
+
     const schema = fs.readFileSync(schemaPath, 'utf8');
     db.exec(schema);
 

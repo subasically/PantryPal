@@ -6,9 +6,10 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest --runInBand --forceExit",
-    "test:watch": "jest --watch --runInBand",
-    "test:coverage": "jest --runInBand --forceExit --coverage",
+    "test": "NODE_ENV=test jest --detectOpenHandles",
+    "test:e2e": "NODE_ENV=test jest --runInBand tests/e2e",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage",
     "test:server": "NODE_ENV=test ALLOW_TEST_ENDPOINTS=true TEST_ADMIN_KEY=pantrypal-test-key-2025 PORT=3002 node src/index.js"
   },
   "keywords": [
@@ -35,16 +36,13 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.5",
+    "@types/supertest": "^6.0.2",
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
-    "supertest": "^7.1.4"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "testTimeout": 10000,
-    "verbose": true,
-    "testMatch": [
-      "**/tests/**/*.test.js"
-    ]
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.3"
   }
 }

@@ -151,6 +151,16 @@ function joinHousehold(userId, code) {
         throw new Error('Invalid or expired invite code');
     }
 
+    // Check member limit (Premium allows up to 8 members)
+    const currentMembers = db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?')
+        .get(invite.household_id).count;
+
+    if (currentMembers >= 8) {
+        const error = new Error('This household has reached the maximum of 8 members');
+        error.code = 'MEMBER_LIMIT_REACHED';
+        throw error;
+    }
+
     // Update user's household
     db.prepare('UPDATE users SET household_id = ?, updated_at = ? WHERE id = ?')
         .run(invite.household_id, new Date().toISOString(), userId);

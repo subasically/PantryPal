@@ -26,7 +26,7 @@ final class InventoryViewModel {
         
         // Load from local database
         do {
-            let descriptor = FetchDescriptor<SDInventoryItem>(sortBy: [SortDescriptor(\.expirationDate)])
+            let descriptor = FetchDescriptor<SDInventoryItem>(sortBy: [SortDescriptor(\SDInventoryItem.product?.name)])
             let sdItems = try context.fetch(descriptor)
             
             // Convert to domain model
@@ -165,7 +165,7 @@ final class InventoryViewModel {
         print("   - Current quantity: \(item.quantity)")
         print("   - Current expiration: \(item.expirationDate?.description ?? "nil")")
         print("   - Current notes: \(item.notes ?? "nil")")
-        print("   - Current location: \(item.locationId)")
+        print("   - Current location: \(String(describing: item.locationId))")
         
         if let q = quantity { 
             print("   ✏️ Updating quantity: \(item.quantity) → \(q)")

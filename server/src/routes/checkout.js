@@ -137,12 +137,12 @@ router.post('/scan', (req, res) => {
         if (inventoryItem.quantity <= 1) {
             db.prepare('DELETE FROM inventory WHERE id = ?').run(inventoryItem.id);
             
-            logSync(req.user.householdId, 'inventory', 'delete', inventoryItem.id, {});
+            logSync(req.user.householdId, 'inventory', inventoryItem.id, 'delete', {});
         } else {
             db.prepare('UPDATE inventory SET quantity = quantity - 1, updated_at = ? WHERE id = ?')
                 .run(now, inventoryItem.id);
                 
-            logSync(req.user.householdId, 'inventory', 'update', inventoryItem.id, { 
+            logSync(req.user.householdId, 'inventory', inventoryItem.id, 'update', { 
                 quantity: inventoryItem.quantity - 1,
                 expirationDate: inventoryItem.expiration_date,
                 notes: inventoryItem.notes,
@@ -150,15 +150,6 @@ router.post('/scan', (req, res) => {
             });
         }
         
-        // Auto-manage grocery list for Premium (when quantity reaches 0)
-        const productFullName = product.brand ? `${product.brand} ${product.name}` : product.name;
-        const addedToGrocery = autoManageGrocery(
-            req.user.householdId, 
-            productFullName,
-            newQuantity,
-            oldQuantity
-        );
-
         // Get updated inventory item (or null if deleted)
         const updatedItem = inventoryItem.quantity > 1 
             ? db.prepare(`
@@ -183,8 +174,7 @@ router.post('/scan', (req, res) => {
             itemDeleted: inventoryItem.quantity <= 1,
             inventoryItem: updatedItem,
             checkoutId: checkoutId,
-            addedToGrocery: addedToGrocery, // Flag for client to show confirmation or toast
-            productName: productFullName // Full product name for grocery add prompt
+            productName: product.brand ? `${product.brand} ${product.name}` : product.name // Full product name for grocery prompt
         });
 
         // Send push notification to household members (async, don't wait)
