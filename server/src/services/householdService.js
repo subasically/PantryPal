@@ -3,28 +3,15 @@ const db = require('../models/database');
 const { isHouseholdPremium } = require('../utils/premiumHelper');
 
 /**
- * Create default storage locations for a household
+ * Create default storage locations for a household (DEPRECATED - now client-managed)
+ * Kept as fallback for backward compatibility
  * @param {string} householdId - Household ID
  */
 function createDefaultLocations(householdId) {
-    const defaultLocations = [
-        { name: 'Pantry', sortOrder: 0 },
-        { name: 'Fridge', sortOrder: 1 },
-        { name: 'Freezer', sortOrder: 2 },
-        { name: 'Cabinet', sortOrder: 3 },
-        { name: 'Garage', sortOrder: 4 },
-        { name: 'Basement', sortOrder: 5 },
-        { name: 'Other', sortOrder: 6 }
-    ];
-
-    const insertLocation = db.prepare(`
-        INSERT INTO locations (id, household_id, name, parent_id, level, sort_order, created_at, updated_at)
-        VALUES (?, ?, ?, NULL, 0, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `);
-
-    defaultLocations.forEach(loc => {
-        insertLocation.run(uuidv4(), householdId, loc.name, loc.sortOrder);
-    });
+    // This function is deprecated. Locations are now created by the iOS app
+    // after household creation to allow easier updates to default locations.
+    // Keeping this as a no-op for backward compatibility.
+    console.log('⚠️ [Deprecated] createDefaultLocations called - locations are now client-managed');
 }
 
 /**
@@ -35,15 +22,26 @@ function createDefaultLocations(householdId) {
  */
 function createHousehold(userId, name) {
     // Check if user already has a household
-    const user = db.prepare('SELECT household_id, last_name FROM users WHERE id = ?').get(userId);
+    const user = db.prepare('SELECT household_id, last_name, email FROM users WHERE id = ?').get(userId);
     if (user.household_id) {
         throw new Error('User already belongs to a household');
     }
 
     // Generate default name if not provided
     if (!name) {
-        if (user.last_name) {
+        if (user.last_name && user.last_name.trim()) {
             name = `${user.last_name} Household`;
+        } else if (user.email) {
+            // Extract name from email as fallback (e.g., "john.doe@example.com" -> "Doe")
+            const emailName = user.email.split('@')[0];
+            const parts = emailName.split(/[._-]/);
+            // Use last part as surname, capitalize it
+            const lastName = parts[parts.length - 1];
+            if (lastName && lastName.length > 0) {
+                name = `${lastName.charAt(0).toUpperCase() + lastName.slice(1)} Household`;
+            } else {
+                name = 'My Household';
+            }
         } else {
             name = 'My Household';
         }
@@ -52,14 +50,14 @@ function createHousehold(userId, name) {
     const householdId = uuidv4();
 
     const transaction = db.transaction(() => {
-        // Create household
-        db.prepare('INSERT INTO households (id, name) VALUES (?, ?)').run(householdId, name);
+        // Create household with owner
+        db.prepare('INSERT INTO households (id, name, owner_id) VALUES (?, ?, ?)').run(householdId, name, userId);
 
         // Update user
         db.prepare('UPDATE users SET household_id = ? WHERE id = ?').run(householdId, userId);
 
-        // Create default locations
-        createDefaultLocations(householdId);
+        // Note: Default locations are now created by the iOS app after household creation
+        // This allows for easier updates to default locations without server deployments
     });
 
     transaction();
@@ -178,6 +176,10 @@ function joinHousehold(userId, code) {
  * @returns {Array} Array of member objects
  */
 function getHouseholdMembers(householdId) {
+    // Get household owner
+    const household = db.prepare('SELECT owner_id FROM households WHERE id = ?').get(householdId);
+    const ownerId = household?.owner_id;
+
     const members = db.prepare(`
         SELECT id, email, first_name, last_name, created_at
         FROM users
@@ -191,6 +193,7 @@ function getHouseholdMembers(householdId) {
         firstName: m.first_name || '',
         lastName: m.last_name || '',
         name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'Member',
+        isOwner: m.id === ownerId,
         createdAt: m.created_at
     }));
 }

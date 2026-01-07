@@ -174,7 +174,7 @@ final class InventoryViewModel {
         
         // CRITICAL: Handle explicit nil to clear expiration
         if expirationDate == nil {
-            print("   🗑️ Clearing expiration date (was: \(item.expirationDate?.description ?? "nil"))")
+            print("   🗑️ Clearing expiration date (was: \(item.expirationDate.map(String.init(describing:)) ?? "nil"))")
             item.expirationDate = nil
         } else if let e = expirationDate {
             print("   📅 Setting expiration date: \(e)")
@@ -186,7 +186,7 @@ final class InventoryViewModel {
             item.notes = n 
         }
         if let l = locationId { 
-            print("   📍 Updating location: \(item.locationId) → \(l)")
+            print("   📍 Updating location: \(String(describing: item.locationId)) → \(l)")
             item.locationId = l
             let locDesc = FetchDescriptor<SDLocation>(predicate: #Predicate { $0.id == l })
             item.location = try? context.fetch(locDesc).first

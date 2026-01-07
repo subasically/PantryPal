@@ -469,6 +469,7 @@ struct HouseholdMember: Codable, Identifiable, Sendable {
     let firstName: String
     let lastName: String
     let createdAt: String
+    let isOwner: Bool
     
     var name: String {
         let fullName = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)

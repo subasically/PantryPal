@@ -98,7 +98,7 @@ function createCustomProduct(householdId, productData) {
             const product = db.prepare('SELECT * FROM products WHERE upc = ?').get(upc);
 
             // Log sync event
-            logSync(householdId, 'product', 'update', product.id, {
+            logSync(householdId, 'product', product.id, 'update', {
                 upc,
                 name,
                 brand,
@@ -121,7 +121,7 @@ function createCustomProduct(householdId, productData) {
     const product = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
 
     // Log sync event
-    logSync(householdId, 'product', 'create', id, {
+    logSync(householdId, 'product', id, 'create', {
         upc: finalUpc,
         name,
         brand,

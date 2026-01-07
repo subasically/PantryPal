@@ -26,7 +26,7 @@ struct PaywallView: View {
                 VStack(spacing: 24) {
                     // Header Image
                     Image(systemName: "crown.fill")
-                        .font(.system(size: 80))
+                        .font(.system(size: 60))
                         .foregroundStyle(
                             LinearGradient(
                                 colors: [.ppPurple, .ppBlue],
@@ -36,7 +36,7 @@ struct PaywallView: View {
                         )
                         .padding(.top, 40)
                     
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         if reason == .householdSharing {
                             Text("Unlock Household Sharing")
                                 .font(.title)
@@ -59,7 +59,7 @@ struct PaywallView: View {
                     }
                     
                     // Features List
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 24) {
                         FeatureRow(icon: "infinity", title: "Unlimited Items", description: "Store as many items as you need")
                         FeatureRow(icon: "person.2.fill", title: "Household Sharing", description: "Sync with your family in real-time")
                         FeatureRow(icon: "icloud.fill", title: "Cloud Sync Across Devices", description: "Reliable backup for all your devices")
@@ -122,7 +122,7 @@ struct PaywallView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(uiColor: .secondarySystemBackground))
+                        .background(Color.gray.opacity(0.15))
                         .cornerRadius(12)
                     }
                     .disabled(isLoading || storeKit.monthlyProduct == nil)
@@ -210,7 +210,7 @@ struct PaywallView: View {
         do {
             let (transaction, updatedHousehold) = try await storeKit.purchase(product)
             
-            if let transaction = transaction {
+            if transaction != nil {
                 // Purchase successful - update local household immediately with server response
                 if let household = updatedHousehold {
                     print("📦 [PaywallView] Household from response:")
@@ -342,4 +342,5 @@ struct FeatureRow: View {
 #Preview {
     PaywallView()
         .environment(AuthViewModel())
+        .environmentObject(ConfettiCenter())
 }

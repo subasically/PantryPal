@@ -40,16 +40,16 @@ function autoManageGrocery(householdId, productName, newQuantity, oldQuantity) {
         if (!isHouseholdPremium(householdId)) {
             return; // Only auto-manage for Premium
         }
-        
+
         const normalizedName = productName.trim().toLowerCase().replace(/\s+/g, ' ');
-        
+
         // If quantity went from >0 to 0, add to grocery
         if (oldQuantity > 0 && newQuantity === 0) {
             const existing = db.prepare(`
                 SELECT id FROM grocery_items
                 WHERE household_id = ? AND normalized_name = ?
             `).get(householdId, normalizedName);
-            
+
             if (!existing) {
                 db.prepare(`
                     INSERT INTO grocery_items (household_id, name, normalized_name)
@@ -58,7 +58,7 @@ function autoManageGrocery(householdId, productName, newQuantity, oldQuantity) {
                 console.log(`[Grocery] Auto-added "${productName}" to grocery list (Premium)`);
             }
         }
-        
+
         // If quantity went from 0 to >0, remove from grocery
         if (oldQuantity === 0 && newQuantity > 0) {
             db.prepare(`
@@ -89,7 +89,7 @@ function getAllInventory(householdId) {
         LEFT JOIN locations l ON i.location_id = l.id
         WHERE i.household_id = ?
     `).all(householdId);
-    
+
     return inventory;
 }
 
@@ -113,7 +113,7 @@ function getExpiringItems(householdId, days = 7) {
         AND date(i.expiration_date) >= date('now')
         ORDER BY i.expiration_date ASC
     `).all(householdId, days);
-    
+
     return inventory;
 }
 
@@ -135,7 +135,7 @@ function getExpiredItems(householdId) {
         AND date(i.expiration_date) < date('now')
         ORDER BY i.expiration_date DESC
     `).all(householdId);
-    
+
     return inventory;
 }
 
@@ -208,7 +208,7 @@ function addInventoryItem(householdId, itemData) {
             WHERE id = ?
         `).run(newQuantity, existingItem.id);
 
-        logSync(householdId, 'inventory', existingItem.id, 'update', { 
+        logSync(householdId, 'inventory', existingItem.id, 'update', {
             quantity: newQuantity,
             expirationDate: existingItem.expiration_date,
             notes: existingItem.notes,
@@ -235,10 +235,10 @@ function addInventoryItem(householdId, itemData) {
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(inventoryId, productId, householdId, locationId, quantity || 1, expirationDate || null, notes || null);
 
-    logSync(householdId, 'inventory', inventoryId, 'create', { 
-        productId, 
-        quantity: quantity || 1, 
-        expirationDate: expirationDate || null, 
+    logSync(householdId, 'inventory', inventoryId, 'create', {
+        productId,
+        quantity: quantity || 1,
+        expirationDate: expirationDate || null,
         notes: notes || null,
         locationId
     });
@@ -281,7 +281,7 @@ function updateInventoryItem(householdId, itemId, updates) {
     }
 
     const item = db.prepare('SELECT * FROM inventory WHERE id = ? AND household_id = ?').get(itemId, householdId);
-    
+
     if (!item) {
         console.log(`❌ [InventoryService] Item not found: ${itemId}`);
         throw new Error('Inventory item not found');
@@ -337,7 +337,7 @@ function updateInventoryItem(householdId, itemId, updates) {
 
     console.log(`✅ [InventoryService] Database updated successfully`);
 
-    logSync(householdId, 'inventory', itemId, 'update', { 
+    logSync(householdId, 'inventory', itemId, 'update', {
         quantity: finalQuantity,
         expirationDate: finalExpiration,
         notes: finalNotes,
@@ -379,28 +379,28 @@ function adjustQuantity(householdId, itemId, adjustment) {
     }
 
     const item = db.prepare('SELECT * FROM inventory WHERE id = ? AND household_id = ?').get(itemId, householdId);
-    
+
     if (!item) {
         throw new Error('Inventory item not found');
     }
 
     const newQuantity = item.quantity + adjustment;
-    
+
     // Get product name for grocery management
     const product = db.prepare('SELECT name FROM products WHERE id = ?').get(item.product_id);
     const oldQuantity = item.quantity;
-    
+
     if (newQuantity <= 0) {
         // Auto-add to grocery if going to 0
         if (product) {
             autoManageGrocery(householdId, product.name, 0, oldQuantity);
         }
-        
+
         // Remove item if quantity reaches 0
         db.prepare('DELETE FROM inventory WHERE id = ?').run(itemId);
-        
+
         logSync(householdId, 'inventory', itemId, 'delete', {});
-        
+
         return { deleted: true, id: itemId };
     }
 
@@ -409,13 +409,13 @@ function adjustQuantity(householdId, itemId, adjustment) {
         SET quantity = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
     `).run(newQuantity, itemId);
-    
+
     // Auto-remove from grocery if coming back from 0
     if (product) {
         autoManageGrocery(householdId, product.name, newQuantity, oldQuantity);
     }
 
-    logSync(householdId, 'inventory', itemId, 'update', { 
+    logSync(householdId, 'inventory', itemId, 'update', {
         quantity: newQuantity,
         expirationDate: item.expiration_date,
         notes: item.notes,
@@ -447,13 +447,13 @@ function deleteInventoryItem(householdId, itemId) {
     }
 
     const item = db.prepare('SELECT * FROM inventory WHERE id = ? AND household_id = ?').get(itemId, householdId);
-    
+
     if (!item) {
         throw new Error('Inventory item not found');
     }
 
     db.prepare('DELETE FROM inventory WHERE id = ?').run(itemId);
-    
+
     logSync(householdId, 'inventory', itemId, 'delete', {});
 }
 
@@ -510,7 +510,7 @@ async function quickAddByUPC(householdId, data) {
     if (!product) {
         // Try external lookup
         const lookupResult = await lookupUPC(upc);
-        
+
         if (lookupResult.found) {
             const productId = uuidv4();
             db.prepare(`
@@ -556,8 +556,8 @@ async function quickAddByUPC(householdId, data) {
             SET quantity = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `).run(newQuantity, existingItem.id);
-        
-        logSync(householdId, 'inventory', existingItem.id, 'update', { 
+
+        logSync(householdId, 'inventory', existingItem.id, 'update', {
             quantity: newQuantity,
             expirationDate: existingItem.expiration_date,
             notes: existingItem.notes,
@@ -573,7 +573,7 @@ async function quickAddByUPC(householdId, data) {
             LEFT JOIN locations l ON i.location_id = l.id
             WHERE i.id = ?
         `).get(existingItem.id);
-        
+
         return { item, action: 'updated' };
     }
 
@@ -584,9 +584,9 @@ async function quickAddByUPC(householdId, data) {
         VALUES (?, ?, ?, ?, ?, ?)
     `).run(inventoryId, product.id, householdId, locationId, quantity || 1, expirationDate || null);
 
-    logSync(householdId, 'inventory', inventoryId, 'create', { 
-        productId: product.id, 
-        quantity: quantity || 1, 
+    logSync(householdId, 'inventory', inventoryId, 'create', {
+        productId: product.id,
+        quantity: quantity || 1,
         expirationDate: expirationDate || null,
         locationId
     });

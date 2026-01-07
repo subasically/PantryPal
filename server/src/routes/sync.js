@@ -22,8 +22,11 @@ router.get('/changes', (req, res) => {
         const params = [householdId];
 
         if (since) {
+            // Convert ISO timestamp to SQLite format for comparison
+            // Replace 'T' with space and remove 'Z' suffix
+            const sqliteTimestamp = since.replace('T', ' ').replace('Z', '').replace(/\.\d+$/, '');
             query += ' AND server_timestamp > ?';
-            params.push(since);
+            params.push(sqliteTimestamp);
         }
 
         query += ' ORDER BY server_timestamp ASC';

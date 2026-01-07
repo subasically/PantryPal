@@ -52,6 +52,30 @@ function initializeDatabase() {
         console.error('Migration error (premium_expires_at):', error);
     }
 
+    // Migration: Add owner_id to households if it doesn't exist
+    try {
+        const tableInfo = db.prepare("PRAGMA table_info(households)").all();
+        const hasOwnerId = tableInfo.some(col => col.name === 'owner_id');
+
+        if (!hasOwnerId) {
+            console.log('Migrating: Adding owner_id column to households table...');
+            db.prepare('ALTER TABLE households ADD COLUMN owner_id TEXT').run();
+
+            // Set owner_id for existing households (use first user in household)
+            const households = db.prepare('SELECT DISTINCT household_id FROM users WHERE household_id IS NOT NULL').all();
+            for (const row of households) {
+                const firstUser = db.prepare('SELECT id FROM users WHERE household_id = ? ORDER BY created_at LIMIT 1').get(row.household_id);
+                if (firstUser) {
+                    db.prepare('UPDATE households SET owner_id = ? WHERE id = ?').run(firstUser.id, row.household_id);
+                }
+            }
+
+            console.log('Migration successful: owner_id added and populated');
+        }
+    } catch (error) {
+        console.error('Migration error (owner_id):', error);
+    }
+
     // Migration: Add brand and upc to grocery_items if they don't exist
     try {
         const tableInfo = db.prepare("PRAGMA table_info(grocery_items)").all();

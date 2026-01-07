@@ -60,7 +60,6 @@
 		A7318C7C6262C42841196DD3 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CF4E9299EE7BFB409D0254 /* CheckoutView.swift */; };
 		B6F261A5C826857BA1B9484D /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4A7C84F0B02C27FF31131A /* ToastView.swift */; };
 		BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */; };
-		E2D1270CD03B316B03D4A15C /* ThankYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EAED54E236807573864AA8 /* ThankYouView.swift */; };
 		EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60392A419ED813B3C8B0683E /* ToastCenter.swift */; };
 /* End PBXBuildFile section */
 
@@ -75,7 +74,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		05EAED54E236807573864AA8 /* ThankYouView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThankYouView.swift; sourceTree = "<group>"; };
 		100 /* PantryPal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PantryPal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		101 /* PantryPalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryPalApp.swift; sourceTree = "<group>"; };
 		102 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -256,9 +254,8 @@
 				2F74C56F2EDE639E006E985C /* SettingsView.swift */,
 				2F3780052EFC6AEB006F4E33 /* SmartScannerView.swift */,
 				2F377FF92EFB7975006F4E33 /* SplashView.swift */,
-				3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */,
 				E915A7DDBE15C9196C72F0C6 /* ThankYouView.swift */,
-				05EAED54E236807573864AA8 /* ThankYouView.swift */,
+				3AC6CC9C0D2DCC4EC12198EE /* ToastHostView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -480,7 +477,6 @@
 				EF3F57B0553244F3CDDFFE44 /* ToastCenter.swift in Sources */,
 				BF9F44CEB1817CE77878A51A /* ToastHostView.swift in Sources */,
 				68C6CE661A94D62DEC30A1D8 /* ThankYouView.swift in Sources */,
-				E2D1270CD03B316B03D4A15C /* ThankYouView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -673,7 +669,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 202601051712;
+				CURRENT_PROJECT_VERSION = 202601060911;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";
@@ -709,7 +705,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PantryPal/PantryPal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 202601051712;
+				CURRENT_PROJECT_VERSION = 202601060911;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PantryPal/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pantry Pal";

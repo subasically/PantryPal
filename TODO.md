@@ -54,6 +54,24 @@
   - [x] UI: Display brand + name in grocery list
   - [x] Hooks: Auto-remove on barcode scan, custom add, quantity increase
   - [x] Toast: Show "Removed X from grocery list" on success
+- [ ] **AWS Migration** 🚀 CRITICAL FOR PRODUCTION
+  - [ ] Evaluate AWS services: EC2 vs ECS vs App Runner vs Elastic Beanstalk
+  - [ ] Set up RDS for SQLite replacement (Aurora Serverless or RDS MySQL/PostgreSQL)
+  - [ ] Configure CloudWatch for logging and monitoring
+  - [ ] Set up S3 for backups and static assets (if needed)
+  - [ ] Route 53 for DNS management (api-pantrypal.subasically.me)
+  - [ ] ALB/SSL certificate via ACM for HTTPS
+  - [ ] Auto-scaling configuration for traffic spikes
+  - [ ] Migrate database (export from Contabo → import to RDS)
+  - [ ] Update DNS to point to AWS
+  - [ ] Test end-to-end before cutting over
+  - [ ] Decommission Contabo server after 1 week of stable AWS operation
+  - **Why:** Contabo VPS is fine for testing but AWS offers:
+    - Better uptime SLAs (99.99% vs ~99.9%)
+    - Auto-scaling for App Store launch traffic
+    - Professional infrastructure for investor/user confidence
+    - Easier compliance (SOC 2, GDPR data residency)
+    - Superior monitoring and alerting
 - [ ] **In-App Purchases (StoreKit 2)** ← NEXT
   - [ ] Product configuration
   - [ ] Purchase flow

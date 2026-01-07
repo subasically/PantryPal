@@ -142,8 +142,10 @@ final class AuthViewModel {
                 await completeHouseholdSetup()
             }
             
-            // Always show household setup to give user choice (or retry if creation failed)
-            showHouseholdSetup = true
+            // Only show household setup if user still doesn't have one (creation failed or needs to join)
+            if currentHousehold == nil {
+                showHouseholdSetup = true
+            }
         } catch let error as APIError {
             errorMessage = error.userFriendlyMessage
         } catch {
@@ -202,8 +204,10 @@ final class AuthViewModel {
                     await completeHouseholdSetup()
                 }
                 
-                // Always show household setup to give user choice (or retry if creation failed)
-                showHouseholdSetup = true
+                // Only show household setup if user still doesn't have one (creation failed or needs to join)
+                if currentHousehold == nil {
+                    showHouseholdSetup = true
+                }
             } catch let error as APIError {
                 print("Apple Sign In API Error: \(error.localizedDescription)")
                 errorMessage = error.userFriendlyMessage
@@ -302,9 +306,56 @@ final class AuthViewModel {
             }
         }
         
+        // Always ensure locations exist (handles both new households and existing households with deleted locations)
+        await ensureDefaultLocationsExist()
+        
         print("✅ [AuthViewModel] Household setup completed, user household: \(currentHousehold?.id ?? "nil")")
         
         // Don't auto-dismiss - let user choose to join existing or continue with created household
+    }
+    
+    /// Ensure default locations exist - creates them if missing (idempotent)
+    private func ensureDefaultLocationsExist() async {
+        do {
+            // Check if locations already exist
+            let locations = try await APIService.shared.getLocations()
+            
+            if locations.isEmpty {
+                print("📍 [AuthViewModel] No locations found, creating defaults...")
+                await createDefaultLocations()
+            } else {
+                print("✅ [AuthViewModel] Found \(locations.count) existing locations, skipping creation")
+            }
+        } catch {
+            print("⚠️ [AuthViewModel] Failed to check existing locations: \(error)")
+            // Try to create anyway - API will handle duplicates
+            await createDefaultLocations()
+        }
+    }
+    
+    /// Create default locations for a new household (client-managed)
+    private func createDefaultLocations() async {
+        let defaultLocations = [
+            "Pantry",
+            "Fridge",
+            "Freezer",
+            "Cabinet",
+            "Garage",
+            "Basement",
+            "Other"
+        ]
+        
+        print("📍 [AuthViewModel] Creating \(defaultLocations.count) default locations")
+        
+        do {
+            for location in defaultLocations {
+                _ = try await APIService.shared.createLocation(name: location, parentId: nil)
+            }
+            print("✅ [AuthViewModel] Successfully created all default locations")
+        } catch {
+            print("⚠️ [AuthViewModel] Failed to create default locations: \(error)")
+            // Non-fatal - user can still use the app and create locations manually
+        }
     }
     
     func logout() {

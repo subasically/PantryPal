@@ -2,16 +2,27 @@
 
 # Reset PantryPal Database
 # This script removes the Docker volume and recreates the database with fresh schema
+# Usage: ./reset-database.sh [--force]
 
 set -e
 
+# Parse arguments
+FORCE=false
+if [ "$1" = "--force" ] || [ "$1" = "-f" ]; then
+    FORCE=true
+fi
+
 echo "🔄 Resetting PantryPal database..."
 echo "⚠️  WARNING: This will delete ALL data!"
-read -p "Are you sure? (yes/no): " confirm
 
-if [ "$confirm" != "yes" ]; then
-    echo "❌ Aborted"
-    exit 1
+if [ "$FORCE" = false ]; then
+    read -p "Are you sure? (yes/no): " confirm
+    if [ "$confirm" != "yes" ]; then
+        echo "❌ Aborted"
+        exit 1
+    fi
+else
+    echo "⚠️  Force mode enabled, skipping confirmation"
 fi
 
 echo ""

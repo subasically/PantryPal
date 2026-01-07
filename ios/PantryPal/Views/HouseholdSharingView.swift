@@ -163,8 +163,7 @@ struct HouseholdSharingView: View {
                                     Text(member.displayName)
                                         .font(.headline)
                                     
-                                    // Assume first member (creator) is owner
-                                    if index == 0 {
+                                    if member.isOwner {
                                         Text("Owner")
                                             .font(.caption2)
                                             .fontWeight(.medium)

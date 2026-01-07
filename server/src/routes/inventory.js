@@ -59,7 +59,7 @@ router.post('/', (req, res) => {
     } catch (error) {
         console.error('Add inventory error:', error);
         if (error.code === 'PREMIUM_REQUIRED' || error.code === 'LIMIT_REACHED') {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 error: error.message,
                 code: error.code,
                 limit: error.limit,
@@ -67,7 +67,7 @@ router.post('/', (req, res) => {
             });
         }
         if (error.code === 'LOCATION_REQUIRED') {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: error.message,
                 code: error.code
             });
@@ -96,7 +96,7 @@ router.post('/quick-add', async (req, res) => {
     } catch (error) {
         console.error('Quick add error:', error);
         if (error.code === 'PREMIUM_REQUIRED' || error.code === 'LIMIT_REACHED') {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 error: error.message,
                 code: error.code,
                 limit: error.limit,
@@ -104,13 +104,13 @@ router.post('/quick-add', async (req, res) => {
             });
         }
         if (error.code === 'LOCATION_REQUIRED') {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: error.message,
                 code: error.code
             });
         }
         if (error.requiresCustomProduct) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 error: error.message,
                 upc: error.upc,
                 requiresCustomProduct: true
@@ -127,35 +127,35 @@ router.post('/quick-add', async (req, res) => {
 router.put('/:id', (req, res) => {
     try {
         const { quantity, expirationDate, notes, locationId } = req.body;
-        
+
         console.log(`📝 [Inventory] Update request for item: ${req.params.id}`);
         console.log(`   - User ID: ${req.user.id}`);
         console.log(`   - Household ID: ${req.user.householdId}`);
         console.log(`   - Request body:`, JSON.stringify(req.body));
         console.log(`   - Expiration date: ${expirationDate === null ? 'NULL (clearing)' : expirationDate === undefined ? 'UNDEFINED (not provided)' : expirationDate}`);
-        
+
         const updated = inventoryService.updateInventoryItem(req.user.householdId, req.params.id, {
             quantity,
             expirationDate,
             notes,
             locationId
         });
-        
+
         console.log(`✅ [Inventory] Item updated successfully: ${req.params.id}`);
         console.log(`   - Updated expiration: ${updated.expiration_date || 'null'}`);
-        
+
         res.json(updated);
     } catch (error) {
         console.error('❌ [Inventory] Update inventory error:', error);
         if (error.code === 'PREMIUM_REQUIRED') {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 error: error.message,
                 code: error.code,
                 upgradeRequired: true
             });
         }
         if (error.code === 'LOCATION_REQUIRED' || error.code === 'INVALID_LOCATION') {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: error.message,
                 code: error.code
             });
@@ -171,7 +171,7 @@ router.put('/:id', (req, res) => {
 router.patch('/:id/quantity', (req, res) => {
     try {
         const { adjustment } = req.body;
-        
+
         if (typeof adjustment !== 'number') {
             return res.status(400).json({ error: 'Adjustment must be a number' });
         }
@@ -181,7 +181,7 @@ router.patch('/:id/quantity', (req, res) => {
     } catch (error) {
         console.error('Adjust quantity error:', error);
         if (error.code === 'PREMIUM_REQUIRED') {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 error: error.message,
                 code: error.code,
                 upgradeRequired: true
@@ -202,7 +202,7 @@ router.delete('/:id', (req, res) => {
     } catch (error) {
         console.error('Delete inventory error:', error);
         if (error.code === 'PREMIUM_REQUIRED') {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 error: error.message,
                 code: error.code,
                 upgradeRequired: true

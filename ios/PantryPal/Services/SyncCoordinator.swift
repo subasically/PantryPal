@@ -86,8 +86,13 @@ class SyncCoordinator: ObservableObject {
                 print("🔄 [SyncCoordinator] No sync cursor, bootstrapping with full sync...")
                 try await SyncService.shared.syncFromRemote(modelContext: modelContext)
                 
-                // Set initial cursor
-                lastSyncServerTime[householdId] = ISO8601DateFormatter().string(from: Date())
+                // Set initial cursor to "now" - all items from bootstrap are current
+                // Use incremental sync endpoint to get server's timestamp
+                let serverTime = try await SyncService.shared.syncChanges(
+                    since: "1970-01-01T00:00:00Z", // Get nothing, just need server time
+                    modelContext: modelContext
+                )
+                lastSyncServerTime[householdId] = serverTime
                 saveSyncState()
             } else {
                 // Incremental sync
