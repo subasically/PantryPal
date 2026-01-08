@@ -4,9 +4,7 @@ import type Database from 'better-sqlite3';
 import { toSQLite, nowISO } from '../utils/timestamp';
 import type { EntityType, SyncOperation } from '../services/syncLogger';
 import authenticateToken from '../middleware/auth';
-
-// Get database instance (will use CommonJS require for now)
-const db = require('../models/database') as Database.Database;
+import db from '../models/database';
 
 const router: Router = express.Router();
 

@@ -1,8 +1,8 @@
 import express, { Response } from 'express';
 import authenticateToken, { AuthenticatedRequest } from '../middleware/auth';
+import groceryService from '../services/groceryService';
 
 const router = express.Router();
-const groceryService = require('../services/groceryService');
 
 console.log('🔵 [Grocery Routes] Module loaded - VERSION 2025-12-30-19:30');
 

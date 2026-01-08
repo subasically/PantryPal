@@ -217,7 +217,7 @@ router.put('/preferences', authenticateToken, (req: AuthenticatedRequest, res: R
  */
 router.post('/test', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
 	try {
-		const pushService = require('../services/pushNotifications').default;
+		const { default: pushService } = await import('../services/pushNotifications');
 		const result = await pushService.sendToUser(req.user!.id, {
 			aps: {
 				alert: {
