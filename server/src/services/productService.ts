@@ -2,14 +2,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { Database } from 'better-sqlite3';
 import { lookupUPC, UPCLookupResult } from './upcLookup';
 import { logSync } from './syncLogger';
+import db from '../models/database';
 
-// Lazy load database to avoid circular dependencies
-let dbInstance: Database | null = null;
+// Use imported database directly
 function getDb(): Database {
-	if (!dbInstance) {
-		dbInstance = require('../models/database');
-	}
-	return dbInstance as Database;
+	return db;
 }
 
 interface ProductRow {
