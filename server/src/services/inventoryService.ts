@@ -3,14 +3,11 @@ import { Database } from 'better-sqlite3';
 import { logSync } from './syncLogger';
 import { lookupUPC } from './upcLookup';
 import { isHouseholdPremium, canAddItems, FREE_LIMIT } from '../utils/premiumHelper';
+import db from '../models/database';
 
-// Lazy load database to avoid circular dependencies
-let dbInstance: Database | null = null;
+// Use imported database directly
 function getDb(): Database {
-	if (!dbInstance) {
-		dbInstance = require('../models/database');
-	}
-	return dbInstance as Database;
+	return db;
 }
 
 interface InventoryRow {

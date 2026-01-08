@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type Database from 'better-sqlite3';
 import { toSQLite } from '../utils/timestamp';
+import db from '../models/database';
 
 /**
  * Valid entity types for sync operations
@@ -29,11 +30,11 @@ export interface SyncLogParams {
 }
 
 /**
- * Lazy load database to avoid circular dependency issues in tests
+ * Get database instance
  * @returns Database instance
  */
 function getDb(): Database.Database {
-	return require('../models/database');
+	return db;
 }
 
 /**
