@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY tsconfig.json ./
+COPY tsconfig*.json ./
 
 # Install ALL dependencies (including devDependencies for TypeScript compilation)
 RUN npm install

@@ -1,8 +1,8 @@
 import express, { Response } from 'express';
 import authenticateToken, { AuthenticatedRequest } from '../middleware/auth';
+import householdService from '../services/householdService';
 
 const router = express.Router();
-const householdService = require('../services/householdService');
 
 // Create a new household
 router.post('/', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
