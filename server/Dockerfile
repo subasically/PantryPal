@@ -10,7 +10,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install ALL dependencies (including devDependencies for TypeScript compilation)
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY src ./src
@@ -29,7 +29,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install ONLY production dependencies
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy compiled JavaScript from builder stage
 COPY --from=builder /app/dist ./dist
