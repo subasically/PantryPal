@@ -131,11 +131,11 @@ class PushNotificationService {
 			let data = '';
 			req.on('response', (headers: http2.IncomingHttpHeaders) => {
 				const statusValue = headers[':status'];
-		const status = typeof statusValue === 'string' 
-			? parseInt(statusValue, 10) 
-			: Array.isArray(statusValue) 
-				? parseInt(statusValue[0], 10) 
-				: (statusValue as number);
+				const status = typeof statusValue === 'string'
+					? parseInt(statusValue, 10)
+					: Array.isArray(statusValue)
+						? parseInt(statusValue[0], 10)
+						: (statusValue as number);
 				req.on('data', (chunk: Buffer) => { data += chunk; });
 				req.on('end', () => {
 					client.close();

@@ -240,10 +240,10 @@ router.post('/scan', (req: AuthenticatedRequest, res: Response) => {
 			).catch(err => console.error('Failed to send checkout notification:', err));
 		}
 	} catch (error) {
-			console.error('Error during checkout scan:', error);
-			res.status(500).json({ error: 'Failed to process checkout' });
-		}
-	});
+		console.error('Error during checkout scan:', error);
+		res.status(500).json({ error: 'Failed to process checkout' });
+	}
+});
 
 /**
  * @route   GET /api/checkout/history
