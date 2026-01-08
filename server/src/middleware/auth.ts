@@ -2,16 +2,13 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { Database } from 'better-sqlite3';
 import logger from '../utils/logger';
+import db from '../models/database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// Lazy load database to avoid circular dependencies
-let dbInstance: Database | null = null;
+// Use imported database directly
 function getDb(): Database {
-	if (!dbInstance) {
-		dbInstance = require('../models/database').default;
-	}
-	return dbInstance as Database;
+	return db;
 }
 
 interface JwtPayload {

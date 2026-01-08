@@ -1,16 +1,13 @@
 import express, { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import authenticateToken, { AuthenticatedRequest } from '../middleware/auth';
+import db from '../models/database';
 
 const router = express.Router();
 
-// Lazy load database
-let dbInstance: any = null;
+// Use imported database directly
 function getDb() {
-	if (!dbInstance) {
-		dbInstance = require('../models/database').default;
-	}
-	return dbInstance;
+	return db;
 }
 
 // All routes require authentication

@@ -2,14 +2,11 @@ import express, { Response } from 'express';
 const router = express.Router();
 import authenticateToken, { AuthenticatedRequest } from '../middleware/auth';
 import logger from '../utils/logger';
+import db from '../models/database';
 
-// Lazy load database
-let dbInstance: any = null;
+// Use imported database directly
 function getDb() {
-	if (!dbInstance) {
-		dbInstance = require('../models/database').default;
-	}
-	return dbInstance;
+	return db;
 }
 
 interface UserRow {

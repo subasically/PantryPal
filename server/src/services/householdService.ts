@@ -1,12 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
+import db from '../models/database';
 
-// Lazy load database
-let dbInstance: any = null;
+// Use imported database directly
 function getDb() {
-	if (!dbInstance) {
-		dbInstance = require('../models/database').default;
-	}
-	return dbInstance;
+	return db;
 }
 
 interface UserRow {

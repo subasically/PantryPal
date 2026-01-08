@@ -1,10 +1,8 @@
-// Lazy load database
-let dbInstance: any = null;
+import db from '../models/database';
+
+// Use imported database directly
 function getDb() {
-	if (!dbInstance) {
-		dbInstance = require('../models/database').default;
-	}
-	return dbInstance;
+	return db;
 }
 
 const FREE_LIMIT = 25;

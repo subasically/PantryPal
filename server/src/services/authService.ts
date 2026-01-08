@@ -3,16 +3,13 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import appleSignin from 'apple-signin-auth';
 import logger from '../utils/logger';
+import db from '../models/database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// Lazy load database to avoid circular dependencies
-let dbInstance: any = null;
+// Use imported database directly
 function getDb() {
-	if (!dbInstance) {
-		dbInstance = require('../models/database').default;
-	}
-	return dbInstance;
+	return db;
 }
 
 interface UserRow {

@@ -5,14 +5,11 @@ import authenticateToken, { AuthenticatedRequest } from '../middleware/auth';
 import pushService from '../services/pushNotifications';
 import { logSync } from '../services/syncLogger';
 import { isHouseholdPremium } from '../utils/premiumHelper';
+import db from '../models/database';
 
-// Lazy load database
-let dbInstance: any = null;
+// Use imported database directly
 function getDb() {
-	if (!dbInstance) {
-		dbInstance = require('../models/database').default;
-	}
-	return dbInstance;
+	return db;
 }
 
 // All routes require authentication

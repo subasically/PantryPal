@@ -1,14 +1,11 @@
 import http2 from 'http2';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
+import db from '../models/database';
 
-// Lazy load database
-let dbInstance: any = null;
+// Use imported database directly
 function getDb() {
-	if (!dbInstance) {
-		dbInstance = require('../models/database').default;
-	}
-	return dbInstance;
+	return db;
 }
 
 interface DeviceToken {
