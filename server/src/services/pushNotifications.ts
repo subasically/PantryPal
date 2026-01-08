@@ -1,197 +1,201 @@
 import http2 from 'http2';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
-import path from 'path';
 
 // Lazy load database
 let dbInstance: any = null;
 function getDb() {
-    if (!dbInstance) {
-        dbInstance = require('../models/database').default;
-    }
-    return dbInstance;
+	if (!dbInstance) {
+		dbInstance = require('../models/database').default;
+	}
+	return dbInstance;
 }
 
 interface DeviceToken {
-    token: string;
-    user_id: string;
+	token: string;
+	user_id: string;
 }
 
 interface Household {
-    id: string;
-    name: string;
+	id: string;
+	name: string;
 }
 
 interface User {
-    id: string;
-    name: string | null;
-    expiration_days_before: number;
+	id: string;
+	name: string | null;
+	expiration_days_before: number;
 }
 
 interface ExpiringItem {
-    id: string;
-    name: string;
-    brand: string | null;
-    expiration_date: string;
-    days_until: number;
+	id: string;
+	name: string;
+	brand: string | null;
+	expiration_date: string;
+	days_until: number;
 }
 
 interface LowStockItem {
-    name: string;
-    brand: string | null;
-    total_quantity: number;
+	name: string;
+	brand: string | null;
+	total_quantity: number;
 }
 
 interface NotificationPayload {
-    aps: {
-        alert: {
-            title: string;
-            body: string;
-        };
-        sound?: string | null;
-        badge?: number;
-    };
-    type: string;
-    householdId: string;
+	aps: {
+		alert: {
+			title: string;
+			body: string;
+		};
+		sound?: string | null;
+		badge?: number;
+	};
+	type: string;
+	householdId: string;
 }
 
 interface NotificationResult {
-    success: boolean;
-    status?: number;
-    reason?: string;
+	success: boolean;
+	status?: number;
+	reason?: string;
 }
 
 class PushNotificationService {
-    private keyId: string | undefined;
-    private teamId: string | undefined;
-    private bundleId: string;
-    private keyPath: string | undefined;
-    private isProduction: boolean;
-    private apnsHost: string;
+	private keyId: string | undefined;
+	private teamId: string | undefined;
+	private bundleId: string;
+	private keyPath: string | undefined;
+	private isProduction: boolean;
+	private apnsHost: string;
 
-    constructor() {
-        this.keyId = process.env.APNS_KEY_ID;
-        this.teamId = process.env.APNS_TEAM_ID;
-        this.bundleId = process.env.APNS_BUNDLE_ID || 'me.subasically.pantrypal';
-        this.keyPath = process.env.APNS_KEY_PATH;
-        this.isProduction = process.env.NODE_ENV === 'production';
-        
-        this.apnsHost = this.isProduction 
-            ? 'api.push.apple.com' 
-            : 'api.sandbox.push.apple.com';
-    }
+	constructor() {
+		this.keyId = process.env.APNS_KEY_ID;
+		this.teamId = process.env.APNS_TEAM_ID;
+		this.bundleId = process.env.APNS_BUNDLE_ID || 'me.subasically.pantrypal';
+		this.keyPath = process.env.APNS_KEY_PATH;
+		this.isProduction = process.env.NODE_ENV === 'production';
 
-    generateToken(): string | null {
-        if (!this.keyPath || !fs.existsSync(this.keyPath)) {
-            console.warn('APNs key not configured');
-            return null;
-        }
+		this.apnsHost = this.isProduction
+			? 'api.push.apple.com'
+			: 'api.sandbox.push.apple.com';
+	}
 
-        const key = fs.readFileSync(this.keyPath);
-        const token = jwt.sign({}, key, {
-            algorithm: 'ES256',
-            header: {
-                alg: 'ES256',
-                kid: this.keyId
-            },
-            issuer: this.teamId,
-            expiresIn: '1h'
-        });
+	generateToken(): string | null {
+		if (!this.keyPath || !fs.existsSync(this.keyPath)) {
+			console.warn('APNs key not configured');
+			return null;
+		}
 
-        return token;
-    }
+		const key = fs.readFileSync(this.keyPath);
+		const token = jwt.sign({}, key, {
+			algorithm: 'ES256',
+			header: {
+				alg: 'ES256',
+				kid: this.keyId
+			},
+			issuer: this.teamId,
+			expiresIn: '1h'
+		});
 
-    async sendNotification(deviceToken: string, payload: NotificationPayload): Promise<NotificationResult> {
-        const token = this.generateToken();
-        if (!token) {
-            console.log('Push notification skipped - APNs not configured');
-            return { success: false, reason: 'APNs not configured' };
-        }
+		return token;
+	}
 
-        return new Promise((resolve) => {
-            const client = http2.connect(`https://${this.apnsHost}:443`);
+	async sendNotification(deviceToken: string, payload: NotificationPayload): Promise<NotificationResult> {
+		const token = this.generateToken();
+		if (!token) {
+			console.log('Push notification skipped - APNs not configured');
+			return { success: false, reason: 'APNs not configured' };
+		}
 
-            client.on('error', (err: Error) => {
-                console.error('APNs connection error:', err);
-                resolve({ success: false, reason: err.message });
-            });
+		return new Promise((resolve) => {
+			const client = http2.connect(`https://${this.apnsHost}:443`);
 
-            const headers = {
-                ':method': 'POST',
-                ':path': `/3/device/${deviceToken}`,
-                'authorization': `bearer ${token}`,
-                'apns-topic': this.bundleId,
-                'apns-push-type': 'alert',
-                'apns-priority': '10',
-                'apns-expiration': '0'
-            };
+			client.on('error', (err: Error) => {
+				console.error('APNs connection error:', err);
+				resolve({ success: false, reason: err.message });
+			});
 
-            const body = JSON.stringify(payload);
-            const req = client.request(headers);
+			const headers = {
+				':method': 'POST',
+				':path': `/3/device/${deviceToken}`,
+				'authorization': `bearer ${token}`,
+				'apns-topic': this.bundleId,
+				'apns-push-type': 'alert',
+				'apns-priority': '10',
+				'apns-expiration': '0'
+			};
 
-            let data = '';
-            req.on('response', (headers: http2.IncomingHttpHeaders) => {
-                const status = headers[':status'] as number;
-                req.on('data', (chunk: Buffer) => { data += chunk; });
-                req.on('end', () => {
-                    client.close();
-                    if (status === 200) {
-                        resolve({ success: true });
-                    } else {
-                        resolve({ success: false, status, reason: data });
-                    }
-                });
-            });
+			const body = JSON.stringify(payload);
+			const req = client.request(headers);
 
-            req.write(body);
-            req.end();
-        });
-    }
+			let data = '';
+			req.on('response', (headers: http2.IncomingHttpHeaders) => {
+				const statusValue = headers[':status'];
+		const status = typeof statusValue === 'string' 
+			? parseInt(statusValue, 10) 
+			: Array.isArray(statusValue) 
+				? parseInt(statusValue[0], 10) 
+				: (statusValue as number);
+				req.on('data', (chunk: Buffer) => { data += chunk; });
+				req.on('end', () => {
+					client.close();
+					if (status === 200) {
+						resolve({ success: true });
+					} else {
+						resolve({ success: false, status, reason: data });
+					}
+				});
+			});
 
-    async sendToHousehold(householdId: string, payload: NotificationPayload): Promise<any[]> {
-        const db = getDb();
-        const tokens = db.prepare(`
+			req.write(body);
+			req.end();
+		});
+	}
+
+	async sendToHousehold(householdId: string, payload: NotificationPayload): Promise<any[]> {
+		const db = getDb();
+		const tokens = db.prepare(`
             SELECT DISTINCT dt.token, dt.user_id 
             FROM device_tokens dt
             JOIN notification_preferences np ON dt.user_id = np.user_id
             WHERE dt.household_id = ?
         `).all(householdId) as DeviceToken[];
 
-        const results = [];
-        for (const { token } of tokens) {
-            const result = await this.sendNotification(token, payload);
-            results.push({ token, ...result });
-            
-            if (!result.success && result.status === 410) {
-                db.prepare('DELETE FROM device_tokens WHERE token = ?').run(token);
-            }
-        }
-        return results;
-    }
+		const results = [];
+		for (const { token } of tokens) {
+			const result = await this.sendNotification(token, payload);
+			results.push({ token, ...result });
 
-    async sendToUser(userId: string, payload: NotificationPayload): Promise<any[]> {
-        const db = getDb();
-        const tokens = db.prepare(`
+			if (!result.success && result.status === 410) {
+				db.prepare('DELETE FROM device_tokens WHERE token = ?').run(token);
+			}
+		}
+		return results;
+	}
+
+	async sendToUser(userId: string, payload: NotificationPayload): Promise<any[]> {
+		const db = getDb();
+		const tokens = db.prepare(`
             SELECT token FROM device_tokens WHERE user_id = ?
         `).all(userId) as DeviceToken[];
 
-        const results = [];
-        for (const { token } of tokens) {
-            const result = await this.sendNotification(token, payload);
-            results.push({ token, ...result });
-            
-            if (!result.success && result.status === 410) {
-                db.prepare('DELETE FROM device_tokens WHERE token = ?').run(token);
-            }
-        }
-        return results;
-    }
+		const results = [];
+		for (const { token } of tokens) {
+			const result = await this.sendNotification(token, payload);
+			results.push({ token, ...result });
 
-    async checkExpiringItems(): Promise<void> {
-        const db = getDb();
-        console.log('Checking for expiring items...');
+			if (!result.success && result.status === 410) {
+				db.prepare('DELETE FROM device_tokens WHERE token = ?').run(token);
+			}
+		}
+		return results;
+	}
 
-        const households = db.prepare(`
+	async checkExpiringItems(): Promise<void> {
+		const db = getDb();
+		console.log('Checking for expiring items...');
+
+		const households = db.prepare(`
             SELECT DISTINCT h.id, h.name 
             FROM households h
             JOIN users u ON u.household_id = h.id
@@ -199,18 +203,18 @@ class PushNotificationService {
             WHERE np.expiration_enabled = 1
         `).all() as Household[];
 
-        for (const household of households) {
-            const users = db.prepare(`
+		for (const household of households) {
+			const users = db.prepare(`
                 SELECT u.id, u.name, np.expiration_days_before
                 FROM users u
                 JOIN notification_preferences np ON np.user_id = u.id
                 WHERE u.household_id = ? AND np.expiration_enabled = 1
             `).all(household.id) as User[];
 
-            for (const user of users) {
-                const daysBefore = user.expiration_days_before || 3;
-                
-                const expiringItems = db.prepare(`
+			for (const user of users) {
+				const daysBefore = user.expiration_days_before || 3;
+
+				const expiringItems = db.prepare(`
                     SELECT i.id, p.name, p.brand, i.expiration_date,
                            julianday(i.expiration_date) - julianday('now') as days_until
                     FROM inventory i
@@ -221,73 +225,73 @@ class PushNotificationService {
                     ORDER BY i.expiration_date ASC
                 `).all(household.id, daysBefore) as ExpiringItem[];
 
-                if (expiringItems.length > 0) {
-                    const todayExpiring = expiringItems.filter(i => Math.floor(i.days_until) === 0);
-                    const soonExpiring = expiringItems.filter(i => Math.floor(i.days_until) > 0);
+				if (expiringItems.length > 0) {
+					const todayExpiring = expiringItems.filter(i => Math.floor(i.days_until) === 0);
+					const soonExpiring = expiringItems.filter(i => Math.floor(i.days_until) > 0);
 
-                    if (todayExpiring.length > 0) {
-                        const itemNames = todayExpiring.slice(0, 3).map(i => 
-                            i.brand ? `${i.brand} ${i.name}` : i.name
-                        ).join(', ');
-                        
-                        const payload: NotificationPayload = {
-                            aps: {
-                                alert: {
-                                    title: '⚠️ Items Expiring Today!',
-                                    body: todayExpiring.length === 1 
-                                        ? `${itemNames} expires today`
-                                        : `${todayExpiring.length} items expire today: ${itemNames}${todayExpiring.length > 3 ? '...' : ''}`
-                                },
-                                sound: 'default',
-                                badge: todayExpiring.length
-                            },
-                            type: 'expiration',
-                            householdId: household.id
-                        };
-                        await this.sendToUser(user.id, payload);
-                    }
+					if (todayExpiring.length > 0) {
+						const itemNames = todayExpiring.slice(0, 3).map(i =>
+							i.brand ? `${i.brand} ${i.name}` : i.name
+						).join(', ');
 
-                    if (soonExpiring.length > 0) {
-                        const itemNames = soonExpiring.slice(0, 3).map(i => 
-                            i.brand ? `${i.brand} ${i.name}` : i.name
-                        ).join(', ');
+						const payload: NotificationPayload = {
+							aps: {
+								alert: {
+									title: '⚠️ Items Expiring Today!',
+									body: todayExpiring.length === 1
+										? `${itemNames} expires today`
+										: `${todayExpiring.length} items expire today: ${itemNames}${todayExpiring.length > 3 ? '...' : ''}`
+								},
+								sound: 'default',
+								badge: todayExpiring.length
+							},
+							type: 'expiration',
+							householdId: household.id
+						};
+						await this.sendToUser(user.id, payload);
+					}
 
-                        const payload: NotificationPayload = {
-                            aps: {
-                                alert: {
-                                    title: '📅 Items Expiring Soon',
-                                    body: soonExpiring.length === 1 
-                                        ? `${itemNames} expires in ${Math.ceil(soonExpiring[0].days_until)} days`
-                                        : `${soonExpiring.length} items expiring soon: ${itemNames}${soonExpiring.length > 3 ? '...' : ''}`
-                                },
-                                sound: 'default'
-                            },
-                            type: 'expiration_warning',
-                            householdId: household.id
-                        };
-                        await this.sendToUser(user.id, payload);
-                    }
-                }
-            }
-        }
-        console.log('Expiring items check completed');
-    }
+					if (soonExpiring.length > 0) {
+						const itemNames = soonExpiring.slice(0, 3).map(i =>
+							i.brand ? `${i.brand} ${i.name}` : i.name
+						).join(', ');
 
-    async checkLowStockItems(): Promise<void> {
-        const db = getDb();
-        console.log('Checking for low stock items...');
+						const payload: NotificationPayload = {
+							aps: {
+								alert: {
+									title: '📅 Items Expiring Soon',
+									body: soonExpiring.length === 1
+										? `${itemNames} expires in ${Math.ceil(soonExpiring[0].days_until)} days`
+										: `${soonExpiring.length} items expiring soon: ${itemNames}${soonExpiring.length > 3 ? '...' : ''}`
+								},
+								sound: 'default'
+							},
+							type: 'expiration_warning',
+							householdId: household.id
+						};
+						await this.sendToUser(user.id, payload);
+					}
+				}
+			}
+		}
+		console.log('Expiring items check completed');
+	}
 
-        const users = db.prepare(`
+	async checkLowStockItems(): Promise<void> {
+		const db = getDb();
+		console.log('Checking for low stock items...');
+
+		const users = db.prepare(`
             SELECT u.id, u.household_id, np.low_stock_threshold
             FROM users u
             JOIN notification_preferences np ON np.user_id = u.id
             WHERE np.low_stock_enabled = 1
         `).all() as Array<{ id: string; household_id: string; low_stock_threshold: number }>;
 
-        for (const user of users) {
-            const threshold = user.low_stock_threshold || 2;
-            
-            const lowStockItems = db.prepare(`
+		for (const user of users) {
+			const threshold = user.low_stock_threshold || 2;
+
+			const lowStockItems = db.prepare(`
                 SELECT p.name, p.brand, SUM(i.quantity) as total_quantity
                 FROM inventory i
                 JOIN products p ON i.product_id = p.id
@@ -296,67 +300,67 @@ class PushNotificationService {
                 HAVING total_quantity <= ? AND total_quantity > 0
             `).all(user.household_id, threshold) as LowStockItem[];
 
-            if (lowStockItems.length > 0) {
-                const itemNames = lowStockItems.slice(0, 3).map(i => 
-                    i.brand ? `${i.brand} ${i.name}` : i.name
-                ).join(', ');
+			if (lowStockItems.length > 0) {
+				const itemNames = lowStockItems.slice(0, 3).map(i =>
+					i.brand ? `${i.brand} ${i.name}` : i.name
+				).join(', ');
 
-                const payload: NotificationPayload = {
-                    aps: {
-                        alert: {
-                            title: '📦 Low Stock Alert',
-                            body: lowStockItems.length === 1
-                                ? `${itemNames} is running low`
-                                : `${lowStockItems.length} items running low: ${itemNames}${lowStockItems.length > 3 ? '...' : ''}`
-                        },
-                        sound: 'default'
-                    },
-                    type: 'low_stock',
-                    householdId: user.household_id
-                };
-                await this.sendToUser(user.id, payload);
-            }
-        }
-        console.log('Low stock check completed');
-    }
+				const payload: NotificationPayload = {
+					aps: {
+						alert: {
+							title: '📦 Low Stock Alert',
+							body: lowStockItems.length === 1
+								? `${itemNames} is running low`
+								: `${lowStockItems.length} items running low: ${itemNames}${lowStockItems.length > 3 ? '...' : ''}`
+						},
+						sound: 'default'
+					},
+					type: 'low_stock',
+					householdId: user.household_id
+				};
+				await this.sendToUser(user.id, payload);
+			}
+		}
+		console.log('Low stock check completed');
+	}
 
-    async sendCheckoutNotification(householdId: string, userId: string, itemName: string, remainingQuantity: number): Promise<void> {
-        const db = getDb();
-        
-        const users = db.prepare(`
+	async sendCheckoutNotification(householdId: string, userId: string, itemName: string, remainingQuantity: number): Promise<void> {
+		const db = getDb();
+
+		const users = db.prepare(`
             SELECT u.id, u.name
             FROM users u
             JOIN notification_preferences np ON np.user_id = u.id
             WHERE u.household_id = ? AND u.id != ? AND np.checkout_enabled = 1
         `).all(householdId, userId) as User[];
 
-        const checkoutUser = db.prepare('SELECT first_name, last_name FROM users WHERE id = ?').get(userId) as { first_name: string | null; last_name: string | null } | undefined;
-        const userName = checkoutUser ? `${checkoutUser.first_name || ''} ${checkoutUser.last_name || ''}`.trim() || 'Someone' : 'Someone';
+		const checkoutUser = db.prepare('SELECT first_name, last_name FROM users WHERE id = ?').get(userId) as { first_name: string | null; last_name: string | null } | undefined;
+		const userName = checkoutUser ? `${checkoutUser.first_name || ''} ${checkoutUser.last_name || ''}`.trim() || 'Someone' : 'Someone';
 
-        for (const user of users) {
-            let body: string;
-            if (remainingQuantity === 0) {
-                body = `${userName} took the last ${itemName}`;
-            } else if (remainingQuantity <= 2) {
-                body = `${userName} took ${itemName}. Only ${remainingQuantity} left!`;
-            } else {
-                body = `${userName} took ${itemName}. ${remainingQuantity} remaining.`;
-            }
+		for (const user of users) {
+			let body: string;
+			if (remainingQuantity === 0) {
+				body = `${userName} took the last ${itemName}`;
+			} else if (remainingQuantity <= 2) {
+				body = `${userName} took ${itemName}. Only ${remainingQuantity} left!`;
+			} else {
+				body = `${userName} took ${itemName}. ${remainingQuantity} remaining.`;
+			}
 
-            const payload: NotificationPayload = {
-                aps: {
-                    alert: {
-                        title: '🛒 Item Checked Out',
-                        body
-                    },
-                    sound: remainingQuantity <= 2 ? 'default' : null
-                },
-                type: 'checkout',
-                householdId
-            };
-            await this.sendToUser(user.id, payload);
-        }
-    }
+			const payload: NotificationPayload = {
+				aps: {
+					alert: {
+						title: '🛒 Item Checked Out',
+						body
+					},
+					sound: remainingQuantity <= 2 ? 'default' : null
+				},
+				type: 'checkout',
+				householdId
+			};
+			await this.sendToUser(user.id, payload);
+		}
+	}
 }
 
 export default new PushNotificationService();

@@ -4,27 +4,27 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'ios/**'
-      - '.github/workflows/ios-build.yml'
+      - "ios/**"
+      - ".github/workflows/ios-build.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'ios/**'
+      - "ios/**"
 
 jobs:
   build:
     runs-on: macos-14
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Select Xcode version
         run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer || echo "Using default Xcode"
-      
+
       - name: Show Xcode version
         run: xcodebuild -version
-      
+
       - name: Build for Generic iOS (Syntax Check)
         run: |
           cd ios
@@ -34,8 +34,8 @@ jobs:
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
             2>&1 | tee build.log || true
-        continue-on-error: true  # Known issue: GitHub Actions Xcode has pbxproj compatibility issues
-      
+        continue-on-error: true # Known issue: GitHub Actions Xcode has pbxproj compatibility issues
+
       - name: Show build summary
         if: always()
         run: |

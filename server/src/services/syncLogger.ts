@@ -21,11 +21,11 @@ export type SyncMetadata = Record<string, any>;
  * Sync log parameters (named for clarity and type safety)
  */
 export interface SyncLogParams {
-    householdId: string;
-    entityType: EntityType;
-    entityId: string;
-    operation: SyncOperation;
-    metadata?: SyncMetadata;
+	householdId: string;
+	entityType: EntityType;
+	entityId: string;
+	operation: SyncOperation;
+	metadata?: SyncMetadata;
 }
 
 /**
@@ -33,7 +33,7 @@ export interface SyncLogParams {
  * @returns Database instance
  */
 function getDb(): Database.Database {
-    return require('../models/database');
+	return require('../models/database');
 }
 
 /**
@@ -53,32 +53,32 @@ function getDb(): Database.Database {
  * ```
  */
 export function logSync(
-    householdId: string,
-    entityType: EntityType,
-    entityId: string,
-    operation: SyncOperation,
-    metadata: SyncMetadata = {}
+	householdId: string,
+	entityType: EntityType,
+	entityId: string,
+	operation: SyncOperation,
+	metadata: SyncMetadata = {}
 ): void {
-    try {
-        const db = getDb();
-        const timestamp = toSQLite(new Date().toISOString());
-        
-        db.prepare(`
+	try {
+		const db = getDb();
+		const timestamp = toSQLite(new Date().toISOString());
+
+		db.prepare(`
             INSERT INTO sync_log (id, household_id, entity_type, entity_id, action, payload, client_timestamp)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `).run(
-            uuidv4(),
-            householdId,
-            entityType,
-            entityId,
-            operation,
-            JSON.stringify(metadata),
-            timestamp
-        );
-    } catch (error) {
-        console.error('[Sync Logger] Error logging sync:', error);
-        // Don't throw - logging should never break the main operation
-    }
+			uuidv4(),
+			householdId,
+			entityType,
+			entityId,
+			operation,
+			JSON.stringify(metadata),
+			timestamp
+		);
+	} catch (error) {
+		console.error('[Sync Logger] Error logging sync:', error);
+		// Don't throw - logging should never break the main operation
+	}
 }
 
 /**
@@ -98,6 +98,6 @@ export function logSync(
  * ```
  */
 export function logSyncNamed(params: SyncLogParams): void {
-    const { householdId, entityType, entityId, operation, metadata = {} } = params;
-    logSync(householdId, entityType, entityId, operation, metadata);
+	const { householdId, entityType, entityId, operation, metadata = {} } = params;
+	logSync(householdId, entityType, entityId, operation, metadata);
 }

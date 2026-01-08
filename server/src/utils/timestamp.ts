@@ -11,10 +11,10 @@
  * @returns SQLite timestamp (e.g., "2026-01-07 18:48:30")
  */
 export function toSQLite(isoTimestamp: string): string {
-    return isoTimestamp
-        .replace('T', ' ')
-        .replace('Z', '')
-        .replace(/\.\d+$/, ''); // Remove milliseconds if present
+	return isoTimestamp
+		.replace('T', ' ')
+		.replace('Z', '')
+		.replace(/\.\d+$/, ''); // Remove milliseconds if present
 }
 
 /**
@@ -23,7 +23,7 @@ export function toSQLite(isoTimestamp: string): string {
  * @returns ISO 8601 timestamp (e.g., "2026-01-07T18:48:30Z")
  */
 export function toISO(sqliteTimestamp: string): string {
-    return sqliteTimestamp.replace(' ', 'T') + 'Z';
+	return sqliteTimestamp.replace(' ', 'T') + 'Z';
 }
 
 /**
@@ -31,7 +31,7 @@ export function toISO(sqliteTimestamp: string): string {
  * @returns Current timestamp as "YYYY-MM-DD HH:MM:SS"
  */
 export function now(): string {
-    return toSQLite(new Date().toISOString());
+	return toSQLite(new Date().toISOString());
 }
 
 /**
@@ -39,7 +39,7 @@ export function now(): string {
  * @returns Current timestamp as ISO 8601 string
  */
 export function nowISO(): string {
-    return new Date().toISOString();
+	return new Date().toISOString();
 }
 
 /**
@@ -48,12 +48,12 @@ export function nowISO(): string {
  * @returns Date object
  */
 export function parse(timestamp: string): Date {
-    // If it contains 'T', it's ISO format
-    if (timestamp.includes('T')) {
-        return new Date(timestamp);
-    }
-    // Otherwise, treat as SQLite format
-    return new Date(timestamp.replace(' ', 'T') + 'Z');
+	// If it contains 'T', it's ISO format
+	if (timestamp.includes('T')) {
+		return new Date(timestamp);
+	}
+	// Otherwise, treat as SQLite format
+	return new Date(timestamp.replace(' ', 'T') + 'Z');
 }
 
 /**
@@ -62,6 +62,6 @@ export function parse(timestamp: string): Date {
  * @returns True if valid timestamp
  */
 export function isValid(timestamp: string): boolean {
-    const date = parse(timestamp);
-    return !isNaN(date.getTime());
+	const date = parse(timestamp);
+	return !isNaN(date.getTime());
 }
