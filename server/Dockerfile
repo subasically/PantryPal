@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 3001
 
-CMD ["node", "src/index.js"]
+CMD ["npx", "ts-node", "src/index.ts"]
