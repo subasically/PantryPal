@@ -38,7 +38,7 @@ npm run test:coverage         # Coverage report
 
 ## Testing & Debugging Workflow
 - **Test Plan:** Follow structured test scenarios in `TESTING.md` (7 tests from free tier → premium → multi-device → offline).
-- **Database Reset:** Use `./server/scripts/reset-database.sh` for clean iterations during development.
+- **Database Reset:** Use `./server/scripts/reset-database.sh` to reset production database on VPS. Script SSHs to server, stops containers, removes volumes, and recreates fresh database. Supports `--force` or `-f` flag to skip confirmation.
 - **iOS Debug Tools:** Settings → Debug → Force Full Sync (clears sync cursor and pending actions).
 - **Sync Debugging:** If items not syncing: (1) Check sync_log table for correct entity_id/action values, (2) Verify syncLogger parameter order matches call sites, (3) Use Force Full Sync to clear stuck cursor.
 - **Common Patterns:**

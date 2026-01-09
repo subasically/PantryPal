@@ -79,7 +79,7 @@ We are currently in the **Revenue Validation** phase.
 10. **syncLogger Parameter Order:** `logSync(householdId, entityType, entityId, action, payload)` - entity_id comes BEFORE action. Check all calls when modifying.
 11. **Sync Debug Pattern:** If items aren't syncing, check: (1) syncLogger parameter order matches call sites, (2) sync_log entries have correct entity_id/action values, (3) sync cursor isn't stuck (use Force Full Sync in Settings → Debug).
 12. **Household Setup Flow:** New users MUST have household created before dismissing HouseholdSetupView. "Create" button should call `await authViewModel.completeHouseholdSetup()` then dismiss. Never dismiss without household_id.
-13. **Database Reset:** Use `./server/scripts/reset-database.sh` for clean testing iterations. Removes Docker volume and recreates database. Always confirm before running.
+13. **Database Reset:** Use `./server/scripts/reset-database.sh` to reset production database on VPS. Script SSHs to server, removes volumes, and recreates fresh database. Supports `--force` flag to skip confirmation. Use for clean testing iterations.
 14. **Household Member Limit:** Maximum 8 members per household. Check enforced in `joinHousehold()`.
 
 ## 📝 Current Task Context
