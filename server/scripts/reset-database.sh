@@ -26,12 +26,20 @@ else
 fi
 
 echo ""
-echo "📦 Stopping containers..."
-ssh root@62.146.177.62 "cd /root/pantrypal-server && docker-compose down -v"
+echo "📦 Stopping containers and removing volumes..."
+ssh root@62.146.177.62 "cd /root/pantrypal-server/server && docker compose down -v"
+
+echo ""
+echo "🧹 Cleaning up any orphaned volumes..."
+ssh root@62.146.177.62 "docker volume prune -f | grep -E '(pantrypal|Total)' || echo 'No orphaned volumes found'"
 
 echo ""
 echo "🚀 Starting containers with fresh database..."
-ssh root@62.146.177.62 "cd /root/pantrypal-server && docker-compose up -d"
+ssh root@62.146.177.62 "cd /root/pantrypal-server/server && docker compose up -d"
+
+echo ""
+echo "🔗 Connecting to nginx network..."
+ssh root@62.146.177.62 "docker network connect web server-pantrypal-api-1 2>&1 || echo 'Already connected'"
 
 echo ""
 echo "⏳ Waiting for database initialization..."
@@ -39,7 +47,7 @@ sleep 5
 
 echo ""
 echo "✅ Checking database status..."
-ssh root@62.146.177.62 "cd /root/pantrypal-server && docker-compose logs --tail=10 pantrypal-api | grep -E '(Database|initialized|running)'"
+ssh root@62.146.177.62 "cd /root/pantrypal-server/server && docker compose logs --tail=10 pantrypal-api | grep -E '(Database|initialized|running)'"
 
 echo ""
 echo "✅ Database reset complete!"
