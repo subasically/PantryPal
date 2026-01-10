@@ -25,6 +25,7 @@ struct InventoryItemRow: View {
                     Text(item.displayName)
                         .font(.headline)
                         .lineLimit(1)
+                        .accessibilityIdentifier(item.displayName)
                     
                     if let brand = item.productBrand {
                         Text(brand)
@@ -71,11 +72,13 @@ struct InventoryItemRow: View {
                             .font(.title2)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("inventory.decrement.\(item.id)")
                     
                     Text("\(item.quantity)")
                         .font(.headline)
                         .foregroundColor(.ppPurple)
                         .frame(minWidth: 30)
+                        .accessibilityIdentifier("inventory.quantity.\(item.id)")
                     
                     Button(action: {
                         HapticService.shared.lightImpact()
@@ -88,6 +91,7 @@ struct InventoryItemRow: View {
                             .font(.title2)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("inventory.increment.\(item.id)")
                 }
             }
         }

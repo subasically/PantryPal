@@ -422,6 +422,7 @@ struct SettingsView: View {
             signOutSection
             dangerZoneSection
         }
+        .accessibilityIdentifier("settings.list")
     }
     
     @ToolbarContentBuilder

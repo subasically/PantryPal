@@ -54,6 +54,7 @@ final class PantryPalUITests: BaseUITest {
         XCTAssertTrue(inventoryPage.addButton.exists, "Add button should be visible after login")
     }
     
+    /* Refactored to Tests/Inventory/InventoryAddItemTests.swift
     func test02_AddCustomItem_Success() throws {
         // GIVEN: User is logged in
         loginAsTestUser()
@@ -74,7 +75,9 @@ final class PantryPalUITests: BaseUITest {
         // THEN: Should return to inventory
         XCTAssertTrue(inventoryPage.inventoryList.waitForExistence(timeout: 3))
     }
+    */
     
+    /* Refactored to Tests/Inventory/InventoryQuantityTests.swift
     func test03_InventoryQuantity_IncrementAndDecrement() throws {
         // GIVEN: User is logged in
         loginAsTestUser()
@@ -94,6 +97,7 @@ final class PantryPalUITests: BaseUITest {
         // THEN: Inventory still exists
         XCTAssertTrue(inventoryPage.inventoryList.exists)
     }
+    */
     
     func test04_NavigateToGroceryTab() throws {
         // GIVEN: User is logged in
@@ -117,6 +121,7 @@ final class PantryPalUITests: BaseUITest {
         XCTAssertTrue(app.exists)
     }
     
+    /* Refactored to Tests/Settings/SettingsSignOutTests.swift
     func test06_NavigateToSettings_AndSignOut() throws {
         // GIVEN: User is logged in
         loginAsTestUser()
@@ -129,6 +134,7 @@ final class PantryPalUITests: BaseUITest {
         // THEN: Should return to login
         loginPage.assertAtLoginScreen()
     }
+    */
     
     func test07_SearchInventory() throws {
         // GIVEN: User is logged in

@@ -60,6 +60,16 @@ class BaseUITest: XCTestCase {
     
     /// Login as the default test user (test@pantrypal.com)
     func loginAsTestUser() {
+        // Check if we are already logged in (stale state) or at login screen
+        let loginBtn = app.buttons["login.continueWithEmailButton"]
+        
+        // Short wait to see if login button appears
+        if !loginBtn.waitForExistence(timeout: 5) {
+            // If not at login screen, assume we might be logged in. 
+            // Try to sign out to ensure clean state (since DB is reset)
+            signOutIfLoggedIn()
+        }
+
         loginPage.loginWithEmail("test@pantrypal.com", password: "Test123!")
         
         // Wait for splash screen to finish and main content to appear

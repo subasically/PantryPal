@@ -7,14 +7,16 @@ struct InventoryPage {
     // MARK: - Elements
     
     var inventoryList: XCUIElement {
-        // Try different element types - List can be table, scrollView, or otherElement
-        if app.tables["inventory.list"].exists {
-            return app.tables["inventory.list"]
-        } else if app.scrollViews["inventory.list"].exists {
-            return app.scrollViews["inventory.list"]
-        } else {
-            return app.otherElements["inventory.list"]
-        }
+        // Preference order for standard List
+        let cv = app.collectionViews["inventory.list"]
+        if cv.exists { return cv }
+        
+        let table = app.tables["inventory.list"]
+        if table.exists { return table }
+        
+        // Return collection view as default if nothing exists yet (for waiting)
+        // This ensures waitForExistence waits for the most likely type
+        return cv
     }
     
     var addButton: XCUIElement {
@@ -30,7 +32,8 @@ struct InventoryPage {
     }
     
     func itemCell(name: String) -> XCUIElement {
-        app.cells.staticTexts[name]
+        // Return the CELL containing the named item, not just the text element
+        inventoryList.cells.containing(.staticText, identifier: name).firstMatch
     }
     
     func incrementButton(id: String) -> XCUIElement {
@@ -55,6 +58,34 @@ struct InventoryPage {
     func tapAddButton() {
         addButton.safeTap()
     }
+
+    func addCustomItem(name: String, brand: String? = nil, quantity: Int? = nil) {
+        tapAddButton()
+        
+        // Wait for sheet
+        let nameField = app.textFields["addItem.nameField"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5), "Add item sheet should appear")
+        
+        nameField.tap()
+        nameField.typeText(name)
+        
+        if let brand = brand {
+            let brandField = app.textFields["addItem.brandField"]
+            if brandField.exists {
+                brandField.tap()
+                brandField.typeText(brand)
+            }
+        }
+        
+        // Handle quantity if needed (assuming defaults for now as existing test did)
+        
+        let saveButton = app.buttons["addItem.saveButton"]
+        XCTAssertTrue(saveButton.isEnabled, "Save button should be enabled after entering name")
+        saveButton.tap()
+        
+        // Wait for sheet to dismiss and inventory to reload
+        XCTAssertTrue(inventoryList.waitForExistence(timeout: 5), "Should return to inventory list")
+    }
     
     func searchFor(_ query: String) {
         searchField.tap()
@@ -70,6 +101,25 @@ struct InventoryPage {
     
     func incrementItem(id: String) {
         incrementButton(id: id).safeTap()
+    }
+    
+    func incrementItem(name: String) {
+        let cell = itemCell(name: name)
+        XCTAssertTrue(cell.exists, "Item '\(name)' not found to increment")
+        
+        // Use inclusive search for any increment button in this cell
+        let btn = cell.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'inventory.increment.'")).firstMatch
+        XCTAssertTrue(btn.waitForExistence(timeout: 2), "Increment button not found for '\(name)'")
+        btn.tap()
+    }
+    
+    func decrementItem(name: String) {
+        let cell = itemCell(name: name)
+        XCTAssertTrue(cell.exists, "Item '\(name)' not found to decrement")
+        
+        let btn = cell.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'inventory.decrement.'")).firstMatch
+        XCTAssertTrue(btn.waitForExistence(timeout: 2), "Decrement button not found for '\(name)'")
+        btn.tap()
     }
     
     func decrementItem(id: String) {
