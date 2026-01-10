@@ -4,6 +4,7 @@ import XCTest
 class BaseUITest: XCTestCase {
     
     var app: XCUIApplication!
+    let server = TestServerClient()
     
     // MARK: - Page Objects (Lazy accessors)
     
@@ -28,6 +29,13 @@ class BaseUITest: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         
+        // 1. Reset & Seed Server (Deterministic state)
+        // We ensure healthy first
+        try? server.ensureHealthy() 
+        server.reset()
+        server.seed()
+        
+        // 2. Launch App
         app = XCUIApplication()
         app.launchArguments = ["--uitesting"]
         app.launchEnvironment = [
@@ -36,10 +44,14 @@ class BaseUITest: XCTestCase {
         ]
         
         app.launch()
+        
+        // 3. Handle System Alerts
+        SystemAlertsHelper.dismissIfPresent(app: app)
     }
     
     override func tearDownWithError() throws {
-        signOutIfLoggedIn()
+        // We terminate the app to ensure clean state for next test
+        // No need to sign out on UI level as we reset DB on next setup
         app.terminate()
         app = nil
     }
@@ -50,7 +62,7 @@ class BaseUITest: XCTestCase {
     func loginAsTestUser() {
         loginPage.loginWithEmail("test@pantrypal.com", password: "Test123!")
         
-        // Wait for splash screen to finish and main content to appear (increased timeout for 2s splash + navigation)
+        // Wait for splash screen to finish and main content to appear
         waitForMainScreen()
         skipOnboardingIfNeeded()
     }
@@ -77,7 +89,14 @@ class BaseUITest: XCTestCase {
         XCTAssertNotNil(appeared, "Should reach main screen after login")
     }
     
-    /// Sign out if currently logged in
+    /// Navigate to a specific tab
+    func navigateToTab(_ tabName: String) {
+        let tabButton = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", tabName)).firstMatch
+        XCTAssertTrue(tabButton.waitForExistence(timeout: 3), "Tab '\(tabName)' should exist")
+        tabButton.safeTap()
+    }
+    
+    /// Sign out if currently logged in (Helper for manual teardown if needed)
     func signOutIfLoggedIn() {
         // Check if we're already at login screen
         let loginBtn = app.buttons["login.continueWithEmailButton"]
@@ -99,12 +118,5 @@ class BaseUITest: XCTestCase {
                 _ = loginBtn.waitForExistence(timeout: 5)
             }
         }
-    }
-    
-    /// Navigate to a specific tab
-    func navigateToTab(_ tabName: String) {
-        let tabButton = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", tabName)).firstMatch
-        XCTAssertTrue(tabButton.waitForExistence(timeout: 3), "Tab '\(tabName)' should exist")
-        tabButton.safeTap()
     }
 }

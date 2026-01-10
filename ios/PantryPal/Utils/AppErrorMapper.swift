@@ -37,6 +37,10 @@ struct AppErrorMapper {
             return .validation(message: "Invalid request. Please check your input.")
             
         case 401:
+            // Check for specific error message (e.g. from Login)
+            if let message = serverMessage, !message.isEmpty {
+                return .validation(message: message)
+            }
             return .unauthorized
             
         case 403:
