@@ -71,16 +71,22 @@ We are currently in the **Revenue Validation** phase.
 2. **Database Reset:** If the schema changes, the `pantrypal-data` Docker volume must be updated or the tables dropped.
 3. **Loading States:** Ensure loading spinners persist for at least **1.5s** to prevent UI flashing.
 4. **Auth Middleware:** Server uses `module.exports = authenticateToken` (default export), NOT named export. Import as `const authenticateToken = require('../middleware/auth')`.
-5. **Server Deployment:** Server directory on VPS is `/root/pantrypal-server` (NOT a git repo). Use `scp` to copy files, then rebuild container.
-6. **iOS Properties:** AuthViewModel uses `currentUser` and `currentHousehold` (NOT `user` or `householdInfo`).
-7. **SwiftData Models:** Grocery items use `SDGroceryItem`. Inventory uses `SDInventoryItem`. Both are cached locally for offline support.
-8. **SwiftData Import Required:** Files using `@Query`, `FetchDescriptor`, or `modelContext` MUST import SwiftData. Missing this import causes "Cannot find type" errors.
-9. **APIError is File-Level:** `APIError` enum is NOT nested in `APIService` class. Use `APIError.unauthorized`, not `APIService.APIError.unauthorized`.
-10. **syncLogger Parameter Order:** `logSync(householdId, entityType, entityId, action, payload)` - entity_id comes BEFORE action. Check all calls when modifying.
-11. **Sync Debug Pattern:** If items aren't syncing, check: (1) syncLogger parameter order matches call sites, (2) sync_log entries have correct entity_id/action values, (3) sync cursor isn't stuck (use Force Full Sync in Settings → Debug).
-12. **Household Setup Flow:** New users MUST have household created before dismissing HouseholdSetupView. "Create" button should call `await authViewModel.completeHouseholdSetup()` then dismiss. Never dismiss without household_id.
-13. **Database Reset:** Use `./server/scripts/reset-database.sh` to reset production database on VPS. Script SSHs to server, removes volumes, and recreates fresh database. Supports `--force` flag to skip confirmation. Use for clean testing iterations.
-14. **Household Member Limit:** Maximum 8 members per household. Check enforced in `joinHousehold()`.
+5. **Subscription Testing - TestFlight vs Sandbox:**
+   - **TestFlight**: ALL subscription durations (1 week → 1 year) renew every **24 hours** for max **6 renewals**, then auto-cancel on day 7. Use for realistic multi-day testing.
+   - **Sandbox**: Accelerated expiration (1 year = 1 hour, 1 month = 5 minutes) with max **12 renewals**. Renewal rate is adjustable in Settings → Developer → Sandbox Account. Use for rapid expiration testing.
+   - **Sandbox Advanced Testing**: Can simulate billing failures, billing retry states, billing grace period, and clear purchase history via Settings → Developer → Sandbox Account → Manage.
+   - **Production**: Normal durations - subscriptions renew at their stated intervals (monthly, yearly, etc.).
+6. **Server Deployment:** Server directory on VPS is `/root/pantrypal-server` (NOT a git repo). Use `scp` to copy files, then rebuild container.
+7. **iOS Properties:** AuthViewModel uses `currentUser` and `currentHousehold` (NOT `user` or `householdInfo`).
+8. **SwiftData Models:** Grocery items use `SDGroceryItem`. Inventory uses `SDInventoryItem`. Both are cached locally for offline support.
+9. **SwiftData Import Required:** Files using `@Query`, `FetchDescriptor`, or `modelContext` MUST import SwiftData. Missing this import causes "Cannot find type" errors.
+10. **APIError is File-Level:** `APIError` enum is NOT nested in `APIService` class. Use `APIError.unauthorized`, not `APIService.APIError.unauthorized`.
+11. **syncLogger Parameter Order:** `logSync(householdId, entityType, entityId, action, payload)` - entity_id comes BEFORE action. Check all calls when modifying.
+12. **Sync Debug Pattern:** If items aren't syncing, check: (1) syncLogger parameter order matches call sites, (2) sync_log entries have correct entity_id/action values, (3) sync cursor isn't stuck (use Force Full Sync in Settings → Debug).
+13. **Household Setup Flow:** New users MUST have household created before dismissing HouseholdSetupView. "Create" button should call `await authViewModel.completeHouseholdSetup()` then dismiss. Never dismiss without household_id.
+14. **Database Reset:** Use `./server/scripts/reset-database.sh` to reset production database on VPS. Script SSHs to server, removes volumes, and recreates fresh database. Supports `--force` flag to skip confirmation. Use for clean testing iterations.
+15. **Household Member Limit:** Maximum 8 members per household. Check enforced in `joinHousehold()`.
+16. **Docker Network:** The PantryPal container MUST use the `web` network (external) for Cloudflare/reverse proxy routing. The `docker-compose.yml` file includes `networks: - web` under the service definition and declares `networks: web: external: true` at the root level. Without this, API requests return 502 Bad Gateway.
 
 ## 📝 Current Task Context
 - ✅ New User Onboarding Flow complete
@@ -105,7 +111,7 @@ cd /root/pantrypal-server
 # 3. Copy updated files (or use scp from local)
 # scp local-file root@62.146.177.62:/root/pantrypal-server/path/
 
-# 4. Rebuild and restart
+# 4. Rebuild and restart (container automatically joins 'web' network)
 docker-compose up -d --build --force-recreate
 
 # 5. Check logs

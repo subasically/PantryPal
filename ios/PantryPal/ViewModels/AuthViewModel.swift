@@ -11,6 +11,7 @@ final class AuthViewModel {
     var errorMessage: String?
     var showBiometricEnablePrompt = false
     var showHouseholdSetup = false
+    var isSettingUpHousehold = false
     var hasLoggedOut = false
     var freeLimit: Int = 25
     var isAppLocked = false
@@ -93,11 +94,17 @@ final class AuthViewModel {
             
             // Auto-create household if user doesn't have one
             if currentHousehold == nil {
+                isSettingUpHousehold = true
                 await completeHouseholdSetup()
+                isSettingUpHousehold = false
             }
             
-            // Always show household setup to give user choice (or retry if creation failed)
-            showHouseholdSetup = true
+            // Only show household setup if user still doesn't have one (creation failed or needs to join)
+            if currentHousehold == nil {
+                showHouseholdSetup = true
+            } else {
+                showHouseholdSetup = false
+            }
         } catch let error as APIError {
             errorMessage = error.userFriendlyMessage
         } catch {
@@ -201,12 +208,16 @@ final class AuthViewModel {
                 
                 // Auto-create household if user doesn't have one
                 if currentHousehold == nil {
+                    isSettingUpHousehold = true
                     await completeHouseholdSetup()
+                    isSettingUpHousehold = false
                 }
                 
                 // Only show household setup if user still doesn't have one (creation failed or needs to join)
                 if currentHousehold == nil {
                     showHouseholdSetup = true
+                } else {
+                    showHouseholdSetup = false
                 }
             } catch let error as APIError {
                 print("Apple Sign In API Error: \(error.localizedDescription)")
@@ -257,7 +268,6 @@ final class AuthViewModel {
             let response = try await APIService.shared.register(email: email, password: password, firstName: firstName, lastName: lastName)
             currentUser = response.user
             isAuthenticated = true
-            showHouseholdSetup = true
             
             // Store credentials temporarily to allow enabling biometrics
             if biometricService.isBiometricAvailable && !biometricService.isBiometricLoginEnabled {
@@ -270,6 +280,20 @@ final class AuthViewModel {
             
             // Load full household info
             await loadCurrentUser()
+            
+            // Auto-create household if user doesn't have one
+            if currentHousehold == nil {
+                isSettingUpHousehold = true
+                await completeHouseholdSetup()
+                isSettingUpHousehold = false
+            }
+            
+            // Only show household setup if user still doesn't have one (creation failed or needs to join)
+            if currentHousehold == nil {
+                showHouseholdSetup = true
+            } else {
+                showHouseholdSetup = false
+            }
         } catch let error as APIError {
             errorMessage = error.userFriendlyMessage
         } catch {

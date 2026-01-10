@@ -229,10 +229,46 @@ struct SettingsView: View {
                     Text("Force Full Sync Now")
                 }
             }
+            
+            Button {
+                Task {
+                    do {
+                        // Call server to simulate premium with far-future expiration
+                        let futureDate = Calendar.current.date(byAdding: .year, value: 1, to: Date())!
+                        let formatter = ISO8601DateFormatter()
+                        let expiresAt = formatter.string(from: futureDate)
+                        
+                        let validationData: [String: Any] = [
+                            "transactionId": "debug_\(UUID().uuidString)",
+                            "productId": "com.pantrypal.premium.annual",
+                            "originalTransactionId": "debug_original",
+                            "expiresAt": expiresAt
+                        ]
+                        
+                        let response = try await APIService.shared.validateReceipt(validationData)
+                        authViewModel.currentHousehold = response.household
+                        
+                        ToastCenter.shared.show("Premium activated (1 year)", type: .success)
+                        confettiCenter.celebrate(duration: 3.0)
+                        
+                        print("🎉 [Debug] Simulated premium with expiration: \(expiresAt)")
+                    } catch {
+                        ToastCenter.shared.show("Failed to simulate premium", type: .error)
+                        print("❌ [Debug] Failed to simulate premium: \(error)")
+                    }
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "star.circle.fill")
+                        .foregroundColor(.ppOrange)
+                        .frame(width: 24)
+                    Text("Simulate Premium (1 Year)")
+                }
+            }
         } header: {
             Text("Debug")
         } footer: {
-            Text("Clears sync cursor, removes stale actions, and forces immediate full sync")
+            Text("Force sync clears cursor and syncs. Simulate Premium adds 1-year subscription for testing (sandbox subscriptions expire in 1 hour).")
         }
     }
     
@@ -251,6 +287,23 @@ struct SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.leading)
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+    
+    private var supportSection: some View {
+        Section("Support") {
+            Link(destination: URL(string: "mailto:webalenko@icloud.com?subject=PantryPal Support Request")!) {
+                HStack {
+                    Image(systemName: "envelope.fill")
+                        .foregroundColor(.ppPurple)
+                        .frame(width: 24)
+                    Text("Report an Issue")
                     Spacer()
                     Image(systemName: "arrow.up.right")
                         .font(.caption)
@@ -364,6 +417,7 @@ struct SettingsView: View {
             notificationsSection
             securitySection
             debugSection
+            supportSection
             aboutSection
             signOutSection
             dangerZoneSection

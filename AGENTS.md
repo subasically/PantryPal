@@ -35,6 +35,7 @@ npm run test:coverage         # Coverage report
 ## Configuration & Deployment Notes
 - Local secrets live in `server/.env` (derived from `server/.env.example`). Do not commit secrets or local `.db` artifacts.
 - Production and ops commands are documented in `DEPLOYMENT.md` and `SERVER_COMMANDS.md`.
+- **Docker Network:** The production `docker-compose.yml` MUST include `networks: - web` under the service and `networks: web: external: true` at the root level. This connects the container to the external `web` network used by the reverse proxy (Traefik/nginx-proxy) for Cloudflare routing. Without this, the API returns 502 Bad Gateway errors.
 
 ## Testing & Debugging Workflow
 - **Test Plan:** Follow structured test scenarios in `TESTING.md` (7 tests from free tier → premium → multi-device → offline).

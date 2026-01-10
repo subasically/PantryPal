@@ -7,6 +7,7 @@ struct GroceryListView: View {
     @State private var viewModel = GroceryViewModel()
     @State private var showingAddSheet = false
     @State private var showingSettings = false
+    @State private var showingPaywall = false
     @State private var newItemName = ""
     @FocusState private var isInputFocused: Bool
     
@@ -37,7 +38,7 @@ struct GroceryListView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showingAddSheet = true
+                        checkAndShowPaywallIfAtLimit()
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
@@ -52,6 +53,10 @@ struct GroceryListView: View {
                 SettingsView()
                     .environment(authViewModel)
                     .environmentObject(NotificationService.shared)
+            }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView()
+                    .environment(authViewModel)
             }
             .task {
                 viewModel.setModelContext(modelContext)
@@ -124,7 +129,7 @@ struct GroceryListView: View {
             }
             
             Button {
-                showingAddSheet = true
+                checkAndShowPaywallIfAtLimit()
             } label: {
                 Label("Add Item", systemImage: "plus.circle.fill")
                     .font(.headline)
@@ -191,6 +196,36 @@ struct GroceryListView: View {
                 newItemName = ""
                 viewModel.errorMessage = nil
             }
+        }
+    }
+    
+    @MainActor
+    private func checkAndShowPaywallIfAtLimit() {
+        // Only check for non-Premium users
+        guard !isPremium else {
+            print("💎 [GroceryList] User is Premium, skipping limit check")
+            showingAddSheet = true
+            return
+        }
+        
+        let itemCount = viewModel.items.count
+        print("📊 [GroceryList] Current grocery item count: \(itemCount)")
+        
+        if itemCount >= 25 {
+            print("🚨 [GroceryList] User has reached the 25 grocery item limit!")
+            print("   - Will show paywall")
+            
+            // Show toast message
+            ToastCenter.shared.show("You've reached your 25 grocery item limit. Upgrade to add unlimited items!", type: .info)
+            
+            // Small delay then show paywall
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                print("💰 [GroceryList] Showing paywall")
+                self.showingPaywall = true
+            }
+        } else {
+            print("✅ [GroceryList] Under limit (\(itemCount)/25), showing add sheet")
+            showingAddSheet = true
         }
     }
 }

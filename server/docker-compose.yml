@@ -10,6 +10,12 @@ services:
     volumes:
       - pantrypal-data:/app/db
     restart: unless-stopped
+    networks:
+      - web
 
 volumes:
   pantrypal-data:
+
+networks:
+  web:
+    external: true

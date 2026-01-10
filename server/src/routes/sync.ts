@@ -297,6 +297,12 @@ function applyInventoryChange(
 ): void {
 	switch (action) {
 		case 'create':
+			// Validate locationId is provided (required for inventory items)
+			if (!payload.locationId) {
+				console.warn(`⚠️ [Sync] Skipping inventory create - missing locationId for item ${entityId}`);
+				return;
+			}
+			
 			db.prepare(`
                 INSERT OR REPLACE INTO inventory (id, product_id, household_id, location_id, quantity, unit, expiration_date, notes, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -304,7 +310,7 @@ function applyInventoryChange(
 				entityId,
 				payload.productId,
 				householdId,
-				payload.locationId || null,
+				payload.locationId,
 				payload.quantity,
 				payload.unit || 'pcs',
 				payload.expirationDate || null,
@@ -312,19 +318,36 @@ function applyInventoryChange(
 			);
 			break;
 		case 'update':
-			db.prepare(`
-                UPDATE inventory 
-                SET quantity = ?, unit = ?, expiration_date = ?, notes = ?, location_id = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE id = ? AND household_id = ?
-            `).run(
-				payload.quantity,
-				payload.unit || 'pcs',
-				payload.expirationDate || null,
-				payload.notes || null,
-				payload.locationId || null,
-				entityId,
-				householdId
-			);
+			// For updates, if locationId is not provided, keep existing value
+			if (payload.locationId) {
+				db.prepare(`
+                    UPDATE inventory 
+                    SET quantity = ?, unit = ?, expiration_date = ?, notes = ?, location_id = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ? AND household_id = ?
+                `).run(
+					payload.quantity,
+					payload.unit || 'pcs',
+					payload.expirationDate || null,
+					payload.notes || null,
+					payload.locationId,
+					entityId,
+					householdId
+				);
+			} else {
+				// Update without changing location
+				db.prepare(`
+                    UPDATE inventory 
+                    SET quantity = ?, unit = ?, expiration_date = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ? AND household_id = ?
+                `).run(
+					payload.quantity,
+					payload.unit || 'pcs',
+					payload.expirationDate || null,
+					payload.notes || null,
+					entityId,
+					householdId
+				);
+			}
 			break;
 		case 'delete':
 			db.prepare('DELETE FROM inventory WHERE id = ? AND household_id = ?').run(entityId, householdId);

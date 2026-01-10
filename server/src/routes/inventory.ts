@@ -101,6 +101,15 @@ router.post('/', (req: AuthenticatedRequest, res: Response) => {
 router.post('/quick-add', async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { upc, quantity, expirationDate, locationId } = req.body;
+
+		console.log('📥 [Inventory] quick-add request:', {
+			householdId: req.user.householdId,
+			upc,
+			quantity,
+			locationId,
+			expirationDate
+		});
+
 		const result = await inventoryService.quickAddByUPC(req.user.householdId, {
 			upc,
 			quantity,

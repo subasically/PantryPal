@@ -77,11 +77,11 @@ export const upcLookupLimiter: RateLimitRequestHandler = rateLimit({
 
 /**
  * Authentication rate limiter
- * 20 requests per 5 minutes per IP
+ * 50 requests per 5 minutes per IP (increased for testing/dev)
  */
 export const authLimiter: RateLimitRequestHandler = rateLimit({
 	windowMs: 5 * 60 * 1000,
-	max: 20,
+	max: 50,
 	message: 'Too many authentication requests, please try again later.',
 	standardHeaders: true,
 	legacyHeaders: false,

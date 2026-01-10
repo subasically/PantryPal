@@ -272,6 +272,12 @@ final class APIService: Sendable {
     }
     
     func quickAdd(upc: String, quantity: Int = 1, expirationDate: String? = nil, locationId: String) async throws -> QuickAddResponse {
+        print("📤 [APIService] quickAdd called:")
+        print("   - UPC: \(upc)")
+        print("   - Quantity: \(quantity)")
+        print("   - LocationID: \(locationId)")
+        print("   - ExpirationDate: \(expirationDate ?? "nil")")
+        
         let body = QuickAddRequest(upc: upc, quantity: quantity, expirationDate: expirationDate, locationId: locationId)
         return try await request(endpoint: "/inventory/quick-add", method: "POST", body: body)
     }

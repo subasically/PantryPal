@@ -233,7 +233,26 @@ final class StoreKitService: ObservableObject {
             // Send to server for validation
             let response = try await APIService.shared.validateReceipt(validationData)
             
-            print("✅ [StoreKit] Server validated subscription. Premium expires: \(response.household.premiumExpiresAt ?? "N/A")")
+            // Log expiration details
+            if let expiresAt = transaction.expirationDate {
+                let timeUntilExpiration = expiresAt.timeIntervalSinceNow
+                let isActive = timeUntilExpiration > 0
+                
+                if isActive {
+                    let minutes = Int(timeUntilExpiration / 60)
+                    let hours = minutes / 60
+                    let remainingMinutes = minutes % 60
+                    
+                    print("✅ [StoreKit] Server validated subscription. Expires: \(expiresAt.ISO8601Format())")
+                    print("⏰ [StoreKit] Time remaining: \(hours)h \(remainingMinutes)m (\(isActive ? "ACTIVE" : "EXPIRED"))")
+                    print("📝 [StoreKit] Note: Sandbox subscriptions expire faster (1 year = 1 hour)")
+                } else {
+                    print("⚠️ [StoreKit] Subscription EXPIRED at: \(expiresAt.ISO8601Format())")
+                    print("💡 [StoreKit] Purchase again to test. Sandbox expires quickly (1 year = 1 hour)")
+                }
+            } else {
+                print("✅ [StoreKit] Server validated subscription. No expiration date.")
+            }
             
             // Return the updated household so caller can update local state immediately
             return response.household

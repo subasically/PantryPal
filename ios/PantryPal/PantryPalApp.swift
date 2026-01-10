@@ -114,7 +114,16 @@ struct ContentView: View {
         @Bindable var authViewModel = authViewModel
         Group {
             if authViewModel.isAuthenticated {
-                if authViewModel.showHouseholdSetup {
+                if authViewModel.isSettingUpHousehold {
+                    // Show loading spinner during auto-household creation
+                    VStack(spacing: 20) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text("Setting up your household...")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                    }
+                } else if authViewModel.showHouseholdSetup {
                     HouseholdSetupView()
                         .accessibilityIdentifier("householdSetup.container")
                 } else {

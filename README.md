@@ -193,7 +193,8 @@ function autoManageGrocery(householdId, product, newQty, oldQty) {
 
 ### Backend
 - **Runtime:** Node.js 20 (Alpine Docker)
-- **Framework:** Express 5.x (CommonJS modules)
+- **Language:** TypeScript 5.7 (compiled to ES6 modules)
+- **Framework:** Express 5.x
 - **Database:** SQLite (better-sqlite3 - synchronous)
 - **Auth:** JWT tokens + bcrypt password hashing
 - **External APIs:** Open Food Facts (UPC lookup)
@@ -284,22 +285,24 @@ PantryPal/
 │   ├── agents/                # AI agent documentation (backend, devops, iOS, testing)
 │   ├── skills/                # Condensed skill versions for GitHub/Claude
 │   └── copilot-instructions.md
-├── server/                    # Node.js API server
+├── server/                    # Node.js API server (TypeScript)
 │   ├── src/
-│   │   ├── app.js             # Express app factory
-│   │   ├── index.js           # Server entry point
+│   │   ├── app.ts             # Express app factory
+│   │   ├── index.ts           # Server entry point
 │   │   ├── routes/            # API endpoints (auth, inventory, grocery, etc.)
 │   │   ├── models/            # Database connection (better-sqlite3)
 │   │   ├── middleware/        # JWT authentication
 │   │   ├── services/          # External APIs (UPC lookup)
 │   │   └── utils/             # Premium helpers, limit checks
+│   ├── dist/                  # Compiled JavaScript (gitignored)
 │   ├── tests/                 # Jest test suites (74 tests)
 │   ├── db/
 │   │   ├── schema.sql         # SQLite database schema
 │   │   └── pantrypal.db       # Local database (gitignored)
-│   ├── Dockerfile
+│   ├── Dockerfile             # Multi-stage build (compile + run)
 │   ├── docker-compose.yml     # Production compose
 │   ├── docker-compose.test.yml # Test server compose
+│   ├── tsconfig.json          # TypeScript config
 │   └── package.json
 ├── ios/                       # iOS SwiftUI app
 │   ├── PantryPal/
@@ -325,8 +328,8 @@ PantryPal/
 
 **Server:**
 - Database schema: [server/db/schema.sql](server/db/schema.sql)
-- Premium logic: [server/src/utils/premiumHelper.js](server/src/utils/premiumHelper.js)
-- Auth middleware: [server/src/middleware/auth.js](server/src/middleware/auth.js)
+- Premium logic: [server/src/utils/premiumHelper.ts](server/src/utils/premiumHelper.ts)
+- Auth middleware: [server/src/middleware/auth.ts](server/src/middleware/auth.ts)
 - Routes: [server/src/routes/](server/src/routes/)
 
 **iOS:**
@@ -351,7 +354,8 @@ docker compose up -d
 cd server
 cp .env.example .env  # Configure JWT_SECRET
 npm install
-npm run dev           # Hot reload on port 3000
+npm run build         # Compile TypeScript to dist/
+npm run dev           # Hot reload on port 3000 (uses tsx)
 ```
 
 **Environment Variables (.env):**
@@ -394,10 +398,10 @@ docker-compose up -d --build --force-recreate
 
 ```bash
 # From local machine, sync files to production
-rsync -avz --exclude='node_modules' --exclude='db/pantrypal.db' \
-  server/ root@62.146.177.62:/root/pantrypal-server/
+rsync -avz --exclude='node_modules' --exclude='db/pantrypal.db' --exclude='dist' \
+  server/ root@62.146.177.62:/root/pantrypal-server/server/
 
-# Then SSH to production and rebuild
+# Then SSH to production and rebuild (Docker compiles TypeScript)
 ssh root@62.146.177.62
 cd /root/pantrypal-server
 docker-compose up -d --build --force-recreate
