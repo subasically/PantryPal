@@ -132,7 +132,7 @@ class PushNotificationService {
 					? parseInt(statusValue, 10)
 					: Array.isArray(statusValue)
 						? parseInt(statusValue[0], 10)
-						: (statusValue as number);
+						: (statusValue as unknown as number);
 				req.on('data', (chunk: Buffer) => { data += chunk; });
 				req.on('end', () => {
 					client.close();

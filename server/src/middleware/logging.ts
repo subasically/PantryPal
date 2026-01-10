@@ -11,7 +11,8 @@ function requestLogger(req: Request, res: Response, next: NextFunction): void {
 	const originalEnd = res.end;
 
 	// Override end to log after response is sent
-	res.end = function (...args: any[]): Response {
+	// @ts-ignore - Signature mismatch with Express Response.end but works at runtime
+	res.end = function (...args: any[]): any {
 		const duration = Date.now() - startTime;
 
 		// Log the request
@@ -29,7 +30,7 @@ function requestLogger(req: Request, res: Response, next: NextFunction): void {
 		);
 
 		// Call original end
-		return originalEnd.apply(res, args);
+		return originalEnd.apply(res, args as any);
 	};
 
 	next();

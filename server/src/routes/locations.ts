@@ -14,11 +14,11 @@ function getDb() {
 router.use(authenticateToken);
 
 // Seed default locations (if none exist)
-router.post('/seed-defaults', (req: AuthenticatedRequest, res: Response) => {
+router.post('/seed-defaults', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const db = getDb();
-		const existingCount = db.prepare('SELECT COUNT(*) as count FROM locations WHERE household_id = ?')
-			.get(req.user.householdId).count;
+		const existingCount = (db.prepare('SELECT COUNT(*) as count FROM locations WHERE household_id = ?')
+			.get(req.user.householdId) as { count: number }).count;
 
 		if (existingCount > 0) {
 			res.json({ message: 'Locations already exist', seeded: false });
@@ -50,10 +50,10 @@ router.post('/seed-defaults', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error seeding locations:', error);
 		res.status(500).json({ error: 'Failed to seed locations' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Get all locations for household (with hierarchy)
-router.get('/', (req: AuthenticatedRequest, res: Response) => {
+router.get('/', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const db = getDb();
 		// Locations are now client-managed (created by iOS app during household setup)
@@ -87,17 +87,17 @@ router.get('/', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error fetching locations:', error);
 		res.status(500).json({ error: 'Failed to fetch locations' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Get flat list of all locations with full path (for dropdowns)
-router.get('/flat', (req: AuthenticatedRequest, res: Response) => {
+router.get('/flat', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const db = getDb();
 		const locations = db.prepare(`
             SELECT * FROM locations
             WHERE household_id = ?
             ORDER BY level, sort_order, name
-        `).all(req.user.householdId);
+        `).all(req.user.householdId) as any[];
 
 		// Build full path for each location
 		const getFullPath = (locationId: string): string => {
@@ -123,15 +123,15 @@ router.get('/flat', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error fetching flat locations:', error);
 		res.status(500).json({ error: 'Failed to fetch locations' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Create a new location
-router.post('/', (req: AuthenticatedRequest, res: Response) => {
+router.post('/', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const db = getDb();
 		const { name, parentId } = req.body;
 
-		if (!name?.trim()) {
+		if (!(name as string)?.trim()) {
 			res.status(400).json({ error: 'Location name is required' });
 			return;
 		}
@@ -140,7 +140,7 @@ router.post('/', (req: AuthenticatedRequest, res: Response) => {
 		let level = 0;
 		if (parentId) {
 			const parent = db.prepare('SELECT level FROM locations WHERE id = ? AND household_id = ?')
-				.get(parentId, req.user.householdId);
+				.get(parentId, req.user.householdId) as { level: number } | undefined;
 			if (!parent) {
 				res.status(400).json({ error: 'Parent location not found' });
 				return;
@@ -153,7 +153,7 @@ router.post('/', (req: AuthenticatedRequest, res: Response) => {
             SELECT COALESCE(MAX(sort_order), -1) as max_sort 
             FROM locations 
             WHERE household_id = ? AND parent_id ${parentId ? '= ?' : 'IS NULL'}
-        `).get(parentId ? [req.user.householdId, parentId] : [req.user.householdId]);
+        `).get(parentId ? [req.user.householdId, parentId] : [req.user.householdId]) as { max_sort: number };
 
 		const id = uuidv4();
 		const now = new Date().toISOString();
@@ -161,7 +161,7 @@ router.post('/', (req: AuthenticatedRequest, res: Response) => {
 		db.prepare(`
             INSERT INTO locations (id, household_id, name, parent_id, level, sort_order, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(id, req.user.householdId, name.trim(), parentId || null, level, maxSort.max_sort + 1, now, now);
+        `).run(id, req.user.householdId, (name as string).trim(), parentId || null, level, maxSort.max_sort + 1, now, now);
 
 		const location = db.prepare('SELECT * FROM locations WHERE id = ?').get(id);
 		res.status(201).json(location);
@@ -169,10 +169,10 @@ router.post('/', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error creating location:', error);
 		res.status(500).json({ error: 'Failed to create location' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Update a location
-router.put('/:id', (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const db = getDb();
 		const { id } = req.params;
@@ -189,9 +189,9 @@ router.put('/:id', (req: AuthenticatedRequest, res: Response) => {
 		const updates: string[] = [];
 		const params: any[] = [];
 
-		if (name?.trim()) {
+		if ((name as string)?.trim()) {
 			updates.push('name = ?');
-			params.push(name.trim());
+			params.push((name as string).trim());
 		}
 
 		if (sortOrder !== undefined) {
@@ -216,16 +216,16 @@ router.put('/:id', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error updating location:', error);
 		res.status(500).json({ error: 'Failed to update location' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Delete a location (and reassign children to parent)
-router.delete('/:id', (req: AuthenticatedRequest, res: Response) => {
+router.delete('/:id', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const db = getDb();
 		const { id } = req.params;
 
 		const existing = db.prepare('SELECT * FROM locations WHERE id = ? AND household_id = ?')
-			.get(id, req.user.householdId);
+			.get(id, req.user.householdId) as { parent_id: string } | undefined;
 
 		if (!existing) {
 			res.status(404).json({ error: 'Location not found' });
@@ -233,7 +233,7 @@ router.delete('/:id', (req: AuthenticatedRequest, res: Response) => {
 		}
 
 		// Check if any inventory items use this location
-		const itemsUsingLocation = db.prepare('SELECT COUNT(*) as count FROM inventory WHERE location_id = ?').get(id);
+		const itemsUsingLocation = db.prepare('SELECT COUNT(*) as count FROM inventory WHERE location_id = ?').get(id) as { count: number };
 		if (itemsUsingLocation.count > 0) {
 			res.status(400).json({
 				error: 'Cannot delete location with inventory items. Move items first.',
@@ -257,6 +257,6 @@ router.delete('/:id', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error deleting location:', error);
 		res.status(500).json({ error: 'Failed to delete location' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 export default router;

@@ -16,7 +16,7 @@ interface AuthenticatedRequest extends Request {
 router.use(authenticateToken);
 
 // Lookup product by UPC
-router.get('/lookup/:upc', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/lookup/:upc', (async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { upc } = req.params;
 		console.log(`🔍 [Products] UPC lookup request: ${upc}`);
@@ -38,10 +38,10 @@ router.get('/lookup/:upc', async (req: AuthenticatedRequest, res: Response) => {
 		console.error('❌ [Products] UPC lookup error:', error);
 		res.status(500).json({ error: 'UPC lookup failed' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Create custom product
-router.post('/', (req: AuthenticatedRequest, res: Response) => {
+router.post('/', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { upc, name, brand, description, category } = req.body;
 		const result = productService.createCustomProduct(req.user.householdId, {
@@ -53,18 +53,20 @@ router.post('/', (req: AuthenticatedRequest, res: Response) => {
 		});
 		const status = result.wasUpdated ? 200 : 201;
 		res.status(status).json(result.product);
+		return;
 	} catch (error) {
 		console.error('Create product error:', error);
 		const err = error as Error;
 		if (err.message === 'Product name is required') {
-			return res.status(400).json({ error: err.message });
+			res.status(400).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to create product' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Get all products for household
-router.get('/', (req: AuthenticatedRequest, res: Response) => {
+router.get('/', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const products = productService.getAllProducts(req.user.householdId);
 		res.json(products);
@@ -72,10 +74,10 @@ router.get('/', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Get products error:', error);
 		res.status(500).json({ error: 'Failed to get products' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Get single product by ID
-router.get('/:id', (req: AuthenticatedRequest, res: Response) => {
+router.get('/:id', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const product = productService.getProductById(req.params.id);
 		res.json(product);
@@ -83,14 +85,15 @@ router.get('/:id', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Get product error:', error);
 		const err = error as Error;
 		if (err.message === 'Product not found') {
-			return res.status(404).json({ error: err.message });
+			res.status(404).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to get product' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Update product
-router.put('/:id', (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { name, brand, description, category } = req.body;
 		const updatedProduct = productService.updateProduct(req.user.householdId, req.params.id, {
@@ -104,14 +107,15 @@ router.put('/:id', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Update product error:', error);
 		const err = error as Error;
 		if (err.message === 'Product not found') {
-			return res.status(404).json({ error: err.message });
+			res.status(404).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to update product' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Delete product
-router.delete('/:id', (req: AuthenticatedRequest, res: Response) => {
+router.delete('/:id', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		productService.deleteProduct(req.user.householdId, req.params.id);
 		res.json({ success: true });
@@ -119,13 +123,15 @@ router.delete('/:id', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Delete product error:', error);
 		const err = error as Error;
 		if (err.message === 'Product not found') {
-			return res.status(404).json({ error: err.message });
+			res.status(404).json({ error: err.message });
+			return;
 		}
 		if (err.message === 'Cannot delete product that is in inventory') {
-			return res.status(400).json({ error: err.message });
+			res.status(400).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to delete product' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 export default router;

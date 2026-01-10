@@ -12,7 +12,7 @@
     "test:e2e": "NODE_ENV=test jest --runInBand tests/e2e",
     "test:watch": "NODE_ENV=test jest --watch",
     "test:coverage": "NODE_ENV=test jest --coverage",
-    "test:server": "NODE_ENV=test ALLOW_TEST_ENDPOINTS=true TEST_ADMIN_KEY=pantrypal-test-key-2025 PORT=3002 ts-node src/index.ts",
+    "test:server": "NODE_ENV=development ALLOW_TEST_ENDPOINTS=true TEST_ADMIN_KEY=pantrypal-test-key-2025 PORT=3002 ts-node src/index.ts",
     "start:dev": "ts-node src/index.ts"
   },
   "keywords": [

@@ -35,14 +35,15 @@ interface NotificationPreferencesRow {
  * @desc    Register device token for push notifications
  * @access  Private
  */
-router.post('/register', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.post('/register', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { token, platform = 'ios' } = req.body;
 		const userId = req.user!.id;
 		const householdId = req.user!.householdId;
 
 		if (!token) {
-			return res.status(400).json({ error: 'Token is required' });
+			res.status(400).json({ error: 'Token is required' });
+			return;
 		}
 
 		const db = getDb();
@@ -78,20 +79,21 @@ router.post('/register', authenticateToken, (req: AuthenticatedRequest, res: Res
 		console.error('Error registering device:', error);
 		res.status(500).json({ error: 'Failed to register device' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * @route   DELETE /api/notifications/unregister
  * @desc    Unregister device token
  * @access  Private
  */
-router.delete('/unregister', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.delete('/unregister', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { token } = req.body;
 		const userId = req.user!.id;
 
 		if (!token) {
-			return res.status(400).json({ error: 'Device token is required' });
+			res.status(400).json({ error: 'Device token is required' });
+			return;
 		}
 
 		const db = getDb();
@@ -101,14 +103,14 @@ router.delete('/unregister', authenticateToken, (req: AuthenticatedRequest, res:
 		console.error('Error unregistering device:', error);
 		res.status(500).json({ error: 'Failed to unregister device' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * @route   GET /api/notifications/preferences
  * @desc    Get notification preferences
  * @access  Private
  */
-router.get('/preferences', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.get('/preferences', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const userId = req.user!.id;
 		const db = getDb();
@@ -145,14 +147,14 @@ router.get('/preferences', authenticateToken, (req: AuthenticatedRequest, res: R
 		console.error('Error getting preferences:', error);
 		res.status(500).json({ error: 'Failed to get notification preferences' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * @route   PUT /api/notifications/preferences
  * @desc    Update notification preferences
  * @access  Private
  */
-router.put('/preferences', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.put('/preferences', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const userId = req.user!.id;
 		const {
@@ -208,17 +210,18 @@ router.put('/preferences', authenticateToken, (req: AuthenticatedRequest, res: R
 		console.error('Error updating preferences:', error);
 		res.status(500).json({ error: 'Failed to update notification preferences' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * @route   POST /api/notifications/test
  * @desc    Test push notification (for debugging)
  * @access  Private
  */
-router.post('/test', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/test', authenticateToken, (async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { default: pushService } = await import('../services/pushNotifications');
 		const result = await pushService.sendToUser(req.user!.id, {
+			householdId: req.user!.householdId || '',
 			aps: {
 				alert: {
 					title: '🧪 Test Notification',
@@ -234,6 +237,6 @@ router.post('/test', authenticateToken, async (req: AuthenticatedRequest, res: R
 		console.error('Error sending test notification:', error);
 		res.status(500).json({ error: 'Failed to send test notification' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 export default router;

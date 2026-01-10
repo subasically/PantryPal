@@ -90,7 +90,7 @@ function checkGroceryLimit(householdId: string | null): boolean {
 	const household = db.prepare('SELECT is_premium FROM households WHERE id = ?').get(householdId) as { is_premium: number } | undefined;
 	if (household && household.is_premium) return true; // Premium = unlimited
 
-	const count = db.prepare('SELECT COUNT(*) as count FROM grocery_items WHERE household_id = ?').get(householdId).count;
+	const count = (db.prepare('SELECT COUNT(*) as count FROM grocery_items WHERE household_id = ?').get(householdId) as { count: number }).count;
 	return count < FREE_LIMIT;
 }
 

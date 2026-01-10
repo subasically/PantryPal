@@ -5,7 +5,7 @@ import householdService from '../services/householdService';
 const router = express.Router();
 
 // Create a new household
-router.post('/', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.post('/', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { name } = req.body;
 		const result = householdService.createHousehold(req.user.id, name);
@@ -16,10 +16,10 @@ router.post('/', authenticateToken, (req: AuthenticatedRequest, res: Response) =
 		const status = err.message === 'User already belongs to a household' ? 400 : 500;
 		res.status(status).json({ error: err.message || 'Failed to create household' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Generate household invite code (6-character alphanumeric, expires in 24 hours)
-router.post('/invite', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.post('/invite', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const result = householdService.generateInviteCode(req.user.householdId, req.user.id);
 		res.json(result);
@@ -36,7 +36,7 @@ router.post('/invite', authenticateToken, (req: AuthenticatedRequest, res: Respo
 		}
 		res.status(500).json({ error: 'Failed to generate invite code' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Validate invite code (for preview before joining) - NO AUTH REQUIRED
 router.get('/invite/:code', (req, res) => {
@@ -52,7 +52,7 @@ router.get('/invite/:code', (req, res) => {
 });
 
 // Join household with invite code
-router.post('/join', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.post('/join', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { code } = req.body;
 
@@ -68,10 +68,10 @@ router.post('/join', authenticateToken, (req: AuthenticatedRequest, res: Respons
 		const err = error as Error;
 		res.status(404).json({ error: err.message || 'Failed to join household' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Get household members
-router.get('/members', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.get('/members', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		if (!req.user.householdId) {
 			res.status(404).json({ error: 'User does not belong to a household' });
@@ -83,10 +83,10 @@ router.get('/members', authenticateToken, (req: AuthenticatedRequest, res: Respo
 		console.error('Get members error:', error);
 		res.status(500).json({ error: 'Failed to get household members' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Get active invite codes for household
-router.get('/invites', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.get('/invites', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		if (!req.user.householdId) {
 			res.status(404).json({ error: 'User does not belong to a household' });
@@ -98,10 +98,10 @@ router.get('/invites', authenticateToken, (req: AuthenticatedRequest, res: Respo
 		console.error('Get invites error:', error);
 		res.status(500).json({ error: 'Failed to get invites' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Reset household data (wipe inventory, history, custom products, locations)
-router.delete('/data', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.delete('/data', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		if (!req.user.householdId) {
 			res.status(404).json({ error: 'User does not belong to a household' });
@@ -115,6 +115,6 @@ router.delete('/data', authenticateToken, (req: AuthenticatedRequest, res: Respo
 		console.error('❌ [Household] Reset household data error:', error);
 		res.status(500).json({ error: 'Failed to reset household data' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 export default router;

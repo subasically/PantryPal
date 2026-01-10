@@ -22,7 +22,7 @@ interface ErrorWithCode extends Error {
 router.use(authenticateToken);
 
 // Get all inventory items for household
-router.get('/', (req: AuthenticatedRequest, res: Response) => {
+router.get('/', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const inventory = inventoryService.getAllInventory(req.user.householdId);
 		res.json(inventory);
@@ -30,10 +30,10 @@ router.get('/', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Get inventory error:', error);
 		res.status(500).json({ error: 'Failed to get inventory' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Get expiring items
-router.get('/expiring', (req: AuthenticatedRequest, res: Response) => {
+router.get('/expiring', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const days = parseInt(req.query.days as string) || 7;
 		const inventory = inventoryService.getExpiringItems(req.user.householdId, days);
@@ -42,10 +42,10 @@ router.get('/expiring', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Get expiring items error:', error);
 		res.status(500).json({ error: 'Failed to get expiring items' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Get expired items
-router.get('/expired', (req: AuthenticatedRequest, res: Response) => {
+router.get('/expired', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const inventory = inventoryService.getExpiredItems(req.user.householdId);
 		res.json(inventory);
@@ -53,10 +53,10 @@ router.get('/expired', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Get expired items error:', error);
 		res.status(500).json({ error: 'Failed to get expired items' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Add item to inventory
-router.post('/', (req: AuthenticatedRequest, res: Response) => {
+router.post('/', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { productId, quantity, expirationDate, notes, locationId } = req.body;
 		const item = inventoryService.addInventoryItem(req.user.householdId, {
@@ -74,31 +74,35 @@ router.post('/', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Add inventory error:', error);
 		const err = error as ErrorWithCode;
 		if (err.code === 'PREMIUM_REQUIRED' || err.code === 'LIMIT_REACHED') {
-			return res.status(403).json({
+			res.status(403).json({
 				error: err.message,
 				code: err.code,
 				limit: err.limit,
 				upgradeRequired: true
 			});
+			return;
 		}
 		if (err.code === 'LOCATION_REQUIRED') {
-			return res.status(400).json({
+			res.status(400).json({
 				error: err.message,
 				code: err.code
 			});
+			return;
 		}
 		if (err.message === 'Product ID is required') {
-			return res.status(400).json({ error: err.message });
+			res.status(400).json({ error: err.message });
+			return;
 		}
 		if (err.message === 'Product not found' || err.message.includes('Location')) {
-			return res.status(404).json({ error: err.message });
+			res.status(404).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to add item to inventory' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Quick add by UPC (lookup + add in one call)
-router.post('/quick-add', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/quick-add', (async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { upc, quantity, expirationDate, locationId } = req.body;
 
@@ -121,35 +125,39 @@ router.post('/quick-add', async (req: AuthenticatedRequest, res: Response) => {
 		console.error('Quick add error:', error);
 		const err = error as ErrorWithCode;
 		if (err.code === 'PREMIUM_REQUIRED' || err.code === 'LIMIT_REACHED') {
-			return res.status(403).json({
+			res.status(403).json({
 				error: err.message,
 				code: err.code,
 				limit: err.limit,
 				upgradeRequired: true
 			});
+			return;
 		}
 		if (err.code === 'LOCATION_REQUIRED') {
-			return res.status(400).json({
+			res.status(400).json({
 				error: err.message,
 				code: err.code
 			});
+			return;
 		}
 		if (err.requiresCustomProduct) {
-			return res.status(404).json({
+			res.status(404).json({
 				error: err.message,
 				upc: err.upc,
 				requiresCustomProduct: true
 			});
+			return;
 		}
 		if (err.message.includes('not found')) {
-			return res.status(404).json({ error: err.message });
+			res.status(404).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to quick add item' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Update inventory item
-router.put('/:id', (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { quantity, expirationDate, notes, locationId } = req.body;
 
@@ -174,32 +182,36 @@ router.put('/:id', (req: AuthenticatedRequest, res: Response) => {
 		console.error('❌ [Inventory] Update inventory error:', error);
 		const err = error as ErrorWithCode;
 		if (err.code === 'PREMIUM_REQUIRED') {
-			return res.status(403).json({
+			res.status(403).json({
 				error: err.message,
 				code: err.code,
 				upgradeRequired: true
 			});
+			return;
 		}
 		if (err.code === 'LOCATION_REQUIRED' || err.code === 'INVALID_LOCATION') {
-			return res.status(400).json({
+			res.status(400).json({
 				error: err.message,
 				code: err.code
 			});
+			return;
 		}
 		if (err.message === 'Inventory item not found') {
-			return res.status(404).json({ error: err.message });
+			res.status(404).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to update inventory item' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Adjust quantity (increment/decrement)
-router.patch('/:id/quantity', (req: AuthenticatedRequest, res: Response) => {
+router.patch('/:id/quantity', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { adjustment } = req.body;
 
 		if (typeof adjustment !== 'number') {
-			return res.status(400).json({ error: 'Adjustment must be a number' });
+			res.status(400).json({ error: 'Adjustment must be a number' });
+			return;
 		}
 
 		const result = inventoryService.adjustQuantity(req.user.householdId, req.params.id, adjustment);
@@ -208,21 +220,23 @@ router.patch('/:id/quantity', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Adjust quantity error:', error);
 		const err = error as ErrorWithCode;
 		if (err.code === 'PREMIUM_REQUIRED') {
-			return res.status(403).json({
+			res.status(403).json({
 				error: err.message,
 				code: err.code,
 				upgradeRequired: true
 			});
+			return;
 		}
 		if (err.message === 'Inventory item not found') {
-			return res.status(404).json({ error: err.message });
+			res.status(404).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to adjust quantity' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // Delete inventory item
-router.delete('/:id', (req: AuthenticatedRequest, res: Response) => {
+router.delete('/:id', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		inventoryService.deleteInventoryItem(req.user.householdId, req.params.id);
 		res.json({ success: true });
@@ -230,17 +244,19 @@ router.delete('/:id', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Delete inventory error:', error);
 		const err = error as ErrorWithCode;
 		if (err.code === 'PREMIUM_REQUIRED') {
-			return res.status(403).json({
+			res.status(403).json({
 				error: err.message,
 				code: err.code,
 				upgradeRequired: true
 			});
+			return;
 		}
 		if (err.message === 'Inventory item not found') {
-			return res.status(404).json({ error: err.message });
+			res.status(404).json({ error: err.message });
+			return;
 		}
 		res.status(500).json({ error: 'Failed to delete inventory item' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 export default router;

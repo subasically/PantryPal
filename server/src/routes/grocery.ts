@@ -9,7 +9,7 @@ console.log('🔵 [Grocery Routes] Module loaded - VERSION 2025-12-30-19:30');
 const FREE_LIMIT = 25;
 
 // GET /api/grocery - Get all grocery items for household
-router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.get('/', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		console.log(`🛒 [Grocery GET] Fetching items for household: ${req.user.householdId}`);
 		const items = groceryService.getAllGroceryItems(req.user.householdId);
@@ -19,10 +19,10 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response) =>
 		console.error('Error fetching grocery items:', error);
 		res.status(500).json({ error: 'Failed to fetch grocery items' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // POST /api/grocery - Add item to grocery list
-router.post('/', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.post('/', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	const { name, brand, upc } = req.body;
 
 	console.log('[Grocery] POST request - householdId:', req.user.householdId, 'name:', name);
@@ -60,10 +60,10 @@ router.post('/', authenticateToken, (req: AuthenticatedRequest, res: Response) =
 		}
 		res.status(500).json({ error: 'Failed to add grocery item' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // DELETE /api/grocery/:id - Remove item from grocery list
-router.delete('/:id', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.delete('/:id', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	const itemId = parseInt(req.params.id);
 
 	try {
@@ -85,10 +85,10 @@ router.delete('/:id', authenticateToken, (req: AuthenticatedRequest, res: Respon
 		}
 		res.status(500).json({ error: 'Failed to delete grocery item' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // DELETE /api/grocery/by-upc/:upc - Remove item by UPC (for auto-remove on restock)
-router.delete('/by-upc/:upc', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.delete('/by-upc/:upc', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	const { upc } = req.params;
 
 	console.log('[Grocery] DELETE by-upc request - householdId:', req.user.householdId, 'upc:', upc);
@@ -109,10 +109,10 @@ router.delete('/by-upc/:upc', authenticateToken, (req: AuthenticatedRequest, res
 		}
 		res.status(500).json({ error: 'Failed to delete grocery item' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 // DELETE /api/grocery/by-name/:normalizedName - Remove item by normalized name (for auto-remove on restock)
-router.delete('/by-name/:normalizedName', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.delete('/by-name/:normalizedName', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	const { normalizedName } = req.params;
 
 	console.log('[Grocery] DELETE by-name request - householdId:', req.user.householdId, 'normalizedName:', normalizedName);
@@ -133,6 +133,6 @@ router.delete('/by-name/:normalizedName', authenticateToken, (req: Authenticated
 		}
 		res.status(500).json({ error: 'Failed to delete grocery item' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 export default router;

@@ -34,7 +34,7 @@ interface SubscriptionStatusRow {
  * @desc    Validate a StoreKit transaction receipt and update household Premium status
  * @access  Private
  */
-router.post('/validate', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.post('/validate', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	const { transactionId, productId, originalTransactionId, expiresAt } = req.body;
 	const userId = req.user!.id;
 
@@ -48,7 +48,8 @@ router.post('/validate', authenticateToken, (req: AuthenticatedRequest, res: Res
 		// Validate required fields
 		if (!transactionId || !productId || !originalTransactionId) {
 			logger.warn(`⚠️  [StoreKit] Missing required fields`, { body: req.body });
-			return res.status(400).json({ error: 'Missing required transaction fields' });
+			res.status(400).json({ error: 'Missing required transaction fields' });
+			return;
 		}
 
 		const db = getDb();
@@ -58,12 +59,14 @@ router.post('/validate', authenticateToken, (req: AuthenticatedRequest, res: Res
 
 		if (!user) {
 			logger.error(`❌ [StoreKit] User not found: ${userId}`);
-			return res.status(404).json({ error: 'User not found' });
+			res.status(404).json({ error: 'User not found' });
+			return;
 		}
 
 		if (!user.household_id) {
 			logger.error(`❌ [StoreKit] User ${userId} has no household`);
-			return res.status(400).json({ error: 'User must belong to a household to purchase Premium' });
+			res.status(400).json({ error: 'User must belong to a household to purchase Premium' });
+			return;
 		}
 
 		// Calculate expiration timestamp
@@ -122,14 +125,14 @@ router.post('/validate', authenticateToken, (req: AuthenticatedRequest, res: Res
 		});
 		res.status(500).json({ error: 'Failed to validate subscription' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * @route   GET /api/subscriptions/status
  * @desc    Get current subscription status for user's household
  * @access  Private
  */
-router.get('/status', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+router.get('/status', authenticateToken, ((req: AuthenticatedRequest, res: Response) => {
 	const userId = req.user!.id;
 
 	try {
@@ -148,11 +151,12 @@ router.get('/status', authenticateToken, (req: AuthenticatedRequest, res: Respon
         `).get(userId) as SubscriptionStatusRow | undefined;
 
 		if (!result || !result.household_id) {
-			return res.json({
+			res.json({
 				isPremium: false,
 				premiumExpiresAt: null,
 				householdId: null
 			});
+			return;
 		}
 
 		// Check if Premium is still active (handle expiration)
@@ -190,6 +194,6 @@ router.get('/status', authenticateToken, (req: AuthenticatedRequest, res: Respon
 		});
 		res.status(500).json({ error: 'Failed to check subscription status' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 export default router;

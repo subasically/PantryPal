@@ -91,13 +91,14 @@ function autoManageGrocery(householdId: string, productName: string, newQuantity
  * @desc    Checkout an item by UPC (quick scan mode - reduces quantity by 1)
  * @access  Private
  */
-router.post('/scan', (req: AuthenticatedRequest, res: Response) => {
+router.post('/scan', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { upc } = req.body;
 		console.log(`[Checkout] Scan request - UPC: ${upc}, User: ${req.user!.id}, Household: ${req.user!.householdId}`);
 
 		if (!upc) {
-			return res.status(400).json({ error: 'UPC is required' });
+			res.status(400).json({ error: 'UPC is required' });
+			return;
 		}
 
 		const db = getDb();
@@ -119,12 +120,13 @@ router.post('/scan', (req: AuthenticatedRequest, res: Response) => {
 		console.log(`[Checkout] Product lookup for UPC ${upc}:`, product ? `Found ${product.name} (ID: ${product.id})` : 'Not found');
 
 		if (!product) {
-			return res.status(200).json({
+			res.status(200).json({
 				success: false,
 				error: 'Product not found',
 				found: false,
 				upc: upc
 			});
+			return;
 		}
 
 		// Find inventory item with this product (prefer oldest expiration)
@@ -142,7 +144,7 @@ router.post('/scan', (req: AuthenticatedRequest, res: Response) => {
 		console.log(`[Checkout] Inventory lookup for product ${product.id}:`, inventoryItem ? `Found ${inventoryItem.quantity} in stock` : 'Not in inventory');
 
 		if (!inventoryItem) {
-			return res.status(200).json({
+			res.status(200).json({
 				success: false,
 				error: 'Item not in inventory',
 				found: true,
@@ -153,10 +155,15 @@ router.post('/scan', (req: AuthenticatedRequest, res: Response) => {
 					brand: product.brand
 				}
 			});
+			return;
 		}
 
 		const oldQuantity = inventoryItem.quantity;
 		const _newQuantity = oldQuantity - 1;
+
+		if (req.user!.householdId) {
+			autoManageGrocery(req.user!.householdId, product.name, _newQuantity, oldQuantity); // Use autoManageGrocery
+		}
 		const now = new Date().toISOString();
 		const checkoutId = uuidv4();
 
@@ -240,14 +247,14 @@ router.post('/scan', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error during checkout scan:', error);
 		res.status(500).json({ error: 'Failed to process checkout' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * @route   GET /api/checkout/history
  * @desc    Get checkout history
  * @access  Private
  */
-router.get('/history', (req: AuthenticatedRequest, res: Response) => {
+router.get('/history', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { startDate, endDate, limit = '50', offset = '0' } = req.query;
 		const db = getDb();
@@ -316,14 +323,14 @@ router.get('/history', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error fetching checkout history:', error);
 		res.status(500).json({ error: 'Failed to fetch checkout history' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * @route   GET /api/checkout/stats
  * @desc    Get consumption stats (for future analytics)
  * @access  Private
  */
-router.get('/stats', (req: AuthenticatedRequest, res: Response) => {
+router.get('/stats', ((req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { days = '30' } = req.query;
 		const startDate = new Date();
@@ -373,6 +380,6 @@ router.get('/stats', (req: AuthenticatedRequest, res: Response) => {
 		console.error('Error fetching checkout stats:', error);
 		res.status(500).json({ error: 'Failed to fetch stats' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 export default router;

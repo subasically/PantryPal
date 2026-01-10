@@ -1,6 +1,5 @@
 import express, { Request, Response, Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import type Database from 'better-sqlite3';
 import { toSQLite, nowISO } from '../utils/timestamp';
 import type { EntityType, SyncOperation } from '../services/syncLogger';
 import authenticateToken from '../middleware/auth';
@@ -113,7 +112,7 @@ router.use(authenticateToken);
  * GET /api/sync/changes
  * Get changes since last sync
  */
-router.get('/changes', (req: Request, res: Response) => {
+router.get('/changes', ((req: Request, res: Response) => {
 	try {
 		const authReq = req as AuthenticatedRequest;
 		const householdId = authReq.user.householdId;
@@ -148,13 +147,13 @@ router.get('/changes', (req: Request, res: Response) => {
 		console.error('Get changes error:', error);
 		res.status(500).json({ error: 'Failed to get changes' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * POST /api/sync/push
  * Push local changes to server
  */
-router.post('/push', (req: Request, res: Response) => {
+router.post('/push', ((req: Request, res: Response) => {
 	try {
 		const authReq = req as AuthenticatedRequest;
 		const { changes } = req.body as { changes: SyncChange[] };
@@ -163,7 +162,8 @@ router.post('/push', (req: Request, res: Response) => {
 		console.log(`[Sync] Push received from user ${authReq.user.id} (Household: ${householdId}) with ${changes?.length || 0} changes`);
 
 		if (!Array.isArray(changes)) {
-			return res.status(400).json({ error: 'Changes must be an array' });
+			res.status(400).json({ error: 'Changes must be an array' });
+			return;
 		}
 
 		const results: Array<{ entityId: string; success: boolean; error?: string }> = [];
@@ -209,13 +209,13 @@ router.post('/push', (req: Request, res: Response) => {
 		console.error('Push changes error:', error);
 		res.status(500).json({ error: 'Failed to push changes' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * GET /api/sync/full
  * Full sync - get complete inventory state
  */
-router.get('/full', (req: Request, res: Response) => {
+router.get('/full', ((req: Request, res: Response) => {
 	try {
 		const authReq = req as AuthenticatedRequest;
 		const householdId = authReq.user.householdId;
@@ -248,7 +248,7 @@ router.get('/full', (req: Request, res: Response) => {
 		console.error('Full sync error:', error);
 		res.status(500).json({ error: 'Failed to perform full sync' });
 	}
-});
+}) as unknown as express.RequestHandler);
 
 /**
  * Apply a sync change to the database
@@ -302,7 +302,7 @@ function applyInventoryChange(
 				console.warn(`⚠️ [Sync] Skipping inventory create - missing locationId for item ${entityId}`);
 				return;
 			}
-			
+
 			db.prepare(`
                 INSERT OR REPLACE INTO inventory (id, product_id, household_id, location_id, quantity, unit, expiration_date, notes, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)

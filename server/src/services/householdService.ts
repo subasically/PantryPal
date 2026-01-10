@@ -146,7 +146,7 @@ function validateInviteCode(code: string): { valid: boolean; householdId: string
 		throw new Error('Invalid or expired invite code');
 	}
 
-	const memberCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?').get(invite.household_id);
+	const memberCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?').get(invite.household_id) as { count: number };
 
 	return {
 		valid: true,
@@ -172,8 +172,8 @@ function joinHousehold(userId: string, code: string): { success: boolean; househ
 		throw new Error('Invalid or expired invite code');
 	}
 
-	const currentMembers = db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?')
-		.get(invite.household_id).count;
+	const currentMembers = (db.prepare('SELECT COUNT(*) as count FROM users WHERE household_id = ?')
+		.get(invite.household_id) as { count: number }).count;
 
 	if (currentMembers >= 8) {
 		const error: any = new Error('This household has reached the maximum of 8 members');
