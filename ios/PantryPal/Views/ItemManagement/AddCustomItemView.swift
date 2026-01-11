@@ -84,12 +84,14 @@ struct AddCustomItemView: View {
                 Section {
                     if viewModel.locations.isEmpty {
                         emptyLocationsView
+                            .accessibilityIdentifier("addItem.emptyLocations")
                     } else {
                         Picker("Storage Location", selection: $selectedLocationId) {
                             ForEach(viewModel.locations) { location in
                                 Text(location.fullPath).tag(location.id)
                             }
                         }
+                        .accessibilityIdentifier("addItem.locationPicker")
                         
                         locationValidationView
                     }

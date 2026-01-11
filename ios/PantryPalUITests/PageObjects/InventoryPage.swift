@@ -51,21 +51,21 @@ struct InventoryPage {
         XCTAssertTrue(addButton.waitForExistence(timeout: 5), "Inventory screen should load (add button visible)")
     }
     
+    func waitForLoaded() { waitForLoad() }
+    
     func isAtInventoryScreen() -> Bool {
         return addButton.exists || inventoryList.exists
     }
     
-    func tapAddButton() {
+    func openAddItem() {
         addButton.safeTap()
+        XCTAssertTrue(app.textFields["addItem.nameField"].waitForExistence(timeout: 5), "Add item sheet should appear")
     }
 
     func addCustomItem(name: String, brand: String? = nil, quantity: Int? = nil) {
-        tapAddButton()
+        openAddItem()
         
-        // Wait for sheet
         let nameField = app.textFields["addItem.nameField"]
-        XCTAssertTrue(nameField.waitForExistence(timeout: 5), "Add item sheet should appear")
-        
         nameField.tap()
         nameField.typeText(name)
         
@@ -77,9 +77,18 @@ struct InventoryPage {
             }
         }
         
-        // Handle quantity if needed (assuming defaults for now as existing test did)
+        // Check for empty locations (blocker)
+        if app.otherElements["addItem.emptyLocations"].exists {
+            XCTFail("Cannot add item: No storage locations available. Seed data might be missing locations.")
+        }
         
         let saveButton = app.buttons["addItem.saveButton"]
+        
+        // Dismiss keyboard if masking save button
+        if !saveButton.isHittable {
+            app.toolbars.buttons["Done"].tap()
+        }
+        
         XCTAssertTrue(saveButton.isEnabled, "Save button should be enabled after entering name")
         saveButton.tap()
         
@@ -104,6 +113,7 @@ struct InventoryPage {
     }
     
     func incrementItem(name: String) {
+        scrollToItem(name: name)
         let cell = itemCell(name: name)
         XCTAssertTrue(cell.exists, "Item '\(name)' not found to increment")
         
@@ -114,6 +124,7 @@ struct InventoryPage {
     }
     
     func decrementItem(name: String) {
+        scrollToItem(name: name)
         let cell = itemCell(name: name)
         XCTAssertTrue(cell.exists, "Item '\(name)' not found to decrement")
         
@@ -132,9 +143,26 @@ struct InventoryPage {
         start.press(forDuration: 0, thenDragTo: end)
     }
     
+    func scrollToItem(name: String) {
+        let cell = itemCell(name: name)
+        if cell.exists && cell.isHittable { return }
+        
+        // Swipe to find item
+        var attempts = 0
+        while !cell.exists && attempts < 5 {
+            if inventoryList.exists {
+                inventoryList.swipeUp()
+            } else {
+                app.swipeUp()
+            }
+            attempts += 1
+        }
+    }
+    
     // MARK: - Assertions
     
     func assertItemExists(name: String) {
+        scrollToItem(name: name)
         XCTAssertTrue(itemCell(name: name).waitForExistence(timeout: 3), "Item '\(name)' should exist")
     }
     

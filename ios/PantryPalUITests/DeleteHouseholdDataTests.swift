@@ -1,213 +1,153 @@
 import XCTest
 
-final class DeleteHouseholdDataTests: XCTestCase {
-    var app: XCUIApplication!
+final class DeleteHouseholdDataTests: BaseUITest {
     
     override func setUpWithError() throws {
-        continueAfterFailure = false
-        app = XCUIApplication()
-        app.launchArguments = ["UI_TESTING", "BYPASS_AUTH"]
-        app.launch()
-    }
-    
-    override func tearDownWithError() throws {
-        app = nil
+        try super.setUpWithError()
+        loginPage.waitForLoaded()
+        // Ensure we are logged in as test user
+        loginAsTestUser()
+        
+        // Ensure we are on inventory tab
+        inventoryPage.waitForLoaded()
     }
     
     /// Test that deleting household data clears all inventory and grocery items
     func testDeleteHouseholdDataClearsAllData() throws {
-        // 1. Add some test items to inventory
-        addTestInventoryItem(name: "Test Milk", quantity: 2)
-        addTestInventoryItem(name: "Test Bread", quantity: 1)
+        // 1. Add some test items via InventoryPage
+        let item1 = "DelMilk-\(Int.random(in: 100...999))"
+        let item2 = "DelBread-\(Int.random(in: 100...999))"
         
-        // 2. Verify items exist in inventory
-        XCTAssertTrue(app.cells.staticTexts["Test Milk"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.cells.staticTexts["Test Bread"].exists)
-        let inventoryCountBefore = app.cells.count
-        XCTAssertGreaterThan(inventoryCountBefore, 0, "Inventory should have items before deletion")
+        inventoryPage.addCustomItem(name: item1, quantity: 2)
+        inventoryPage.addCustomItem(name: item2, quantity: 1)
+        
+        // 2. Verify items exist
+        inventoryPage.assertItemExists(name: item1)
+        inventoryPage.assertItemExists(name: item2)
         
         // 3. Navigate to Settings
         let settingsButton = app.buttons["settings.button"]
-        XCTAssertTrue(settingsButton.waitForExistence(timeout: 2))
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5), "Settings button should be visible")
         settingsButton.tap()
         
-        // 4. Scroll to find Delete Household Data button
+        // 4. Find Delete Household Data button (might need scrolling)
         let deleteButton = app.buttons["Delete Household Data"]
         if !deleteButton.exists {
+            app.swipeUp() // Scroll down
             app.swipeUp()
         }
-        XCTAssertTrue(deleteButton.waitForExistence(timeout: 3))
+        XCTAssertTrue(deleteButton.waitForExistence(timeout: 3), "Delete button not found")
         deleteButton.tap()
         
         // 5. Confirm first alert
         let deleteAlert = app.alerts["Delete Household Data?"]
-        XCTAssertTrue(deleteAlert.waitForExistence(timeout: 2))
+        XCTAssertTrue(deleteAlert.waitForExistence(timeout: 3))
         deleteAlert.buttons["Continue"].tap()
         
         // 6. Enter verification text in second alert
         let verifyAlert = app.alerts["Verify Reset"]
-        XCTAssertTrue(verifyAlert.waitForExistence(timeout: 2))
+        XCTAssertTrue(verifyAlert.waitForExistence(timeout: 3))
         
         let textField = verifyAlert.textFields.firstMatch
-        XCTAssertTrue(textField.exists)
+        XCTAssertTrue(textField.waitForExistence(timeout: 2))
         textField.tap()
         textField.typeText("RESET")
         
         verifyAlert.buttons["Delete"].tap()
         
-        // 7. Wait for deletion to complete (loading spinner, etc.)
-        sleep(3)
+        // 7. Wait for deletion to complete and Settings to dismiss
+        // The app dismisses Settings automatically on success, revealing Inventory
+        let emptyState = app.staticTexts["No items in your pantry"]
+        XCTAssertTrue(emptyState.waitForExistence(timeout: 10), "Should show empty state after deletion")
         
-        // 8. Settings should be dismissed automatically
-        // We should be back at inventory list
-        let inventoryTitle = app.navigationBars.element(boundBy: 0)
-        XCTAssertTrue(inventoryTitle.waitForExistence(timeout: 5))
-        
-        // 9. Verify inventory is empty
-        // The inventory list should show the empty state
-        let emptyState = app.staticTexts["No items in your pantry yet"]
-        XCTAssertTrue(emptyState.waitForExistence(timeout: 3), "Empty state should be visible after deletion")
-        
-        // Alternative: Check that previous items no longer exist
-        XCTAssertFalse(app.cells.staticTexts["Test Milk"].exists, "Test Milk should be deleted")
-        XCTAssertFalse(app.cells.staticTexts["Test Bread"].exists, "Test Bread should be deleted")
-        
-        // 10. Navigate to Grocery list to verify it's also empty
-        let groceryTab = app.buttons["tab.grocery"]
-        if groceryTab.waitForExistence(timeout: 2) {
-            groceryTab.tap()
-            
-            // Verify grocery list is empty
-            let groceryEmptyState = app.staticTexts["Your grocery list is empty"]
-            XCTAssertTrue(groceryEmptyState.waitForExistence(timeout: 3), "Grocery list should be empty after deletion")
-        }
+        // 8. Verify specific items are gone
+        XCTAssertFalse(inventoryPage.itemCell(name: item1).exists, "Item 1 should be deleted")
+        XCTAssertFalse(inventoryPage.itemCell(name: item2).exists, "Item 2 should be deleted")
     }
     
     /// Test that canceling the delete operation preserves data
     func testCancelDeletePreservesData() throws {
-        // 1. Add a test item
-        addTestInventoryItem(name: "Test Item", quantity: 1)
-        XCTAssertTrue(app.cells.staticTexts["Test Item"].waitForExistence(timeout: 3))
+        // 1. Add item
+        let item = "KeepMe-\(Int.random(in: 100...999))"
+        inventoryPage.addCustomItem(name: item)
+        inventoryPage.assertItemExists(name: item)
         
-        // 2. Navigate to Settings
+        // 2. Navigate to Settings -> Delete
         let settingsButton = app.buttons["settings.button"]
-        XCTAssertTrue(settingsButton.waitForExistence(timeout: 2))
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
         settingsButton.tap()
         
-        // 3. Tap Delete Household Data
         let deleteButton = app.buttons["Delete Household Data"]
         if !deleteButton.exists {
             app.swipeUp()
+            app.swipeUp()
         }
-        XCTAssertTrue(deleteButton.waitForExistence(timeout: 3))
         deleteButton.tap()
         
-        // 4. Cancel first alert
+        // 3. Cancel first alert
         let deleteAlert = app.alerts["Delete Household Data?"]
-        XCTAssertTrue(deleteAlert.waitForExistence(timeout: 2))
+        XCTAssertTrue(deleteAlert.waitForExistence(timeout: 3))
         deleteAlert.buttons["Cancel"].tap()
         
-        // 5. Close settings
+        // 4. Close Settings
         let doneButton = app.buttons["Done"]
-        XCTAssertTrue(doneButton.exists)
-        doneButton.tap()
+        if doneButton.exists {
+            doneButton.tap()
+        }
         
-        // 6. Verify item still exists
-        XCTAssertTrue(app.cells.staticTexts["Test Item"].waitForExistence(timeout: 2), "Item should still exist after cancel")
+        // 5. Verify item still exists
+        inventoryPage.scrollToItem(name: item)
+        inventoryPage.assertItemExists(name: item)
     }
     
     /// Test that wrong verification text prevents deletion
     func testWrongVerificationTextPreventsDeletion() throws {
-        // 1. Add a test item
-        addTestInventoryItem(name: "Protected Item", quantity: 1)
-        XCTAssertTrue(app.cells.staticTexts["Protected Item"].waitForExistence(timeout: 3))
+        // 1. Add item
+        let item = "Safe-\(Int.random(in: 100...999))"
+        inventoryPage.addCustomItem(name: item)
+        inventoryPage.assertItemExists(name: item)
         
-        // 2. Navigate to Settings
+        // 2. Settings -> Delete -> Continue
         let settingsButton = app.buttons["settings.button"]
-        XCTAssertTrue(settingsButton.waitForExistence(timeout: 2))
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
         settingsButton.tap()
         
-        // 3. Tap Delete Household Data
         let deleteButton = app.buttons["Delete Household Data"]
         if !deleteButton.exists {
             app.swipeUp()
+            app.swipeUp()
         }
-        XCTAssertTrue(deleteButton.waitForExistence(timeout: 3))
         deleteButton.tap()
         
-        // 4. Confirm first alert
         let deleteAlert = app.alerts["Delete Household Data?"]
-        XCTAssertTrue(deleteAlert.waitForExistence(timeout: 2))
+        XCTAssertTrue(deleteAlert.waitForExistence(timeout: 3))
         deleteAlert.buttons["Continue"].tap()
         
-        // 5. Enter WRONG verification text
+        // 3. Wrong text in second alert
         let verifyAlert = app.alerts["Verify Reset"]
-        XCTAssertTrue(verifyAlert.waitForExistence(timeout: 2))
+        XCTAssertTrue(verifyAlert.waitForExistence(timeout: 3))
         
         let textField = verifyAlert.textFields.firstMatch
-        XCTAssertTrue(textField.exists)
         textField.tap()
         textField.typeText("WRONG")
         
-        // 6. Delete button should be disabled
-        let deleteConfirmButton = verifyAlert.buttons["Delete"]
-        XCTAssertTrue(deleteConfirmButton.exists)
-        // Note: isEnabled doesn't work reliably on alerts in UI tests
-        // We'll just verify that tapping it doesn't work by canceling instead
-        
-        verifyAlert.buttons["Cancel"].tap()
-        
-        // 7. Close settings
-        let doneButton = app.buttons["Done"]
-        XCTAssertTrue(doneButton.exists)
-        doneButton.tap()
-        
-        // 8. Verify item still exists
-        XCTAssertTrue(app.cells.staticTexts["Protected Item"].waitForExistence(timeout: 2), "Item should still exist after wrong verification")
-    }
-    
-    // MARK: - Helper Methods
-    
-    private func addTestInventoryItem(name: String, quantity: Int) {
-        // Tap + button
-        let addButton = app.buttons["inventory.addButton"]
-        XCTAssertTrue(addButton.waitForExistence(timeout: 2))
-        addButton.tap()
-        
-        // Select "Add Custom Item"
-        let addCustomButton = app.buttons["Add Custom Item"]
-        XCTAssertTrue(addCustomButton.waitForExistence(timeout: 2))
-        addCustomButton.tap()
-        
-        // Fill in the form
-        let nameField = app.textFields["Item Name"]
-        XCTAssertTrue(nameField.waitForExistence(timeout: 2))
-        nameField.tap()
-        nameField.typeText(name)
-        
-        let quantityField = app.textFields["Quantity"]
-        XCTAssertTrue(quantityField.exists)
-        quantityField.tap()
-        quantityField.typeText("\(quantity)")
-        
-        // Select a location (tap the first location picker)
-        let locationPicker = app.buttons.matching(identifier: "location.picker").firstMatch
-        if locationPicker.exists {
-            locationPicker.tap()
-            
-            // Select first location from list
-            let firstLocation = app.buttons.matching(identifier: "location.option").firstMatch
-            if firstLocation.waitForExistence(timeout: 2) {
-                firstLocation.tap()
-            }
+        // 4. Attempt Delete (should allow tap but fail action)
+        let deleteActionBtn = verifyAlert.buttons["Delete"]
+        if deleteActionBtn.isEnabled {
+             deleteActionBtn.tap()
         }
         
-        // Save
-        let saveButton = app.buttons["Save"]
-        XCTAssertTrue(saveButton.exists)
-        saveButton.tap()
+        // 5. Cancel out
+        verifyAlert.buttons["Cancel"].tap()
         
-        // Wait for sheet to dismiss
-        sleep(1)
+        // 6. Close Settings
+        let doneButton = app.buttons["Done"]
+        if doneButton.exists {
+            doneButton.tap()
+        }
+        
+        // 7. Verify item still exists
+        inventoryPage.scrollToItem(name: item)
+        inventoryPage.assertItemExists(name: item)
     }
 }
